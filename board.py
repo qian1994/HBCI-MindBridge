@@ -1,0 +1,1 @@
+from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations

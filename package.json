@@ -1,0 +1,34 @@
+{
+  "name": "CNSC",
+  "private": true,
+  "version": "21.0.0",
+  "description": "基于脑机接口开发相关软件",
+  "author": "伍骞<13419664597@163.com>",
+  "scripts": {
+    "init": "npm install && run-script-os",
+    "init:macos": "npm install --prefix ./gui && python3 pyapp/spec/getSpec.py --mac && python3 -m venv pyenv && ./pyenv/bin/pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r ./pyapp/assets/requirements.txt",
+    "init:windows": "python pyapp\\spec\\getSpec.py && python -m venv pyenv\\pyenv && .\\pyenv\\pyenv\\Scripts\\pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r .\\pyapp\\assets\\requirements.txt && python -m venv pyenv\\pyenvCEF && .\\pyenv\\pyenvCEF\\Scripts\\pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r .\\pyapp\\assets\\requirements.txt && .\\pyenv\\pyenvCEF\\Scripts\\pip install -i https://pypi.tuna.tsinghua.edu.cn/simple cefpython3",
+    "start": "concurrently \"npm run dev --prefix ./gui\" \"npm run startos\"",
+    "startos": "run-script-os",
+    "startos:macos": "nodemon --config ./pyapp/nodemon.json --exec ./pyenv/bin/python -X dev ./gui.py",
+    "startos:windows": "nodemon --config .\\pyapp\\nodemon.json --exec .\\pyenv\\pyenv\\Scripts\\python -X dev .\\gui.py",
+    "start:cef": "concurrently \"npm run dev --prefix ./gui\" \"nodemon --config .\\pyapp\\nodemon.json --exec .\\pyenv\\pyenvCEF\\Scripts\\python -X dev .\\gui.py --cef\"",
+    "pre": "shx rm -rf build && npm run build --prefix ./gui && run-script-os",
+    "pre:macos": "./pyenv/bin/pyinstaller --clean ./pyapp/spec/macos-pre.spec",
+    "pre:windows": ".\\pyenv\\pyenv\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-pre.spec",
+    "pre:cef": "shx rm -rf buildCEF && npm run build --prefix ./gui && .\\pyenv\\pyenvCEF\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-pre-cef.spec && shx mv .\\build\\windows-pre-cef .\\buildCEF\\windows-pre-cef",
+    "pre:folder": "shx rm -rf build && npm run build --prefix ./gui && .\\pyenv\\pyenv\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-folder-pre.spec",
+    "pre:folder:cef": "shx rm -rf buildCEF && npm run build --prefix ./gui && .\\pyenv\\pyenvCEF\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-folder-pre-cef.spec && shx mv .\\build\\windows-folder-pre-cef .\\buildCEF\\windows-folder-pre-cef",
+    "build": "shx rm -rf build && run-script-os",
+    "build:macos": "./pyenv/bin/pyinstaller --clean ./pyapp/spec/macos.spec",
+    "build:windows": ".\\pyenv\\pyenv\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows.spec",
+    "build:cef": "shx rm -rf buildCEF && npm run build --prefix ./gui && .\\pyenv\\pyenvCEF\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-cef.spec && shx mv .\\build\\windows-cef .\\buildCEF\\windows-cef",
+    "build:folder": "shx rm -rf build && npm run build --prefix ./gui && .\\pyenv\\pyenv\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-folder.spec",
+    "build:folder:cef": "shx rm -rf buildCEF && npm run build --prefix ./gui && .\\pyenv\\pyenvCEF\\Scripts\\pyinstaller --clean .\\pyapp\\spec\\windows-folder-cef.spec && shx mv .\\build\\windows-folder-cef .\\buildCEF\\windows-folder-cef"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "nodemon": "^2.0.20",
+    "run-script-os": "^1.1.6"
+  }
+}
