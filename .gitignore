@@ -6,7 +6,7 @@ target
 dist
 edfFile
 img
-test_data
+
 main/node_modules
 mi/node_modules
 p300/node_modules

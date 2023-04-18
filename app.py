@@ -661,5 +661,6 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     m = MainWindow()
+    m.currentApp = 'svp1_2'
     m.show()
     sys.exit(app.exec_())
