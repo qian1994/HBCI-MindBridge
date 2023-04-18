@@ -22,7 +22,7 @@ from config import MindBridge
 from signals import Signal
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from dataPorcessing import DataProcessing
-from scipy.io import savemat
+import scipy.io as sio
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -99,9 +99,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl("http://localhost:8082/")
+        # html_path = QtCore.QUrl.fromLocalFile(
+        #     QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl("http://localhost:8082/")
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -407,7 +407,8 @@ class MainWindow(QMainWindow):
     def trigger(self, number):
         self.board.insert_marker(int(number))
 
-    def endsingleTask(self):
+    def endSingleTask(self, message):
+        print('message', message)
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-flash'}))
 
@@ -491,17 +492,17 @@ class MainWindow(QMainWindow):
         self.showNormal()
 
     # 添加edf 信息
-    def saveToEDF(self, fileName,info, originData, channels, sampleRate):
+    def saveToEDF(self, fileName,info, originData,  sampleRate, channels):
         otherInfo = info
         eegSaveData = EEGSAVEDATA()
         eegSaveData.saveFile(fileName=fileName, data=originData,
                              channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
 
-    def saveDataInfo(self, info, originData,  ):
-        pationCode = info['pationCode']
+    def saveDataInfo(self, info, originData):
+        patientcode = info['patientcode']
         userName = info['userName']
         mode = info['selectModel']
-        dataDir = QDir.currentPath() +'/test_data/' + pationCode+'_'+userName
+        dataDir = QDir.currentPath() +'/test_data/' + patientcode+'_'+userName
         if not os.path.exists(dataDir):
             os.makedirs(dataDir)
         if not os.path.exists(dataDir + '/' +self.currentTimeString) :
@@ -529,7 +530,7 @@ class MainWindow(QMainWindow):
                 "gender": info['gender'],
                 "userName": info['userName'],
                 "startData": info["startDate"],
-                "pationCode": info["patientcode"],
+                "patientcode": info["patientcode"],
                 "technician": info["technician"]
             }))
         file.close()
@@ -557,8 +558,6 @@ class MainWindow(QMainWindow):
                 'trial': info['trial']
             }))
         file.close()
-
-
         data = info
         mindBridge = MindBridge()
         channels = []
@@ -585,45 +584,50 @@ class MainWindow(QMainWindow):
         marker_data = np.array([originData[:, mar_channel]]).T
         originData = np.concatenate((eeg_data, marker_data), axis=1)
         data['recording_additional'] = json.dumps(data['patient_additional'])
-
-
         self.brainflow_file_name = dataDir +'/data/'+ info['fileName']+ '.csv'
-        self.edf_file_name = dataDir +'/data/'+ info['fileName']+ '.edf'
+        self.edf_file_name = dataDir +'/data/'+ info['fileName']+ '.bdf'
+        self.mat_file_name = dataDir +'/data/'+ info['fileName']+ '.mat'
+        channels.extend(['marker'])
+        info['sampleRate'] = sampleRate
+        info['channels'] = channels
+        info['data'] = originData
         self.saveToEDF(self.edf_file_name,info, originData, sampleRate, channels)
+        sio.savemat(self.mat_file_name, info)
         datafilter = DataFilter()
         datafilter.write_file(
-            data=originData, file_name=self.brainflow_file_name, file_mode='w')
+            data=originData.T, file_name=self.brainflow_file_name, file_mode='w')
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'sucess-save-data'}))
     # 文件存储
     def endTotalTask(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
-        try:
-            self.stopStream('')
-            if self.timmer != None:
-                self.timmer.stop()
-                self.killTimer(self.timmer.timerId())
-            if self.brainflow_file_name == None or self.brainflow_file_name == '':
-                self.brainflow_file_name = self.dir_path+"/data/" + \
-                    self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
-                self.bci_file_name = self.dir_path+"/data/" + \
-                    self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
-                self.edf_file_name = self.dir_path+"/edfFile/" + \
-                    self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
-            data = self.board.get_board_data()
-            if self.currentApp == 'svp1_2':
-                self.saveDataInfo(info, data)
-            datafilter = DataFilter()
-            datafilter.write_file(
-                data=data, file_name=self.brainflow_file_name, file_mode='w')
-            self.python_bridge.getFromServer.emit(
-                json.dumps({"id": 0, "data": 'sucess-save-data'}))
-        except Exception as e:
-            print(e)
-            return 'fail'
-        return 'ok'
-
+        print(message)
+        # try:
+        self.paradigms.close()
+        self.stopStream('')
+        if self.timmer != None:
+            self.timmer.stop()
+            self.killTimer(self.timmer.timerId())
+        if self.brainflow_file_name == None or self.brainflow_file_name == '':
+            self.brainflow_file_name = self.dir_path+"/data/" + \
+                self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
+            self.bci_file_name = self.dir_path+"/data/" + \
+                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
+            self.edf_file_name = self.dir_path+"/edfFile/" + \
+                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
+        data = self.board.get_board_data()
+        if self.currentApp == 'svp1_2':
+            self.saveDataInfo(info, data.T)
+        datafilter = DataFilter()
+        datafilter.write_file(
+            data=data, file_name=self.brainflow_file_name, file_mode='w')
+        self.python_bridge.getFromServer.emit(
+            json.dumps({"id": 0, "data": 'sucess-save-data'}))
+        # except Exception as e:
+        #     print(e)
+        #     return 'fail'
+        # return 'ok'
     # 弹出对话框，选取文件
 
     def openFileDialog(self, message):
@@ -654,13 +658,8 @@ class MainWindow(QMainWindow):
                 return json.dumps(data.tolist())
         return "[]"
 
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     m = MainWindow()
-    m.currentApp = 'svp1_2'
-    m.endTotalTask('11')
-
-    # m.show()
-
-    # sys.exit(app.exec_())
+    m.show()
+    sys.exit(app.exec_())

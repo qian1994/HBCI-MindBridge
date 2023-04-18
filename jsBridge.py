@@ -10,6 +10,7 @@ from pyedflib import highlevel
 from p300Model import P300Model
 from convertFileFormat import ConvertFileFormat
 from eeg_positions import get_elec_coords
+import scipy.io as sio
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
@@ -152,9 +153,12 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] ==  'open-file-dialog':
             data = self.openFileDialog(message)
+        
+        if message['action'] ==  'get-info-by-file-name':
+            data = self.getInfoByFileName(message)
 
-        if message['action'] == 'open-files-dialog':
-            data = self.openFilesDialog(message)
+        if message['action'] == 'end-signal-trial-task':
+            data = self.endSignalTrialTask(message)
             
         if message['action'] == 'open-dir-dialog':
             data = self.openDirectory(message)
@@ -391,7 +395,6 @@ class JsBridge(QtCore.QObject):
     
     def openFileDialog(self, message):
         fileName = self.mainwindow.openFileDialog(message)
-        print(fileName)
         return fileName
 
     def openFilesDialog(self, message):
@@ -407,7 +410,20 @@ class JsBridge(QtCore.QObject):
     def filterBoardData(self,message):
         data = self.mainwindow.filterBoardData(message)
         return data
-    
+    def endSignalTrialTask(self, message):
+        data = self.mainwindow.endSingleTask(message)
+        return data
+    def getInfoByFileName(self, message):
+        fileName = message['data']['fileName']
+        fileName = fileName.replace('.edf', '.mat')
+        fileName = fileName.replace('.bdf', '.mat')
+        info = sio.loadmat(fileName)
+        data_dict = {}
+        for key in info.keys():
+            if key[0] != '_':
+                data_dict[key] = info[key].tolist()
+        data_dict['data'] = ''
+        return data_dict
     def getEEGElectronPosition(self, message):
         # system = message['data']['system'] 
         coords = get_elec_coords(system='1010', as_mne_montage=False)

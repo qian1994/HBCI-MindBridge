@@ -14,7 +14,8 @@
   </div>
 </template>
 <script>
-import { startImpendenceTest, 
+import { 
+  startImpendenceTest, 
   endImpendenceTest, 
   getImpendenceFromServe, 
   getConfigFromServe,

@@ -14,7 +14,7 @@ class Ui_Paradigms(object):
         print('Ui_Paradigms widget')
 
 class Paradigms(QWidget, Ui_Paradigms):
-    def __init__(self, ):
+    def __init__(self):
         super(Paradigms, self).__init__()
         self.setupUi(self)
         self.timeDownCountNumber = 3
@@ -114,6 +114,8 @@ class Paradigms(QWidget, Ui_Paradigms):
              self.flashViewlayout.itemAt(i).widget().setParent(None)
         self.imageWi = []
         self.count = 0
+        self.python_bridge.getFromServer.emit(
+            json.dumps({"id": 0, "data": 'stop-flash'}))
 
     def doTimerTimeout(self): #定时中断相应
         if self.count == 0:

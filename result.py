@@ -51,9 +51,32 @@ class Result(object):
         signals, signal_headers, header = highlevel.read_edf(fileName)
         return signals, signal_headers, header
 
-    def count164z(self, list):
-        print('list')
+    def count164z(self, zScore, threshold, base_freq_idx):
+        num_electrode = zScore.shape[0]
+        num_base = 0  # 6Hz frequency band counts
+        num_singular = 0  # 1.2Hz frequency band counts
+        zdata164 = [np.empty((num_electrode, zScore.shape[1])), np.empty((num_electrode, zScore.shape[1]))]
+        idxMarked = [np.empty(num_electrode, dtype=np.int64), np.empty(num_electrode, dtype=np.int64)]
+        for e in range(num_electrode):
+            if zScore[e, base_freq_idx] > threshold:  # Check for 6Hz frequency band
+                num_base += 1
+                zdata164[0][e, :] = zScore[e, :]
+                idxMarked[0][num_base - 1] = e  # Record the electrode with 6Hz frequency band
+                if zScore[e, 0] > threshold:  # Check for 1.2Hz frequency band
+                    num_singular += 1
+                    zdata164[1][e, :] = zScore[e, :]
+                    idxMarked[1][num_singular - 1] = e  # Record the electrode with 1.2Hz frequency band
+                else:
+                    aa = np.sum(zScore[e, :] > threshold)  # Check if there are more than 3 high-frequency bands
+                    if aa >= 3:
+                        num_singular += 1
+                        zdata164[1][e, :] = zScore[e, :]
+                        idxMarked[1][num_singular - 1] = e  # Record the electrode with 1.2Hz frequency band
+        return num_base, num_singular, zdata164, idxMarked
     
+    def count164z(self, zScore, threshold, base_freq_idx):
+        print('this is count164z')
+
     def drawCsv(self, csvFile):
         print('csv file')
 
@@ -157,8 +180,8 @@ class Result(object):
                 zScore = zScore.tolist()
                 for id in range(len(zScore)):
                     stringScore += str(xtick[id]) + ":"+ str(round(zScore[id], 2)) + "    "
-                plt.xlabel(stringScore)
-                plt.title(headerInfo[index],loc='left')
-                plt.savefig(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
-                imagePath.append(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
+                # plt.xlabel(stringScore)
+                # plt.title(headerInfo[index],loc='left')
+                # plt.savefig(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
+                # imagePath.append(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
             return imagePath

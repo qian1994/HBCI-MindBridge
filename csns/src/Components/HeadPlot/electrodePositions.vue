@@ -7,6 +7,7 @@
           <span class="point-out-color" v-if="point['show'] == 'color'" :style="`background:#${(-point['value'] *(parseInt('ff0000', 16)- parseInt('00ff00', 16))+ parseInt('ff0000', 16)).toString(16)}` ">
             {{parseInt(100 - point.value)}} %
           </span>
+          <span @click="chooseBadChannel(point['label'])" v-if="point['show'] == 'bad-channel'"  :class="'point-out-color'"> {{  point['label']  }}</span>
         </div>
       </div>
     </div>
@@ -19,6 +20,7 @@ export default {
   data() {
     return {
       line: 20,
+      badChannel: []
     }
   },
   computed:{
@@ -48,6 +50,10 @@ export default {
     }
   },
   methods:{
+    chooseBadChannel(currentChannel){
+      console.log(currentChannel)
+      
+    },
     pointClick(data) {
         this.$emit('point-click', data)
     }
@@ -140,6 +146,8 @@ export default {
   transform: translate(-50%, -50%);
   transform: rotateZ(60deg);
 }
+
+
 
 </style>
   

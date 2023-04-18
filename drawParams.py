@@ -25,7 +25,7 @@ class Paradigms(QtCore.QObject):
         self.height = parent.height
         self.flashViewlayout = parent.flashViewlayout
         self.trigger = parent.trigger
-        self.endsingleTask = parent.endsingleTask
+        self.endSingleTask = parent.endSingleTask
         
     def start(self, data):
         self.targetIndex = int(data["targetIndex"])

@@ -33,9 +33,9 @@ const routes = [
     name: 'pationInfo',
     component:() => import('../views/pationInfo.vue')
    }, {
-    path: '/result',
-    name: 'result',
-    component:() => import('../views/result.vue')
+    path: '/operate',
+    name: 'operate',
+    component:() => import('../views/operate.vue')
    },{
     path: '/create-image',
     name: 'create-image',

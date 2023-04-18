@@ -201,6 +201,30 @@ export function openParamsWindow(msg) {
     })
 }
 
+export function endSignalTrialTask(msg) {
+    return apiClient.send({
+        action: 'end-signal-trial-task',
+        data: msg
+    })
+}
+
+
+export function openFileDialog(msg){
+    return apiClient.send({
+        action: 'open-file-dialog',
+        data: msg
+    })
+}
+
+export function getInfoByFileName(msg){
+    return apiClient.send({
+        action: 'get-info-by-file-name',
+        data: msg
+    })
+}
+
+
+
 export function getEEGElectronPosition(msg) {
     return apiClient.send({
         action: "get-eeg-electron-position",

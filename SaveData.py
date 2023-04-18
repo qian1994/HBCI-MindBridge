@@ -39,17 +39,16 @@ class EEGSAVEDATA(object):
             birthdate : str/datetime.datetime, optional
                 date of birth of the patient. The default is ''.
             """
+            data = data.T
             signals = []
-            for channel in range(len(data[0])):
-                DataFilter.detrend(data[:, channel], DetrendOperations.NO_DETREND.value)
-                signals.append(data[:, channel])
-            signals = np.array(signals)
+            for channel in range(len(data)):
+                DataFilter.detrend(data[channel], DetrendOperations.NO_DETREND.value)
+                signals.append(data[channel]/1)
+            signals = np.ascontiguousarray(np.array(signals))
             channel_names = channels
             list_of_labels = []
-            otherLabels = ['marker']
             for i in range(len(channel_names)):
                 list_of_labels.append(str(channel_names[i]))
-            list_of_labels.extend(otherLabels)
             signalHeaders = highlevel.make_signal_headers(
                 list_of_labels=list_of_labels,
                 sample_frequency=sampleRate, 
@@ -94,6 +93,7 @@ class EEGSAVEDATA(object):
                                         admincode=admincode,
                                         gender=gender, 
                                         birthdate=birthdate)
+            print(signals.shape, len(signalHeaders))
             res = highlevel.write_edf(fileName, signals=signals, signal_headers=signalHeaders, digital=False,file_type=3, header=header)
         # except Exception as e :
         #     print(e)

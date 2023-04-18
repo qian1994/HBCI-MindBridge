@@ -30,7 +30,7 @@
               <img class="container-modelBox-img" src="../assets/wallet.png" alt="">
               <el-form-item>
                 <div>被试id</div>
-                <el-input v-model="form.pationCode" placeholder="实验名"></el-input>
+                <el-input v-model="form.patientcode" placeholder="实验名"></el-input>
               </el-form-item>
             </div>
           </el-col>
@@ -39,7 +39,7 @@
               <img class="container-modelBox-img" src="../assets/receiving.png" alt="">
               <el-form-item>
                 <div>被试姓名</div>
-                <el-input v-model="form.userName" placeholder="脑电实验文件名称"></el-input>
+                <el-input v-model="form.userName" placeholder="请输入被试姓名"></el-input>
               </el-form-item>
             </div>
           </el-col>
@@ -67,10 +67,12 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-select disabled v-model="form.gender" placeholder="请选择被试性别">
-          <el-option valu="male" label="male"></el-option>
-          <el-option valu="female" label="female"></el-option>
-        </el-select>
+        <el-form-item label="被试性别">
+          <el-select v-model="form.gender" placeholder="请选择被试性别"> 
+            <el-option value="male" label="male"></el-option>
+            <el-option value="female" label="female"></el-option>
+          </el-select> 
+        </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item label="被试生日">
@@ -84,7 +86,6 @@
           </el-popover>
         </el-form-item>
       </el-col>
-
       <el-col :span="12">
         <el-form-item label="打标数字">
           <el-input v-model="form.marker" disabled placeholder=""> </el-input>
@@ -103,8 +104,8 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="trial间隔时长">
-          <el-input v-model="form.trialLantency" type="number" placeholder="请输入每次trial间隔休息时长：毫秒"></el-input>
+        <el-form-item label="闪烁间隔时长">
+          <el-input v-model="form.trialLantency" type="number" placeholder="请输入每次闪烁间隔休息时长：毫秒"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -125,8 +126,8 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="总共trial">
-          <el-input v-model="form.totalTrial" type="number" placeholder="请输入进行的trial 的总数"></el-input>
+        <el-form-item label="round次数">
+          <el-input v-model="form.totalTrial" type="number" placeholder="请输入进行的round 的总数"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -135,8 +136,8 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="单次trial数量">
-          <el-select v-model="form.trialNumber" placeholder="请选择一个trial显示的照片数量">
+        <el-form-item label="单次round数量">
+          <el-select v-model="form.trialNumber" placeholder="请选择一个round显示的照片数量">
             <el-option v-for="item in trial" :label="item" :value="item"></el-option>
           </el-select>
         </el-form-item>
@@ -206,6 +207,7 @@ export default {
         colorObject: 'r',
         colorTarget: 'g',
         userName: '',
+        gender: 'female',
         ip: '192.168.31.98',
         triggerTrialStart: -1,
         triggerRoundStart: 1,
@@ -218,12 +220,12 @@ export default {
         age: 0,
         pationCode: 0,
         passedImpedence: false,
-        targetIndex: 0,
-        trialNumber: 0,
-        totalTrial: 0,
-        lantency: 0,
-        instance: 0,
-        trialLantency: 0,
+        targetIndex: 3,
+        trialNumber: 5,
+        totalTrial: 24,
+        lantency: 83,
+        instance: 83,
+        trialLantency: 83,
         technician: '',
         patient_additional: '',
         patientcode: '',
@@ -241,6 +243,7 @@ export default {
     }
   },
   created() {
+    initDevTools()
     const config = localStorage.getItem('mindbridgeinfo')
     if (config) {
       const infor = JSON.parse(config)
@@ -320,7 +323,7 @@ export default {
         });
         return
       }
-      if (this.form.pationCode == '') {
+      if (this.form.patientcode == '') {
         this.$alert('', "请输入被试id", {
           confirmButtonText: '确定',
         });

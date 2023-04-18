@@ -6,7 +6,7 @@
     </div>
 </template>
 <script>
-import { trigger, fullScreen, exitFullScreen, endTrialTask, msgListener } from '../api/index'
+import { trigger, fullScreen, exitFullScreen, endSignalTrialTask, msgListener } from '../api/index'
 export default {
     data() {
         return {
@@ -37,6 +37,9 @@ export default {
         getPageParams(res) {
             const params = JSON.parse(res)
             console.log(params)
+            if (params && params['data'] == 'stop-flash') {
+                return
+            }
             this.timeDownCount = 3
             this.timmer = null
             this.timmer2 = null
@@ -79,6 +82,10 @@ export default {
                 this.timeDownCount -=1
             }, 1000);
         },
+        async endSignalTrialTask() {
+            clearInterval(this.timmer)
+            await endSignalTrialTask()
+        },
         taskStart() {
             let count = 0
             trigger(-1)
@@ -87,8 +94,8 @@ export default {
             let trialNumber = this.params.trialNumber
             this.timmer = setInterval(async () => {
                 if (count > totalTrial * trialNumber * 2) {
+                    this.endSignalTrialTask()
                     clearInterval(this.timmer)
-                    await endTrialTask()
                     return
                 }
                 if (count % 2 == 0) {

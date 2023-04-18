@@ -7,13 +7,13 @@
             </p>
         </div>
         <div class="warning-header" v-if="show">
-            <el-button class="enter-button" @click="start" v-if="currentTrial == 0">开始实验</el-button>
-            <el-button class="enter-button" @click="nextTrial" v-if="currentTrial != 0">下一轮</el-button>
-            <el-button class="enter-button" v-if="currentTrial > 0" @click="endTotal" type="primary">实验结束</el-button>
+            <el-button class="enter-button" :disabled="!stopFlashed" @click="start" v-if="currentTrial == 0">开始实验</el-button>
+            <el-button class="enter-button" :disabled="!stopFlashed" @click="nextTrial" v-if="currentTrial != 0">下一轮</el-button>
+            <el-button class="enter-button" :disabled="!stopFlashed" v-if="currentTrial > 0" @click="endTotal" type="primary">实验结束</el-button>
         </div>
         <div class="">
             <div class="total-trial">
-                <span></span><el-button v-for="item in totalTrialButton"
+                <span></span><el-button :disabled="!stopFlashed" v-for="item in totalTrialButton"
                     :type="goodTrial.indexOf(item - 1) >= 0 ? 'primary' : 'info'" @click="troggle(item)">trial : {{ item
                     }}</el-button>
             </div>
@@ -22,7 +22,7 @@
 </template>
 <script>
 import Vue from 'vue'
-import { startFlashTask, msgListener, endTrialTask, endTotalTask, startSession, initDevTools , openParamsWindow} from '../api/index'
+import { startFlashTask, msgListener, endTotalTask, startSession, initDevTools , openParamsWindow} from '../api/index'
 export default {
     data() {
         return {
@@ -34,8 +34,8 @@ export default {
             currentTrial: 0,
             badTrial: [],
             goodTrial: [],
-            motionParams: {},
-            params: {}
+            params: {},
+            stopFlashed: true
         }
     },
     mounted() {
@@ -76,8 +76,8 @@ export default {
         },
         flashTaskEnd() {
             setTimeout(() => {
-                endTrialTask()
-            }, 1000);
+                this.stopFlashed = true
+            }, 100);
         },
         preload() {
             let params = {}
@@ -85,34 +85,10 @@ export default {
                 params = JSON.parse(localStorage.getItem('config'))
             }
             this.params = params
-            const images = params.images || []
-            this.targetIndex = params.targetIndex
-            this.trialNumber = params.trialNumber
-            this.totalTrial = params.totalTrial
-            this.lantency = params.lantency
-            this.instance = params.instance
-            this.trialLantency = params.trialLantency
-            this.selectModel = params.selectModel
-            this.motionParams = {
-                motionNumber: params.motionNumber,
-                motionDistance: params.motionDistance,
-                motionWidth: params.motionWidth,
-                motionHeight: params.motionHeight,
-                motionSpeed: params.motionSpeed,
-                motionInstance: params.instance,
-                targetIndex: params.targetIndex,
-                trialNumber: params.trialNumber,
-                totalTrial: params.totalTrial
-            }
-            // if (this.$router.currentRoute.params && this.$router.currentRoute.params.currentTrialIndex) {
-            //     this.currentTrial = this.$router.currentRoute.params.currentTrialIndex
-            // }
-
-            // if (this.$router.currentRoute.params && this.$router.currentRoute.params.goodTrial) {
-            //     this.goodTrial = this.$router.currentRoute.params.goodTrial
-            // }
+       
         },
         async start() {
+            this.stopFlashed = false
             this.currentTrial += 1
             this.troggle(this.currentTrial)
             startFlashTask({ ...this.params, images: [] })
@@ -127,13 +103,13 @@ export default {
             })
             const res = await endTotalTask({...this.$router.currentRoute.params, trial: trial})
             if (res == 'ok') {
-                const config = JSON.parse(localStorage.getItem('config'))
-                config.passedImpedence = true
-                localStorage.setItem('config', JSON.stringify(config))
-                this.$router.push({ name: 'pationInfo', params: { "status": "end-task", "additional": trial.join(',') } })
+                this.$message('数据保存成功')
+                localStorage.setItem('config', JSON.stringify(this.params))
+                this.$router.push({ name: 'home' })
             }
         },
         nextTrial() {
+            this.stopFlashed = false
             this.currentTrial += 1
             this.troggle(this.currentTrial)
             startFlashTask({ ...this.params, images: [] })

@@ -6,7 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     timeSerise: [],
-    fft: []
+    fft: [],
   },
   mutations: {
     changeTimeSerise: (state, params) => {
@@ -16,12 +16,8 @@ export default new Vuex.Store({
   },
   actions: {
     changeTimeSerise: (root, timeSerise) => {
-      const array = root.state.timeSerise;
-      root.state.timeSerise = array.concat(timeSerise)
     },
     changeFFT: (root, fft) => {
-      const array = root.state.fft;
-      root.state.fft = array.concat(fft)
     }
   },
   modules: {
