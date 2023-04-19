@@ -44,6 +44,10 @@ const routes = [
     path: '/motion',
     name: 'motion',
     component:() => import('../views/motion.vue')
+   },{
+    path: '/result',
+    name: 'result',
+    component:() => import('../views/result.vue')
    }
 ]
 

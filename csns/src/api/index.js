@@ -237,3 +237,25 @@ export function createNewExpriment(msg) {
         
     })
 }
+
+
+export function getResultInfoByFileName(msg) {
+    return apiClient.send({
+        action: 'get-result-info-by-file-ssvep',
+        data: msg
+    })
+}
+
+export function getBadChannel(msg) {
+    return apiClient.send({
+        action: 'get-bad-channel',
+        data: msg
+    })
+}
+
+export function updateBadChannel(msg){
+    return apiClient.send({
+        action: 'update-bad-channel',
+        data: msg
+    })
+}

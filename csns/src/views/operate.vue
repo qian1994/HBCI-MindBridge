@@ -19,8 +19,13 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
+                        <el-form-item label="刺激前时长">
+                            <el-input v-model="form.startTrialTime" placeholder="请选择计算信噪比的前后值"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
                         <el-form-item label="刺激时长">
-                            <el-input v-model="form.paradigmTime" placeholder="请输入需要计算信噪比的值"></el-input>
+                            <el-input v-model="form.endTrialTime" placeholder="请选择计算信噪比的前后值"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -49,13 +54,8 @@
                         <div class="divider"> 频谱分析参数 </div>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="刺激前时长">
-                            <el-input v-model="form.startTrialTime" placeholder="请选择计算信噪比的前后值"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
                         <el-form-item label="刺激时长">
-                            <el-input v-model="form.endTrialTime" placeholder="请选择计算信噪比的前后值"></el-input>
+                            <el-input v-model="form.paradigmTime" placeholder="请输入需要计算信噪比的值"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -109,15 +109,16 @@
                     <el-col :span="24" v-if="this.trials.length">
                         <el-form-item label="选择trial">
                             <el-button class="trial-button" v-for="item, index in trials"
-                                :type="selectTrial.split(',')[index] == '1' ? 'primary' : ''" @click="troggle(index)">trial
+                                :type="selectTrial[index] == '1' ? 'primary' : ''" @click="troggle(index)">trial
                                 {{ index + 1 }}</el-button>
                         </el-form-item>
                     </el-col>
+                    
                     <el-col :span="24" v-if="selectedChannel.length">
                         <el-form-item label="通道选择">
                             <div class="bad-channel-choose">
                                 <div class="eeg-position">
-                                    <ElectrodePositions :eeg-info="selectedChannel" :radius="radius"
+                                    <ElectrodePositions :show-info="selectedChannel" :radius="radius"
                                         @point-click="pointClick">
                                         <div class="img" v-if="this.images.length">
                                             <img :src="selectedImg" alt="" srcset="">
@@ -126,6 +127,14 @@
                                 </div>
                             </div>
                         </el-form-item>
+                    </el-col>
+                    <el-col :span="24" v-if="selectedChannel.length">
+                        <div>
+                            <span>坏导：</span> <el-button class="create-image" type="info" disabled v-for="channel in badChannel">{{channel}}</el-button>
+                        </div>
+                        <div>
+                            <span>选择计算电极：</span> <el-button class="create-image" type="info" v-for="channel in selectComputedChannel" @click="reomveSelectComputedChannel(channel)">{{channel}}</el-button>
+                        </div>
                     </el-col>
                     <el-col :span="24">
                         <el-form-item>
@@ -147,15 +156,13 @@ export default {
             files: [],
             maxFrequency: 10,
             images: [],
-            currentImage: '',
             trials: [],
             text: "",
             currentEDFFile: '',
             activeNames: '1',
-            eegInfo: [],
             form: {
-                baseLineTime: 0,
-                paradigmTime: 0,
+                baseLineTime: 0.1,
+                paradigmTime: 20,
                 filterlow: 0,
                 filterHigh: 100,
                 startTrialTime: 0.5,
@@ -170,6 +177,8 @@ export default {
                 filter: 100,
                 rereference: "0",
             },
+            selectComputedChannel: [],
+            badChannel: [],
             selectTrial: '',
             radius: 400,
             info: ''
@@ -179,9 +188,7 @@ export default {
         ElectrodePositions
     },
     computed: {
-        selectedImg() {
-            return "file:///" + this.currentImage
-        },
+        
         resultFiles() {
             if (this.files.length == 0) {
                 return []
@@ -223,57 +230,46 @@ export default {
         },
         selectedChannel() {
             let channels = this.info.channels
-            if (!this.eegInfo || this.eegInfo.length == 0 || !this.info || !this.info.channels ) {
-                return []
+            let info = {}
+            if(!this.info || channels) {
+                return info
             }
-            this.eegInfo[0] = this.eegInfo[0].map(item => {
-                return item.toUpperCase()
-            })
-            let info = channels.map((item, index) => {
-                const id = this.eegInfo[0].indexOf(item)
-                let label = ''
-                let x = ''
-                let y = ''
-                if (id >= 0) {
-                    x = this.eegInfo[1][id]
-                    y = this.eegInfo[2][id]
-                    label = this.eegInfo[0][id]
-                }
-                const data = {
+            channels.forEach((item, index) => {
+                info[item] = {
                     label: label,
                     show: 'label',
-                    x: x,
-                    y: y,
-                    name: item,
-                    value: 0,
-                    impedence: 0,
                 }
-                return data
             })
             return info
         }
     },
     methods: {
+        reomveSelectComputedChannel(channel) {
+            this.selectComputedChannel = this.selectComputedChannel.filter(item => item != channel)
+        },
         showReport(data) {
         },
         pointClick(data) {
-            this.showImages.forEach(item => {
-                if (item.label == data['label']) {
-                    this.currentImage = item.value
-                    console.log(this.currentImage, item.value, data['label'])
-                }
-            })
+            if(this.badChannel.indexOf(data['label']) >= 0) {
+                this.$message('坏导不可参与计算')
+                return
+            }
+            if(this.selectComputedChannel.indexOf(data['label'])) {
+                this.selectComputedChannel = this.selectComputedChannel.filter(item => item != data['label'])
+            }else {
+                this.selectComputedChannel.push(data['label'])
+            }
         },
         troggle(index) {
-            this.selectTrial = this.selectTrial.split(',').map((item, id) => {
+            this.selectTrial = this.selectTrial.map((item, id) => {
                 if (id == index) {
                     return Math.abs(parseInt(item) - 1)
                 }
                 return item
-            }).join(',')
+            })
         },
         async showAnnaly() {
-            if (this.selectTrial.indexOf(1) < 0) {
+            if (this.selectTrial.length <= 0) {
                 this.$alert('', "请选择要分析的trial， 至少一个", {
                     confirmButtonText: '确定',
                 });
@@ -313,6 +309,9 @@ export default {
             if(res) {
                 this.info = res
                 this.trials = res.trial[0]
+                this.selectTrial = res.trial[0]
+                this.badChannel = res.badChannel
+                this.selectComputedChannel = info['channels'].filter(item => res.badChannel.indexOf(item) == -1)
             }
         },
         async fileChoose() {
@@ -329,8 +328,6 @@ export default {
         // const data = await getResultFiles()
         // this.files = data.split(',')
         // this.getImageByFileName()
-        const res = await getEEGElectronPosition("1010")
-        this.eegInfo = res
     }
 };
 </script>

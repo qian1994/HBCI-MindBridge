@@ -7,8 +7,12 @@
         <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio> 
         <el-radio border size="small" label='color' v-model="showLabel">脱落颜色</el-radio> 
       </div>
+      <div class="impedences-bad-channel" v-if="badChannels.length">
+        <div class="impedences-bad-channel-warning">选择相关坏导： </div>
+        <el-button  v-for="channel in badChannels" type="danger" @click="removeBadChannel(channel)"> {{channel}}</el-button>
+      </div>
       <div  class="impedences-pass">
-        <ElectrodePositions :eeg-info="selectedImpedences" :radius="radius"> </ElectrodePositions> 
+        <ElectrodePositions :show-info="selectedImpedences" :radius="radius" @point-click="cellClick"> </ElectrodePositions> 
       </div>
     </div>
   </div>
@@ -19,7 +23,9 @@ import {
   endImpendenceTest, 
   getImpendenceFromServe, 
   getConfigFromServe,
-  getEEGElectronPosition
+  getEEGElectronPosition,
+  updateBadChannel,
+  getBadChannel
 } from '../api/index'
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
 export default {
@@ -38,6 +44,7 @@ export default {
       entered: false,
       eegInfo: [],
       radius: 690,
+      badChannels: [],
       showLabel: 'label'  // label  color  impandence raild
     }
   },
@@ -61,6 +68,9 @@ export default {
     }, 300);
     const res = await getEEGElectronPosition({system: '1010'})
     this.eegInfo = res
+
+    const badChanne = await getBadChannel()
+    this.badChannels = badChanne['bad-channel']
   },
   components:{
     ElectrodePositions
@@ -86,40 +96,37 @@ export default {
       if (!channels || !channels.length) {
         return []
       }
-      this.eegInfo[0] = this.eegInfo[0].map(item  => {
-        return item.toUpperCase()
-      })
-      let info = channels.map((item, index) => {
-        const id = this.eegInfo[0].indexOf(item)
-        let label = ''
-        let x = ''
-        let y = ''
-        
-        if(id >=0) {
-          x = this.eegInfo[1][id]
-          y = this.eegInfo[2][id]
-          label = this.eegInfo[0][id]
-        }
-        const data = {
-          label: label,
+      let info = {}
+      channels.forEach((item, index) => {
+        info[item]={
+          label: item,
           show: this.showLabel,
-          x: x,
-          y: y,
           name: item,
           value: this.railed[index] || 0,
           impedence: this.impedences[index] || 0
         }
-        return data
       })
       return info
+    }
+  },
+  async beforeDestroy(){
+    const res = await updateBadChannel({"bad-channel": this.badChannels})
+    if (res == 'ok') {
+      this.$message('保存成果')
     }
   },
   methods: {
     chooseShowType(type) {
       this.showLabel = type
     },
-    cellClick(row, column, cell, event) {
-      console.log('click', row, column)
+    cellClick(point) {
+      if (point.show == 'label') {
+        return
+      }
+      if(this.badChannels.indexOf(point['label']) >=0) {
+        return 
+      }
+      this.badChannels.push(point['label'])
     },
     enter() {
       const config = JSON.parse(localStorage.getItem('config'))
@@ -161,6 +168,9 @@ export default {
       }
       this.start()
     },
+    removeBadChannel(label) {
+      this.badChannels = this.badChannels.filter(item => item != label)
+    }
   }
 };
 </script>
@@ -203,4 +213,15 @@ export default {
 .impedences img {
   width: 100%;
 }
+.impedences-bad-channel {
+  padding: 10px 20px;
+}
+.impedences-bad-channel-warning {
+  margin-bottom: 30px;
+}
+
+.impedences-bad-channel .el-button {
+  margin-bottom: 20px;
+}
+
 </style>

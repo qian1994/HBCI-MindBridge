@@ -11,6 +11,8 @@ from p300Model import P300Model
 from convertFileFormat import ConvertFileFormat
 from eeg_positions import get_elec_coords
 import scipy.io as sio
+import numpy as np
+import base64
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
@@ -63,6 +65,9 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'impendence-data':
             data = self.impendenceData(message)
+        
+        if message['action'] == 'update-bad-channel':
+            data = self.updateBadChannel(message)
 
         if message['action'] == 'start-impendence-test':
             data = self.startImpendenceTest(message)
@@ -81,6 +86,12 @@ class JsBridge(QtCore.QObject):
         
         if message['action'] == 'get-result-files':
             data = self.getResultFiles(message)
+        
+        if message['action'] == 'get-result-info-by-file-ssvep':
+            data = self.getResultInfoByFileName(message)
+
+        if message['action'] == 'get-bad-channel':
+            data = self.getBadChannel(message)
         
         if message['action'] == 'get-experiment-image':
             data = self.drawImage(message)
@@ -413,6 +424,20 @@ class JsBridge(QtCore.QObject):
     def endSignalTrialTask(self, message):
         data = self.mainwindow.endSingleTask(message)
         return data
+        
+    def getResultInfoByFileName(self, message):
+        fileName = message['data']['fileName']
+        with open(fileName) as f:
+            data = json.load(f)
+        f.close()
+        return data
+
+    def getBadChannel(self, message):
+        return self.mainwindow.badChannel
+    
+    def updateBadChannel(self, message):
+        return self.mainwindow.updateBadChannel(message['data'])
+
     def getInfoByFileName(self, message):
         fileName = message['data']['fileName']
         fileName = fileName.replace('.edf', '.mat')

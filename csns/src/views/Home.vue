@@ -60,7 +60,6 @@
           <el-input v-model="form.patient_additional" placeholder="请输入被试相关信息"></el-input>
         </el-form-item>
       </el-col>
-
       <el-col :span="12">
         <el-form-item label="被试年龄">
           <el-input v-model="form.age" type="number" placeholder="请输入被试的年龄"></el-input>
@@ -243,7 +242,7 @@ export default {
     }
   },
   created() {
-    initDevTools()
+    // initDevTools()
     const config = localStorage.getItem('mindbridgeinfo')
     if (config) {
       const infor = JSON.parse(config)

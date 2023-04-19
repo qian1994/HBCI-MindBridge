@@ -84,6 +84,7 @@ class MainWindow(QMainWindow):
         })
 
         self.paradigms = Paradigms()
+        self.badChannel = None
 
     def createWebEng(self):
         self.webView = QWebEngineView()
@@ -284,6 +285,8 @@ class MainWindow(QMainWindow):
         except:
             return 'fail'
         return 'ok'
+    def updateBadChannel(self, message):
+        self.badChannel = message
 
     def endImpendenceTest(self, data):
         # try:
@@ -408,7 +411,6 @@ class MainWindow(QMainWindow):
         self.board.insert_marker(int(number))
 
     def endSingleTask(self, message):
-        print('message', message)
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-flash'}))
 
@@ -555,7 +557,8 @@ class MainWindow(QMainWindow):
                 'instance': info['instance'], 
                 'trialLantency': info['trialLantency'],
                 'equipment': info['equipment'], 
-                'trial': info['trial']
+                'trial': info['trial'],
+                'badChannel': self.badChannel
             }))
         file.close()
         data = info
@@ -591,6 +594,7 @@ class MainWindow(QMainWindow):
         info['sampleRate'] = sampleRate
         info['channels'] = channels
         info['data'] = originData
+        info['badChannel'] = self.badChannel
         self.saveToEDF(self.edf_file_name,info, originData, sampleRate, channels)
         sio.savemat(self.mat_file_name, info)
         datafilter = DataFilter()
