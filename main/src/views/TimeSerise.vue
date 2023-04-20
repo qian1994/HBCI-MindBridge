@@ -61,18 +61,31 @@
             <el-button class="data-config-apply" @click="apply" type="primary">应用</el-button>
           </div>
       </el-form>
-      <div class="channel-button" v-if="showChannels.length">
-        <span>通道名：</span> <el-button class="" :type="showAll ? 'success' : ''" @click="showAllToggle">All</el-button>
+      <div class="channel-button">
+        <ElectrodePositions :show-info="showChannels" :radius="radius" @point-click="toggle"></ElectrodePositions>
+        <!-- <span>通道名：</span> <el-button class="" :type="showAll ? 'success' : ''" @click="showAllToggle">All</el-button>
         <el-button v-for="item in showChannels" :type="selectChannels.includes(item) ? 'success' : ''"
-          @click="toggle(item)">{{ item }}</el-button>
+          @click="toggle(item)">{{ item }}</el-button> -->
       </div>
     </div>
-
   </div>
 </template>
 <script>
 import CompoentConfig from '../Components/index.js'
-import { openTimeSeriseWindow, homePage, getConfigFromServe, postSelectChannel, initDevTools, startStream, stopStream, filterBoardData, openFFTWindow, closeTimeSeriseWindow  } from '../api/index'
+import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
+
+import { 
+  openTimeSeriseWindow, 
+  homePage, 
+  getConfigFromServe, 
+  postSelectChannel, 
+  initDevTools, 
+  startStream, 
+  stopStream, 
+  filterBoardData, 
+  openFFTWindow, 
+  closeTimeSeriseWindow
+} from '../api/index'
 export default {
   data() {
     return {
@@ -81,6 +94,8 @@ export default {
       showAll: false,
       selectChannels: [],
       channels: [],
+      radius: 400,
+
       form: {
         productId: "5",
         ip: "",
@@ -96,7 +111,8 @@ export default {
   components: {
     "time-serise-config": CompoentConfig["TimeSeriseConfig"],
     "fft-config": CompoentConfig["fftConfig"],
-    "head-plot-config": CompoentConfig['headPlotConfig']
+    "head-plot-config": CompoentConfig['headPlotConfig'],
+    ElectrodePositions
   },
   destroyed() {
     if (this.timmer) {
@@ -105,13 +121,35 @@ export default {
   },
   computed: {
     showChannels() {
-      if (this.form.productId == '' || this.channels.length == 0)
-        return []
-      if (this.form.productId == "5") {
-        return this.channels['8']
+      let channels = []
+      if (this.form.productId == '5') {
+        channels = this.channels['8']
       }
-      const id = this.form.productId - 500
-      return this.channels[id]
+      if (this.form.productId == '516') {
+        channels = this.channels["16"]
+      }
+      if (this.form.productId == '520') {
+        channels = this.channels["20"]
+      }
+      if (this.form.productId == '532') {
+        channels = this.channels['32']
+      }
+      if (this.form.productId == '564') {
+        channels = this.channels['64']
+      }
+      if (!channels || !channels.length) {
+        return []
+      }
+      let info = {}
+      channels.forEach((item, index) => {
+        info[item]={
+          switch: this.selectChannels.indexOf(item) >=0 ? false: true,
+          label: item,
+          show: 'switch',
+          name: item,
+        }
+      })
+      return info
     }
   },
   async mounted() {
@@ -170,7 +208,8 @@ export default {
     async apply() {
       const res =  await filterBoardData(this.form)
     },
-    toggle(channel) {
+    toggle(point) {
+      const channel = point['label']
       if (this.selectChannels.includes(channel)) {
         this.selectChannels = this.selectChannels.filter(item => item != channel)
       } else {

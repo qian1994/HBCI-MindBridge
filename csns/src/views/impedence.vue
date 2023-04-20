@@ -6,13 +6,15 @@
         <el-button class="impedences-pass-btn" v-else type="success"  @click="enter">测试通过进入实验</el-button>
         <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio> 
         <el-radio border size="small" label='color' v-model="showLabel">脱落颜色</el-radio> 
+        <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio> 
+
       </div>
       <div class="impedences-bad-channel" v-if="badChannels.length">
         <div class="impedences-bad-channel-warning">选择相关坏导： </div>
         <el-button  v-for="channel in badChannels" type="danger" @click="removeBadChannel(channel)"> {{channel}}</el-button>
       </div>
       <div  class="impedences-pass">
-        <ElectrodePositions :show-info="selectedImpedences" :radius="radius" @point-click="cellClick"> </ElectrodePositions> 
+        <ElectrodePositions :show-info="selectedChannelInfo" :radius="radius" @point-click="cellClick"> </ElectrodePositions> 
       </div>
     </div>
   </div>
@@ -42,7 +44,6 @@ export default {
       timmer: null,
       channels: [],
       entered: false,
-      eegInfo: [],
       radius: 690,
       badChannels: [],
       showLabel: 'label'  // label  color  impandence raild
@@ -66,17 +67,17 @@ export default {
       this.channels = JSON.parse(data)['channels']
       this.products = JSON.parse(data)['products']
     }, 300);
-    const res = await getEEGElectronPosition({system: '1010'})
-    this.eegInfo = res
 
-    const badChanne = await getBadChannel()
-    this.badChannels = badChanne['bad-channel']
+    const badChannels = await getBadChannel()
+    if(badChannels && badChannels['bad-channel']) {
+      this.badChannels = badChannels['bad-channel']
+    }
   },
   components:{
     ElectrodePositions
   },
   computed: {
-    selectedImpedences() {
+    selectedChannelInfo() {
       let channels = []
       if (this.form.productId == '5') {
         channels = this.channels['8']
@@ -99,6 +100,7 @@ export default {
       let info = {}
       channels.forEach((item, index) => {
         info[item]={
+          switch: this.badChannels.indexOf(item) >=0 ? false: true,
           label: item,
           show: this.showLabel,
           name: item,
@@ -120,12 +122,13 @@ export default {
       this.showLabel = type
     },
     cellClick(point) {
-      if (point.show == 'label') {
+      if (point.show !== 'switch'&& point.show !== 'color') {
         return
       }
-      if(this.badChannels.indexOf(point['label']) >=0) {
-        return 
-      }
+      if(this.badChannels.indexOf(point['label']) >= 0) {
+        this.removeBadChannel(point['label'])
+        return
+      } 
       this.badChannels.push(point['label'])
     },
     enter() {

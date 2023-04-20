@@ -10,7 +10,6 @@
         <el-menu-item index="/home" >开始评估</el-menu-item>
         <el-menu-item index="/operate">评估配置</el-menu-item>
         <el-menu-item index="/result">评估结果</el-menu-item>
-
         <el-button class="backHome" type="warning" @click="homePage"> 回到首页</el-button>
     </el-menu>
     <router-view @PationInfo="getPationInfo"/>

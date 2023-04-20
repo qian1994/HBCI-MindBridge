@@ -1,72 +1,88 @@
 <template>
   <div class="electrode-positions">
-    <div class="electrode-positions-head">
-      <div class="electrode-positions-head-cirle" :style="'width:' + radius +'px;'+'height:' + radius + 'px' ">
-        <div class="point-out"  v-for="point in points" :style="point['position']" @click="pointClick(point)">
-          <span class="point-out-color  point-out-color-label" v-if="point['show'] == 'label'">  {{  point['label']  }}</span>
-          <span class="point-out-color" v-if="point['show'] == 'color'" :style="'background:#' + (-point['value'] *(parseInt('ff0000', 16)- parseInt('00ff00', 16))+ parseInt('ff0000', 16)).toString(16)">
-            {{point.value}} 
+    <div class="electrode-positions-head" :style="'min-height: ' + radius + 'px;' + 'width:' + radius + 'px'">
+      <div class="electrode-positions-head-cirle" :style="'width:' + radius + 'px;' + 'height:' + radius + 'px'">
+        <div class="point-out" v-for="point in points" :style="point['position']" @click="pointClick(point)">
+          <span class="point-out-color  point-out-color-label" v-if="point['show'] == 'label'"> {{ point['label']
+          }}</span>
+          <span class="point-out-color" v-if="point['show'] == 'color'"
+            :style="`background:#${(-point['value'] * (parseInt('ff0000', 16) - parseInt('00ff00', 16)) + parseInt('ff0000', 16)).toString(16)}`">
+            {{ parseInt(100 - point.value) }} %
           </span>
+          <span :style="`background:${point['color']}`" @click="chooseBadChannel(point['label'])" v-if="point['show'] == 'result'"
+            :class="'point-out-color'"> {{ point['label'] }}</span>
+          <span :style="`background:${point.switch ? '#00ff00': '#ff0000'}`" @click="chooseBadChannel(point['label'])" v-if="point['show'] == 'switch'"
+            :class="'point-out-color'"> {{ point['label'] }}</span>
         </div>
       </div>
-      <div class="electrode-positions-head-position">
-      </div>
     </div>
+    <slot></slot>
   </div>
 </template>
 <script>
+import { getEEGElectronPosition } from '../../api/index'
 export default {
-  props:['eegInfo', 'radius'],
+  props: ['showInfo', 'radius', 'crosswise'],
   data() {
     return {
       line: 20,
+      badChannel: [],
+      eegInfo: []
     }
   },
-  computed:{
+  async mounted() {
+    const res = await getEEGElectronPosition("1010")
+    this.eegInfo = res
+  },
+  computed: {
     lines() {
       const array = []
-      for(let i =0; i < this.line; i++) {
+      for (let i = 0; i < this.line; i++) {
         array.push(i)
       }
       return array
     },
     points() {
-      if(!this.eegInfo || this.eegInfo.length == 0){
+      if (!this.eegInfo || this.eegInfo.length == 0) {
         return []
       }
-      const radius = this.radius/2
-      return this.eegInfo.map((res) => {
-        return {
-          show: res.show,
-          label: res.label,
-          x: res.x * radius + radius,
-          y: res.y * radius + radius,
-          value: res.value || 0,
-          impedence: res.impedence||0,
-          position: `top:${res.x  * radius + radius}px;left:${res.y * radius+ radius}px`
+      if (!this.showInfo || this.showInfo.length == 0) {
+        return []
+      }
+      const radius = this.radius / 2
+      const showPoints = []
+      this.eegInfo[0].forEach((item, index) => {
+        item = item.toUpperCase()
+        if (!this.showInfo[item.toUpperCase()]) {
+          return
         }
+        const res = [this.eegInfo[0][index], this.eegInfo[1][index], this.eegInfo[2][index]]
+        showPoints.push({
+          show: this.showInfo[item].show,
+          label: this.showInfo[item].label,
+          color: this.showInfo[item].color,
+          switch: this.showInfo[item].switch,
+          x: res[1] * radius + radius,
+          y: res[2] * radius + radius,
+          value: this.showInfo[item].value || 0,
+          impedence: this.showInfo[item].impedence || 0,
+          position: `top:${res[1] * radius + radius}px;left:${ res[2] * radius + radius}px`
+        })
       })
-      // const radius = this.radius/2
-      // return this.eegInfo[0].map((res, index) => {
-      //   return {
-      //     labels: this.eegInfo[0][index],
-      //     x: this.eegInfo[1][index] * radius + radius,
-      //     y: this.eegInfo[2][index] * radius + radius,
-      //     position: `top:${this.eegInfo[1][index] * radius + radius}px;left:${this.eegInfo[2][index] * radius+ radius}px`
-      //   }
-      // })
+      return showPoints
     }
   },
-  methods:{
+  methods: {
+    chooseBadChannel(currentChannel) {
+    },
     pointClick(data) {
-        console.log(data)
+      this.$emit('point-click', data)
     }
   }
 }
 </script>
   
 <style>
-
 .point-out {
   position: absolute;
   border: 1px solid #ddd;
@@ -82,6 +98,7 @@ export default {
   cursor: pointer;
   overflow: hidden;
 }
+
 .point-out-color {
   display: inline-block;
   width: 100%;
@@ -92,18 +109,15 @@ export default {
 .point-out-color-label {
   color: black;
 }
+
 .electrode-positions {
   position: relative;
-  min-height: 700px;
-
 }
 
 .electrode-positions-head {
   margin: 0 auto;
   position: relative;
   transform: rotateZ(-90deg);
-  min-height: 700px;
-  width: 600px;
 }
 
 
@@ -153,14 +167,5 @@ export default {
   transform: translate(-50%, -50%);
   transform: rotateZ(60deg);
 }
-
-.img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 800px;
-  height: auto;
-} 
 </style>
   

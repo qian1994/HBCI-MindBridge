@@ -30,6 +30,15 @@ export const msgListener = {
 };
 
 
+export function getEEGElectronPosition(msg) {
+    return apiClient.send({
+        action: "get-eeg-electron-position",
+        data: msg
+    })
+}
+
+
+
 export function startSession(msg){
     return apiClient.send({
         action: 'start-session',
@@ -194,9 +203,16 @@ export function initDevTools(msg) {
     })
 }
 
-export function getEEGElectronPosition(msg) {
+export function getBadChannel(msg) {
     return apiClient.send({
-        action: "get-eeg-electron-position",
+        action: 'get-bad-channel',
+        data: msg
+    })
+}
+
+export function updateBadChannel(msg){
+    return apiClient.send({
+        action: 'update-bad-channel',
         data: msg
     })
 }

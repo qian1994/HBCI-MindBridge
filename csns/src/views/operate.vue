@@ -237,7 +237,8 @@ export default {
             channels.forEach((item, index) => {
                 info[item] = {
                     label: label,
-                    show: 'label',
+                    show: 'switch',
+                    switch: this.selectComputedChannel.indexOf(item) >=0 ? false:  true
                 }
             })
             return info
