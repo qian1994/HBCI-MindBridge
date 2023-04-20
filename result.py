@@ -127,8 +127,7 @@ class Result(object):
     def createInfoByColor(self, message):
         file = message['data']['fileName']
     
-    def drawImages(self, message):
-           
+    def createExprimentSsvepResult(self, message):
             file = message['data']['fileName']
             startTrialTime = float(message['data']['startTrialTime'])
             endTrialTime = float(message['data']['endTrialTime'])
@@ -149,7 +148,7 @@ class Result(object):
             # if not os.path.exists(imagesdir):
             #     os.makedirs(imagesdir)
             # fs = sample_rate[0]
-            
+            selectComputedChannel = message['data']['selectComputedChannel']
             rereference = message['data']['rereference']
             xtick = message['data']['frequency']
             baseFrequency = message['data']['basefrequency']
@@ -208,6 +207,8 @@ class Result(object):
                     continue
                 if channels[index] == 'marker':
                     continue
+                if channels[index] not in selectComputedChannel:
+                    continue
                 channel_data = dict({})
                 foi_idx = []
                 ch_feature = feature[index]
@@ -249,7 +250,8 @@ class Result(object):
                 # plt.savefig(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
                 # imagePath.append(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
             # return imagePath
-            file = file.replace('/data/', '/result/').replace(".bdf", '-result.json')
+            print('file', file)
+            file = file.replace('/data/', '/result/').replace(".mat", '-result.json')
             with open(file, "w") as f:
                 json.dump(channel_Score, f)
             f.close()

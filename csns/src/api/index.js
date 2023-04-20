@@ -151,6 +151,13 @@ export function drawExperimentImages(msg) {
     })
 }
 
+export function createExprimentSsvepResult(msg) {
+    return apiClient.send({
+        action: 'create-expriment-ssvep-result',
+        data: msg
+    })
+}
+
 export function getChannelImageByFiles(msg) {
     return apiClient.send({
         action: 'get-result-image-by-filename',

@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
         self.webViewlayout.addWidget(self.webView)
         # 调试工具
         # html_path = QtCore.QUrl.fromLocalFile(
-        #     QDir.currentPath() + "/mainPage/index.html")
+            # QDir.currentPath() + "/mainPage/index.html")
         html_path = QtCore.QUrl("http://localhost:8082/")
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)

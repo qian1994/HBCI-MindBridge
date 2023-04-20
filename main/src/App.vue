@@ -17,7 +17,6 @@ export default {
     Header
   },
   mounted() {
-    initDevTools()
     setTimeout(async () => {
       const config = await getApplications()
       this.config = config

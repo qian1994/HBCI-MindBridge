@@ -114,7 +114,7 @@
                         </el-form-item>
                     </el-col>
                     
-                    <el-col :span="24" v-if="selectedChannel.length">
+                    <el-col :span="24" v-show="currentEDFFile">
                         <el-form-item label="通道选择">
                             <div class="bad-channel-choose">
                                 <div class="eeg-position">
@@ -128,12 +128,12 @@
                             </div>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="24" v-if="selectedChannel.length">
-                        <div>
-                            <span>坏导：</span> <el-button class="create-image" type="info" disabled v-for="channel in badChannel">{{channel}}</el-button>
+                    <el-col :span="24" v-show="currentEDFFile">
+                        <div class="bad-channel-container">
+                            <span>坏导：</span> <el-button  type="info" disabled v-for="channel in badChannel">{{channel}}</el-button>
                         </div>
-                        <div>
-                            <span>选择计算电极：</span> <el-button class="create-image" type="info" v-for="channel in selectComputedChannel" @click="reomveSelectComputedChannel(channel)">{{channel}}</el-button>
+                        <div  class="computed-channel-container">
+                            <span>选择计算电极：</span> <el-button type="primary" v-for="channel in selectComputedChannel" @click="reomveSelectComputedChannel(channel)">{{channel}}</el-button>
                         </div>
                     </el-col>
                     <el-col :span="24">
@@ -149,7 +149,7 @@
 </template>
 <script>
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
-import { getResultFiles, drawExperimentImages, getChannelImageByFiles, initDevTools, getEEGElectronPosition, openFileDialog , getInfoByFileName} from '../api/index'
+import { getResultFiles, createExprimentSsvepResult, getChannelImageByFiles, initDevTools, getEEGElectronPosition, openFileDialog , getInfoByFileName} from '../api/index'
 export default {
     data() {
         return {
@@ -231,14 +231,25 @@ export default {
         selectedChannel() {
             let channels = this.info.channels
             let info = {}
-            if(!this.info || channels) {
+            if(!this.info || channels.length == 0) {
                 return info
             }
+
             channels.forEach((item, index) => {
+                item = item.replaceAll(' ', '')
+                let color = ''
+                if(this.badChannel.indexOf(item) == -1) {
+                    if (this.selectComputedChannel.indexOf(item) >=0) {
+                        color = ''
+                    }else {
+                        color = '#ddd'
+                    }
+                }
                 info[item] = {
-                    label: label,
+                    label: item,
                     show: 'switch',
-                    switch: this.selectComputedChannel.indexOf(item) >=0 ? false:  true
+                    color: color,
+                    switch: this.badChannel.indexOf(item) >=0 ? false:  true
                 }
             })
             return info
@@ -255,7 +266,7 @@ export default {
                 this.$message('坏导不可参与计算')
                 return
             }
-            if(this.selectComputedChannel.indexOf(data['label'])) {
+            if(this.selectComputedChannel.indexOf(data['label']) >= 0) {
                 this.selectComputedChannel = this.selectComputedChannel.filter(item => item != data['label'])
             }else {
                 this.selectComputedChannel.push(data['label'])
@@ -276,49 +287,34 @@ export default {
                 });
                 return
             }
-            const data = { ...this.form, fileName: this.currentEDFFile, rereference: parseInt(this.form.rereference), selectTrial: this.selectTrial }
-            const res = await drawExperimentImages(data)
+            const data = { ...this.form, fileName: this.currentEDFFile, selectComputedChannel: this.selectComputedChannel, rereference: parseInt(this.form.rereference), selectTrial: this.selectTrial }
+            const res = await createExprimentSsvepResult(data)
             if (res == 'ok') {
-                this.$alert('', "获取生成图片成功", {
+                this.$alert('', "成功生成报告", {
                     confirmButtonText: '确定',
                 });
-                setTimeout(() => {
-                    this.getImageByFileName()
-                }, 1000);
+               
             } else {
                 this.$alert('', "参数错误，请输入正确参数", {
                     confirmButtonText: '确定',
                 });
             }
         },
-        async getImageByFileName() {
-            const res = await getChannelImageByFiles(this.files[this.form.fileId])
-            const info = res
-            if (!info || !info.images || info.images.length == 0) {
-                this.images = []
-            } else {
-                this.images = info.images.split(',')
-            }
-            if (info && info.trialInfo) {
-                this.trials = info.trialInfo.replaceAll('"', '').split(',')
-                this.selectTrial = info.trialInfo.replaceAll('"', '')
-            }
-        },
+     
         async getInfoByFileName() {
             const res = await getInfoByFileName({fileName: this.currentEDFFile})
-            console.log(res)
             if(res) {
                 this.info = res
                 this.trials = res.trial[0]
                 this.selectTrial = res.trial[0]
-                this.badChannel = res.badChannel
-                this.selectComputedChannel = info['channels'].filter(item => res.badChannel.indexOf(item) == -1)
+                this.badChannel = res.badChannel.map(item => item.replaceAll(' ', ''))
+                this.selectComputedChannel = this.info['channels'].map(item => item.replaceAll(' ', '')).filter(item => this.badChannel.indexOf(item) == -1).filter(item => item != 'marker')
             }
         },
         async fileChoose() {
             const res = await openFileDialog()
-            if (res.indexOf('.bdf') < 0) {
-                this.$message('请选择bdf文件');
+            if (res.indexOf('.mat') < 0) {
+                this.$message('请选择mat文件');
                 return true
             }
             this.currentEDFFile = res
@@ -326,9 +322,7 @@ export default {
         }
     },
     async mounted() {
-        // const data = await getResultFiles()
-        // this.files = data.split(',')
-        // this.getImageByFileName()
+        
     }
 };
 </script>
@@ -459,6 +453,11 @@ export default {
 
 .choose-current-edf-file {
     margin-left: 30px;
+}
+
+.bad-channel-container .el-button, .computed-channel-container .el-button {
+    margin-bottom: 10px;
+    margin-right: 10px;
 }
 </style>
   

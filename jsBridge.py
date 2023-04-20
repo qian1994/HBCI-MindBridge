@@ -141,6 +141,9 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'start-ssvep-task':
             data = self.startSsvepTask(message)
         
+        if message['action'] == 'create-expriment-ssvep-result':
+            data = self.createExprimentSsvepResult(message)
+
         if message['action'] == 'post-time-serise-channel-show':
             data = self.postTimeSeriseChannelShow(message)
             
@@ -322,6 +325,11 @@ class JsBridge(QtCore.QObject):
         data = self.mainwindow.startssvepTask(message)
         return data
 
+    def createExprimentSsvepResult(self, message):
+        res = Result()
+        data = res.createExprimentSsvepResult(message)
+        return data
+    
     def postTimeSeriseChannelShow(self, message):
         data = self.mainwindow.postTimeSeriseChannelShow(message)
         return data
@@ -409,7 +417,6 @@ class JsBridge(QtCore.QObject):
         return fileName
 
     def openFilesDialog(self, message):
-        print(message)
         fileNames = self.mainwindow.openFilesDialog(message)
         return fileNames
     
@@ -444,11 +451,15 @@ class JsBridge(QtCore.QObject):
         fileName = fileName.replace('.bdf', '.mat')
         info = sio.loadmat(fileName)
         data_dict = {}
+        info['data'] = ''
         for key in info.keys():
             if key[0] != '_':
-                data_dict[key] = info[key].tolist()
-        data_dict['data'] = ''
+                if isinstance(info[key], np.ndarray):
+                    data_dict[key] = info[key].tolist()
+                if key == 'badChannel':
+                    data_dict['badChannel'] = data_dict['badChannel'][0][0][0].tolist()
         return data_dict
+   
     def getEEGElectronPosition(self, message):
         # system = message['data']['system'] 
         coords = get_elec_coords(system='1010', as_mne_montage=False)

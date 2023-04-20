@@ -75,7 +75,6 @@ export default {
         async getResultInfoByFileName() {
             const res = await getResultInfoByFileName({ fileName: this.currentEDFFile })
             this.resultInfo = res
-
         },
         chooseElectron(point) {
             let data = this.resultInfo[point['label']]
@@ -103,7 +102,6 @@ export default {
                         interval: 0,
                         formatter: function (value, index) {
                             if (xindex.indexOf(index) >= 0) {
-                                console.log(data['freq'][index])
                                 return data['freq'][index].toFixed(1)
                             }
                         }

@@ -94,8 +94,8 @@ export default {
       showAll: false,
       selectChannels: [],
       channels: [],
+      currentChannels: [],
       radius: 400,
-
       form: {
         productId: "5",
         ip: "",
@@ -141,9 +141,10 @@ export default {
         return []
       }
       let info = {}
+      this.currentChannels = channels
       channels.forEach((item, index) => {
         info[item]={
-          switch: this.selectChannels.indexOf(item) >=0 ? false: true,
+          switch: this.selectChannels.indexOf(item) >=0 ? true: false,
           label: item,
           show: 'switch',
           name: item,
@@ -210,7 +211,7 @@ export default {
     },
     toggle(point) {
       const channel = point['label']
-      if (this.selectChannels.includes(channel)) {
+      if (this.selectChannels.indexOf(channel) >= 0) {
         this.selectChannels = this.selectChannels.filter(item => item != channel)
       } else {
         this.selectChannels.push(channel)
@@ -228,7 +229,7 @@ export default {
         return
       }
       this.showAll = true
-      this.selectChannels = this.showChannels
+      this.selectChannels = this.currentChannels
       postSelectChannel(this.selectChannels)
     }
   }

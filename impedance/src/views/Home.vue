@@ -21,8 +21,8 @@
 </template>
 <script>
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
-
-import { startImpendenceTest, 
+import { 
+  startImpendenceTest, 
   endImpendenceTest, 
   getImpendenceFromServe,
   updateBadChannel,
@@ -30,7 +30,8 @@ import { startImpendenceTest,
   getConfigFromServe, 
   homePage, 
   startSession ,
-   initDevTools} from '../api/index'
+   initDevTools
+  } from '../api/index'
 export default {
   data() {
     return {
@@ -55,7 +56,6 @@ export default {
     ElectrodePositions
   },
   created() {
-    initDevTools()
     startSession()
   },
   destroyed() {
@@ -75,11 +75,11 @@ export default {
       const data = await getConfigFromServe("msg")
       this.channels = JSON.parse(data)['channels']
       this.products = JSON.parse(data)['products']
+      const badChannels = await getBadChannel()
+      if(badChannels && badChannels['bad-channel']) {
+        this.badChannels = badChannels['bad-channel']
+      }
     }, 300);
-    const badChannels = await getBadChannel()
-    if(badChannels && badChannels['bad-channel']) {
-      this.badChannels = badChannels['bad-channel']
-    }
   },
   computed: {
     selectedChannelInfo() {
@@ -102,8 +102,6 @@ export default {
       if (!channels || !channels.length) {
         return []
       }
-      console.log('channels')
-      console.log(channels)
       let info = {}
       channels.forEach((item, index) => {
         info[item]={
