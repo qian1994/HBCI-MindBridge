@@ -102,6 +102,8 @@ export default {
       if (!channels || !channels.length) {
         return []
       }
+      console.log('channels')
+      console.log(channels)
       let info = {}
       channels.forEach((item, index) => {
         info[item]={
