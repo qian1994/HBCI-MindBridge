@@ -14,8 +14,8 @@
         <el-form ref="form" label-position="top" :model="form" label-width="auto" width class="productBox-content">
           <div class="productBox-model">
             <img class="productBox-model-img" src="../assets/monitor.png" alt="">
-            <el-form-item label="产品型号">
-              <el-select v-model="form.productId" placeholder="请选择产品型号">
+            <el-form-item label="">
+              <el-select v-model="form.productId" disabled placeholder="请选择产品型号">
                 <el-option v-for="item in products" :label="item.name" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
@@ -63,7 +63,7 @@ export default {
     return {
       form: {
         ip: '192.168.31.156',
-        productId: '5'
+        productId: '532'
       },
       products: [],
     }

@@ -1,19 +1,14 @@
 <template>
   <div id="app">
+    <Header></Header>
     <router-view />
   </div>
 </template>
 <script>
+import Header from './Components/header/index.vue'
 export default {
-  methods: {
-    refresh() {
-      window.location.reload();
-    },
-    streamReceive(stream) {
-      this.streamJson = stream;
-      const data = JSON.parse(JSON.parse(stream).data);
-      console.log(data);
-    },
+  components:{
+    Header
   },
 };
 </script>
@@ -26,11 +21,11 @@ export default {
 html,
 body {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
 #app {
-  height: 100%;
+  min-height: 100%;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

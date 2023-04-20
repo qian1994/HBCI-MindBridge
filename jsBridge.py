@@ -13,17 +13,21 @@ from eeg_positions import get_elec_coords
 import scipy.io as sio
 import numpy as np
 import base64
+from util import *
+
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
+
     def __init__(self, parent=None):
         super(JsBridge, self).__init__(parent)
         self.responseSignal.connect(self.responseCall)
         self.getFromServer.connect(self.postFromServer)
         self.mainwindow = parent
-        self.dir_path = os
+        self.dir_path = ''
+
     @QtCore.pyqtSlot(str, result=str)
-    def requestFromClient(self,message):
+    def requestFromClient(self, message):
         message = json.loads(message)
         data = None
         if message["action"] == 'trigger':
@@ -50,7 +54,7 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'choose-dir':
             data = self.chooseDir(message)
-        
+
         if message['action'] == 'get-images':
             data = self.getImages(message)
 
@@ -65,7 +69,7 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'impendence-data':
             data = self.impendenceData(message)
-        
+
         if message['action'] == 'update-bad-channel':
             data = self.updateBadChannel(message)
 
@@ -77,25 +81,30 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'get-config':
             data = self.postConfigToPage(message)
-        
+
         if message['action'] == 'add-patient-info':
             data = self.addPationInfo(message)
 
         if message['action'] == 'draw-image-by-label-ssvep':
             data = self.drawImageByLabelSSVEP(message)
-        
+
+        if message['action'] == 'get-report-file-list-ssvep':
+            data = self.getRepoortFileListSSVEP(message)
+        if message['action'] == 'create-file-reaport-ssvep':
+            data = self.createFileReportSSVEP(message)
+
         if message['action'] == 'end-total-task':
             data = self.endTotalTask(message)
-        
+
         if message['action'] == 'get-result-files':
             data = self.getResultFiles(message)
-        
+
         if message['action'] == 'get-result-info-by-file-ssvep':
             data = self.getResultInfoByFileName(message)
 
         if message['action'] == 'get-bad-channel':
             data = self.getBadChannel(message)
-        
+
         if message['action'] == 'get-experiment-image':
             data = self.drawImage(message)
 
@@ -110,7 +119,7 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'open-html':
             data = self.openHtml(message)
-        
+
         if message['action'] == 'go-to-home-page':
             data = self.goToHomePage(message)
 
@@ -125,7 +134,7 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'close-psd-window':
             data = self.closePSDWindow(message)
-        
+
         if message['action'] == 'open-head-plot-window':
             data = self.openHeadPlotWindow(message)
 
@@ -143,16 +152,16 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'start-ssvep-task':
             data = self.startSsvepTask(message)
-        
+
         if message['action'] == 'create-expriment-ssvep-result':
             data = self.createExprimentSsvepResult(message)
 
         if message['action'] == 'post-time-serise-channel-show':
             data = self.postTimeSeriseChannelShow(message)
-            
+
         if message['action'] == 'init-board':
             data = self.initTestBoard(message)
-        
+
         if message['action'] == 'full-screen':
             data = self.fullScreen(message)
 
@@ -161,22 +170,22 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'init-dev-tools':
             data = self.initDevTools(message)
-        
+
         if message['action'] == 'get-p300-dectation':
             data = self.getP300Dectation(message)
 
         if message['action'] == 'get-current-board-data':
             data = self.getCurrentBoardData(message)
 
-        if message['action'] ==  'open-file-dialog':
+        if message['action'] == 'open-file-dialog':
             data = self.openFileDialog(message)
-        
-        if message['action'] ==  'get-info-by-file-name':
+
+        if message['action'] == 'get-info-by-file-name':
             data = self.getInfoByFileName(message)
 
         if message['action'] == 'end-signal-trial-task':
             data = self.endSignalTrialTask(message)
-            
+
         if message['action'] == 'open-dir-dialog':
             data = self.openDirectory(message)
 
@@ -185,38 +194,43 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'filter-board-dta':
             data = self.filterBoardData(message)
-        
+
         if message['action'] == 'convert-file-format':
             data = self.convertFileFormat(message)
-        
+
         if message['action'] == 'open-params-window':
             data = self.openParamsWindow(message)
-        
+
         if message['action'] == 'get-eeg-electron-position':
             data = self.getEEGElectronPosition(message)
-        
+
         if message['action'] == 'create-new-expriment':
             data = self.createNewExpriment(message)
 
         message['data'] = data
         return self.responseSignal.emit(json.dumps(message))
-    
+
     @QtCore.pyqtSlot(str, result=str)
     def context(self, message):
         self.handleMessage(message)
+
     def responseCall(self, message):
         return message
+
     def postFromServer(self, message):
         return message
+
     def handleMessage(self, message):
         print(message)
-    def getModels(self,message):
+
+    def getModels(self, message):
         models = os.listdir('./assets')
         return models
 
     def startSession(self, message):
         data = self.mainwindow.startSession(message)
         return data
+
     def startStream(self, message):
         self.mainwindow.startStream(message)
 
@@ -231,30 +245,30 @@ class JsBridge(QtCore.QObject):
     def getImages(self, message):
         data = self.mainwindow.getImages(message)
         return data
-    
+
     def endFlashTask(self, message):
         data = self.mainwindow.endFlashTask(message)
         return data
-    
+
     def showResult(message):
         print('showResult')
 
-    def choosefile(self,message):
+    def choosefile(self, message):
         print('message')
 
-    def chooseDir(self,message):
+    def chooseDir(self, message):
         print("message")
 
     def showDialog(self, message):
         self.mainwindow.showDialog(message)
-    
+
     def startFlashTask(self, message):
         self.mainwindow.startFlashTask(message['data'])
 
     def trigger(self, message):
         self.mainwindow.trigger(message['data'])
         return 'ok'
-    
+
     def startImpendenceTest(self, message):
         data = self.mainwindow.startImpendenceTest(message)
         return data
@@ -269,61 +283,63 @@ class JsBridge(QtCore.QObject):
 
     def postConfigToPage(self, message):
         mindBridge = MindBridge()
-        return  json.dumps(dict({"channels": mindBridge.channelImpedences, "products": mindBridge.products}))
-        
+        return json.dumps(dict({"channels": mindBridge.channelImpedences, "products": mindBridge.products}))
+
     def addPationInfo(self, message):
         self.mainwindow.addPationInfo(message)
         return 'ok'
-    
+
     def endTotalTask(self, message):
         data = self.mainwindow.endTotalTask(message)
         return data
-    
+
     def getResultFiles(self, message):
         res = Result()
         data = res.readAllFiles()
         return ','.join(data)
-    
+
     def drawImage(self, message):
         res = Result()
         data = res.drawImages(message)
         if len(data) > 0:
             return 'ok'
-        return  'fail'
-    
+        return 'fail'
+
     def getimageByFileName(self, message):
         self.dir_path = os.getcwd()
         self.dir_path = self.dir_path.replace("\\", "/", 5)
         fileName = message['data'].replace('.edf', '')
         if fileName == '':
-            return dict({"images":[], "trialInfo": ''})
-        edffile = self.dir_path + '/edfFile/svp1_2/'+ fileName + '.edf'
-        signals, signal_headers, header =  highlevel.read_edf(edffile)
+            return dict({"images": [], "trialInfo": ''})
+        edffile = self.dir_path + '/edfFile/svp1_2/' + fileName + '.edf'
+        signals, signal_headers, header = highlevel.read_edf(edffile)
         trialInfo = header['recording_additional']
-        imagePath = self.dir_path + "/img/" + fileName+ '/'
+        imagePath = self.dir_path + "/img/" + fileName + '/'
         if not os.path.exists(imagePath):
-            return dict({"images":[], "trialInfo": trialInfo})
-        images = os.listdir(imagePath) 
-        images = ','.join([self.dir_path + "/img/" + fileName +'/'+ i for i in images])
-        return dict({"images":images, "trialInfo": trialInfo})
+            return dict({"images": [], "trialInfo": trialInfo})
+        images = os.listdir(imagePath)
+        images = ','.join(
+            [self.dir_path + "/img/" + fileName + '/' + i for i in images])
+        return dict({"images": images, "trialInfo": trialInfo})
 
     def getApplication(self, message):
         data = os.listdir('./web-app')
         return data
-    
+
     def openHtml(self, message):
         self.mainwindow.openHtml(message['data'])
-        return 'ok' 
+        return 'ok'
 
     def goToHomePage(self, message):
         self.mainwindow.homePage()
-        return 'ok' 
+        return 'ok'
 
     def openTimeSeriseWindow(self, message):
         return self.mainwindow.openTimeSeriseWindow(message)
-    
+
     def openRealTimeFFTWindow(self, message):
         return self.mainwindow.openRealTimeFFTWindow(message)
+
     def startSsvepTask(self, message):
         data = self.mainwindow.startssvepTask(message)
         return data
@@ -332,11 +348,11 @@ class JsBridge(QtCore.QObject):
         res = Result()
         data = res.createExprimentSsvepResult(message)
         return data
-    
+
     def postTimeSeriseChannelShow(self, message):
         data = self.mainwindow.postTimeSeriseChannelShow(message)
         return data
-    
+
     def closeTimeSeriseWindow(self, message):
         data = self.mainwindow.closeTimeSeriseWindow(message)
         return data
@@ -344,28 +360,30 @@ class JsBridge(QtCore.QObject):
     def openfftWindow(self, message):
         data = self.mainwindow.openfftWindow(message)
         return data
+
     def closefftWindow(self, message):
         data = self.mainwindow.closefftWindow(message)
         return data
 
     def openPSDWindow(self, message):
         data = self.mainwindow.openPSDWindow(message)
-        return data 
+        return data
+
     def closePSDWindow(self, message):
         data = self.mainwindow.closePSDWindow(message)
-        return data 
-    
+        return data
+
     def openHeadPlotWindow(self, message):
         data = self.mainwindow.openHeadPlotWindow(message)
-        return data 
+        return data
 
     def closeHeadPlotindow(self, message):
-        data =self.mainwindow.closeHeadPlotindow(message)
-        return data 
-    
+        data = self.mainwindow.closeHeadPlotindow(message)
+        return data
+
     def fullScreen(self, message):
         self.mainwindow.fullScreen(message)
-    
+
     def exitFullScreen(self, message):
         self.mainwindow.exitFullScreen(message)
 
@@ -376,34 +394,36 @@ class JsBridge(QtCore.QObject):
         self.mainwindow.getP300Dectation(message)
 
     def getCurrentBoardData(self, message):
-       return self.mainwindow.getCurrentBoardData(message)
-    
+        return self.mainwindow.getCurrentBoardData(message)
+
     def drawImageByLabelSSVEP(self, message):
         res = Result()
         data = res.createImages(message)
         return data
-    
+
     def getBatterVertage(self, message):
         try:
-            result = requests.get('http://'+message['data']['ip']+ ':80/BatteryVoltage', timeout=1, headers = { 'Connection': 'close'})
+            result = requests.get(
+                'http://'+message['data']['ip'] + ':80/BatteryVoltage', timeout=1, headers={'Connection': 'close'})
             res = json.loads(result.text)
             Battery = res['BatteryProportion']
-            return int(Battery/ 10) 
+            return int(Battery / 10)
         except Exception as e:
             print(e)
-            return 0 
-    
+            return 0
+
     def openParamsWindow(self, message):
         self.mainwindow.openParamsWindow(message)
-        
+
     def initTestBoard(self, message):
         try:
-            result = requests.get('http://'+message['data']['ip']+ ':80/all', timeout=3, headers = { 'Connection': 'close'})
+            result = requests.get(
+                'http://'+message['data']['ip'] + ':80/all', timeout=3, headers={'Connection': 'close'})
             res = json.loads(result.text)
             result.close()
             if result.status_code != 200:
                 return "fail"
-            else: 
+            else:
                 if message['data']['productId'] == '5' and res['num_channels'] == 8:
                     return 'ok'
                 if message['data']['productId'] == '516' and res['num_channels'] == 16:
@@ -414,12 +434,12 @@ class JsBridge(QtCore.QObject):
                     return 'ok'
                 if message['data']['productId'] == '520' and res['CHIP_CHANNEL_NUM'] == 6:
                     return 'ok'
-            
+
                 return 'fail'
         except Exception as e:
             print(e)
             return 'false'
-    
+
     def openFileDialog(self, message):
         fileName = self.mainwindow.openFileDialog(message)
         return fileName
@@ -427,19 +447,20 @@ class JsBridge(QtCore.QObject):
     def openFilesDialog(self, message):
         fileNames = self.mainwindow.openFilesDialog(message)
         return fileNames
-    
+
     def openDirectory(self, message):
         dir = self.mainwindow.openDirectory(message)
         return dir
 
     # 实时数据进行滤波处理
-    def filterBoardData(self,message):
+    def filterBoardData(self, message):
         data = self.mainwindow.filterBoardData(message)
         return data
+
     def endSignalTrialTask(self, message):
         data = self.mainwindow.endSingleTask(message)
         return data
-        
+
     def getResultInfoByFileName(self, message):
         fileName = message['data']['fileName']
         with open(fileName) as f:
@@ -448,8 +469,11 @@ class JsBridge(QtCore.QObject):
         return data
 
     def getBadChannel(self, message):
+        print('message', message, self.mainwindow.badChannel)
+        if self.mainwindow.badChannel == None:
+            return []
         return self.mainwindow.badChannel
-    
+
     def updateBadChannel(self, message):
         return self.mainwindow.updateBadChannel(message['data'])
 
@@ -467,27 +491,83 @@ class JsBridge(QtCore.QObject):
                 if key == 'badChannel':
                     data_dict['badChannel'] = data_dict['badChannel'][0][0][0].tolist()
         return data_dict
-   
+
     def getEEGElectronPosition(self, message):
-        # system = message['data']['system'] 
+        # system = message['data']['system']
         coords = get_elec_coords(system='1010', as_mne_montage=False)
-        data = [coords['label'].tolist(), coords['x'].tolist(), coords['y'].tolist()]
+        data = [coords['label'].tolist(), coords['x'].tolist(),
+                coords['y'].tolist()]
         return data
-    
+
+    def getRepoortFileListSSVEP(self, message):
+        pations = os.listdir('test_data')
+        pationsTree = dict({})
+        for dir in pations:
+            if '.' in dir:
+                continue
+            files = []
+            for file in os.listdir('test_data/'+dir):
+                if '.' in file:
+                    continue
+                files.append(file)
+            pationsTree[dir] = files
+        
+        return pationsTree
+
+    def createFileReportSSVEP(self, message):
+        data = message['data']
+        if 'pationcode' not in data:
+            return 'fail'
+        pationcode = data['pationcode']
+        path = pationcode
+        if data['time'] != '':
+            path += '/' + data['time']
+        currentRootPath = os.getcwd() + '/test_data/' + path
+        paths = find_json_files(currentRootPath)
+        reports = []
+        for filepath in paths:
+            filepath = filepath.replace('\\', '/', 20)
+            dactData = ''
+            with open(filepath) as f:
+                dactData = json.load(f)
+            f.close()
+            base = 0
+            odd = 0
+            for key in dactData.keys():
+                if key == 'badChannel':
+                    continue
+                item = dactData[key]
+                if type(item) != dict:
+                    continue
+
+                pathDir = filepath.split('/')
+                pationcode = pathDir[len(pathDir) - 5]
+                etime = pathDir[len(pathDir) - 4]
+                mode = pathDir[len(pathDir) - 3]
+                if item['base'] > 0:
+                    base += 1
+                if item['odd'] > 0:
+                    odd+=1
+            reports.append([pationcode, etime, mode,base, odd, ''])
+        storeData = [['pathoncode', 'time', 'mode', 'base', 'odd', 'remarks']]
+        storeData = np.concatenate((np.array(storeData), np.array(reports)), axis=0)
+        np.savetxt(os.getcwd() + '/test_data/' + path +'/report.csv', storeData, delimiter=',', fmt='%s')
+        return storeData.tolist()
     def convertFileFormat(self, message):
         savePath = message['data']['savePath']
         files = message['data']['fileList']
         fileFormat = ConvertFileFormat()
         for file in files:
-            if message['data']['type'] =='edf':
+            if message['data']['type'] == 'edf':
                 fileFormat.toEDF(file, message['data'], savePath)
             elif message['data']['type'] == 'openbci':
                 fileFormat.toTXT(file, savePath)
             elif message['data']['type'] == 'mne':
                 fileFormat.toMNE(file, savePath)
-                
+
         return 'ok'
     # 生成p300 检测模型
+
     def createMechainLearnP300(self, message):
         try:
             trainModel = P300Model()
@@ -497,10 +577,10 @@ class JsBridge(QtCore.QObject):
             if len(fileLists) == '0':
                 return 'no file'
             trainModel.createModels(fileLists, message['data'])
-        except Exception as e :
+        except Exception as e:
             print(e)
             return 'fail create p300 model'
-        return 'ok' 
+        return 'ok'
 
         # if fileName == '':
         #     return dict({"images":[], "trialInfo": ''})

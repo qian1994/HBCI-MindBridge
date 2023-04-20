@@ -29,7 +29,6 @@ export default {
     }
   },
   created() {
-    initDevTools()
   },
   mounted() {
     const path = window.location.href.split('#')[1]

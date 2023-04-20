@@ -99,9 +99,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # 调试工具
-        # html_path = QtCore.QUrl.fromLocalFile(
-            # QDir.currentPath() + "/mainPage/index.html")
-        html_path = QtCore.QUrl("http://localhost:8082/")
+        html_path = QtCore.QUrl.fromLocalFile(
+            QDir.currentPath() + "/mainPage/index.html")
+        # html_path = QtCore.QUrl("http://localhost:8082/")
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -231,7 +231,6 @@ class MainWindow(QMainWindow):
         showPoints = showSeconds * sampling_rate
         if self.boartStatus == 'startStream':
             boardData = self.board.get_current_board_data(numPoints)
-            # boardData = self.board.get_board_data()
             boardData = boardData[exg_channels]
             if boardData.shape[0] == 0 or boardData.shape[1] == 0:
                 return []

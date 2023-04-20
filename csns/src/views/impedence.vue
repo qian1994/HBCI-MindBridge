@@ -7,7 +7,6 @@
         <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio> 
         <el-radio border size="small" label='color' v-model="showLabel">脱落颜色</el-radio> 
         <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio> 
-
       </div>
       <div class="impedences-bad-channel" v-if="badChannels.length">
         <div class="impedences-bad-channel-warning">选择相关坏导： </div>
@@ -25,7 +24,6 @@ import {
   endImpendenceTest, 
   getImpendenceFromServe, 
   getConfigFromServe,
-  getEEGElectronPosition,
   updateBadChannel,
   getBadChannel
 } from '../api/index'
@@ -130,6 +128,7 @@ export default {
         return
       } 
       this.badChannels.push(point['label'])
+      updateBadChannel({"bad-channel": this.badChannels})
     },
     enter() {
       const config = JSON.parse(localStorage.getItem('config'))

@@ -85,12 +85,13 @@ class Result(object):
         stringScore =''
         for item in zScore:
             stringScore += str(item[0]) + ":"+ str(round(item[1])) + "    "
+        fig = plt.figure()
         plt.title(label ,loc='left')
         plt.xlabel(stringScore)
         for item in data['xtick']:
             plt.axvline(item, linestyle='dashed', color='red')
         plt.plot(data['freq'], data['patsnr'])
-        plt.savefig(file.replace('-result.json', "-" +label+'.jpg'))
+        fig.savefig(file.replace('-result.json', "-" +label+'.jpg'))
         return 'ok'
         # file = 'C:/Users/admin/Desktop/mindBridgeSoftware/HBCI/test_data/32_12/2023_04_19_11_01_08/6motion/result/FPVS-result.mat'
         # data = json.loads(file)

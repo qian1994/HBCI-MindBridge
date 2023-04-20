@@ -105,7 +105,9 @@ export default {
             if (res == 'ok') {
                 this.$message('数据保存成功')
                 localStorage.setItem('config', JSON.stringify(this.params))
-                this.$router.push({ name: 'home' })
+                setTimeout(() => {
+                    this.$router.push({ name: 'home' })
+                }, 1000);
             }
         },
         nextTrial() {

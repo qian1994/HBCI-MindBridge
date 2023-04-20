@@ -141,6 +141,7 @@ export default {
         return
       } 
       this.badChannels.push(point['label'])
+      updateBadChannel({"bad-channel": this.badChannels})
     },
     start() {
       startImpendenceTest(this.form)
