@@ -82,7 +82,6 @@ class MainWindow(QMainWindow):
             "order": 2,
             "filterType": 0,
         })
-
         self.paradigms = Paradigms()
         self.badChannel = None
 

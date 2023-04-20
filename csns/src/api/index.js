@@ -266,3 +266,10 @@ export function updateBadChannel(msg){
         data: msg
     })
 }
+
+export function drawImageByLabelSSVEP(msg) {
+    return apiClient.send({
+        action: 'draw-image-by-label-ssvep',
+        data: msg
+    })
+}

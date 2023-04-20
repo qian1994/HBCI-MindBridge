@@ -80,6 +80,9 @@ class JsBridge(QtCore.QObject):
         
         if message['action'] == 'add-patient-info':
             data = self.addPationInfo(message)
+
+        if message['action'] == 'draw-image-by-label-ssvep':
+            data = self.drawImageByLabelSSVEP(message)
         
         if message['action'] == 'end-total-task':
             data = self.endTotalTask(message)
@@ -374,6 +377,11 @@ class JsBridge(QtCore.QObject):
 
     def getCurrentBoardData(self, message):
        return self.mainwindow.getCurrentBoardData(message)
+    
+    def drawImageByLabelSSVEP(self, message):
+        res = Result()
+        data = res.createImages(message)
+        return data
     
     def getBatterVertage(self, message):
         try:

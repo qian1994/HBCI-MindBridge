@@ -55,35 +55,6 @@ class Result(object):
         signals, signal_headers, header = highlevel.read_edf(fileName)
         return signals, signal_headers, header
 
-    # def count164z(self, zScore, threshold, base_freq_idx):
-    #     num_electrode = zScore.shape[0]
-    #     num_base = 0  # 6Hz frequency band counts
-    #     num_singular = 0  # 1.2Hz frequency band counts
-    #     zdata164 = [np.empty((num_electrode, zScore.shape[1])), np.empty(
-    #         (num_electrode, zScore.shape[1]))]
-    #     idxMarked = [np.empty(num_electrode, dtype=np.int64),
-    #                           np.empty(num_electrode, dtype=np.int64)]
-    #     for e in range(num_electrode):
-    #         if zScore[e, base_freq_idx] > threshold:  # Check for 6Hz frequency band
-    #             num_base += 1
-    #             zdata164[0][e, :] = zScore[e, :]
-    #             # Record the electrode with 6Hz frequency band
-    #             idxMarked[0][num_base - 1] = e
-    #             if zScore[e, 0] > threshold:  # Check for 1.2Hz frequency band
-    #                 num_singular += 1
-    #                 zdata164[1][e, :] = zScore[e, :]
-    #                 # Record the electrode with 1.2Hz frequency band
-    #                 idxMarked[1][num_singular - 1] = e
-    #             else:
-    #                 # Check if there are more than 3 high-frequency bands
-    #                 aa = np.sum(zScore[e, :] > threshold)
-    #                 if aa >= 3:
-    #                     num_singular += 1
-    #                     zdata164[1][e, :] = zScore[e, :]
-    #                     # Record the electrode with 1.2Hz frequency band
-    #                     idxMarked[1][num_singular - 1] = e
-    #     return num_base, num_singular, zdata164, idxMarked
-
     def count164z(self, zScores, channels,baseFrequency, ZScoreStandard):
         countbase = 0
         countOdd = 0
@@ -93,6 +64,7 @@ class Result(object):
             if int(item[0] * 10) != int(baseFrequency* 10) and item[1] > ZScoreStandard:
                 countOdd += 1
         return countbase, countOdd
+    
     def drawCsv(self, csvFile):
         print('csv file')
 
@@ -100,13 +72,29 @@ class Result(object):
         print(message)
 
     def getResultInfo(self, message):
-        # file = message['data']['fileName']
-        file = 'C:/Users/admin/Desktop/mindBridgeSoftware/HBCI/test_data/32_12/2023_04_19_11_01_08/6motion/result/FPVS-result.mat'
+        file = message['data']['fileName']
+        # file = 'C:/Users/admin/Desktop/mindBridgeSoftware/HBCI/test_data/32_12/2023_04_19_11_01_08/6motion/result/FPVS-result.mat'
         data = sio.loadmat(file)
         return data
 
     def createImages(self, message):
-        print('sss')
+        data = message['data']
+        file = message['data']['file']
+        zScore = data['zScore']
+        label = data['label']
+        stringScore =''
+        for item in zScore:
+            stringScore += str(item[0]) + ":"+ str(round(item[1])) + "    "
+        plt.title(label ,loc='left')
+        plt.xlabel(stringScore)
+        for item in data['xtick']:
+            plt.axvline(item, linestyle='dashed', color='red')
+        plt.plot(data['freq'], data['patsnr'])
+        plt.savefig(file.replace('-result.json', "-" +label+'.jpg'))
+        return 'ok'
+        # file = 'C:/Users/admin/Desktop/mindBridgeSoftware/HBCI/test_data/32_12/2023_04_19_11_01_08/6motion/result/FPVS-result.mat'
+        # data = json.loads(file)
+        # print(data)
         #   for i in foi_idx:
         #     freqi = freq[i]
         #     plt.axvline(freqi, linestyle='dashed', color='red')
@@ -244,6 +232,7 @@ class Result(object):
                 channel_data['freq-index'] = foi_idx
                 channel_data['xtick'] = xtick
                 channel_Score[channels[index]] = channel_data
+                channel_Score['channels'] = channels
                 # plt.xlabel(stringScore)
                 # plt.title(channels[index],loc='left')
                 # plt.show()
