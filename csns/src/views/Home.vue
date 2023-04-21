@@ -45,6 +45,9 @@
           </el-col>
         </el-row>
       </div>
+      <el-col :span="24">
+        <h3>基础信息</h3>
+      </el-col>
       <el-col :span="12">
         <el-form-item label="文件名">
           <el-input v-model="form.fileName" placeholder=""> </el-input>
@@ -90,6 +93,9 @@
           <el-input v-model="form.marker" disabled placeholder=""> </el-input>
         </el-form-item>
       </el-col>
+      <el-col :span="24">
+        <h3>评估参数</h3>
+      </el-col>
       <el-col :span="12">
         <el-form-item label="刺激模式">
           <el-select v-model="form.selectModel" placeholder="请选择刺激的模式">
@@ -98,18 +104,20 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="点数量" v-if="form.selectModel == '6motion'">
-          <el-input v-model="form.motionNumber" placeholder="请选择小球数量"> </el-input>
+        <el-form-item label="刺激持续时长">
+          <el-input v-model="form.instance" type="number" placeholder="请输入每次刺激持续的时长：毫秒"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="闪烁间隔时长">
-          <el-input v-model="form.trialLantency" type="number" placeholder="请输入每次闪烁间隔休息时长：毫秒"></el-input>
+        <el-form-item label="间隔时长">
+          <el-input v-model="form.lantency" type="number" placeholder="请输入每次刺激间隔休息时长：毫秒"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="中心距离" v-if="form.selectModel == '6motion'">
-          <el-input v-model="form.motionDistance" placeholder="请输入中心距离"> </el-input>
+        <el-form-item label="单次round数量">
+          <el-select v-model="form.trialNumber" placeholder="请选择一个round显示的照片数量">
+            <el-option v-for="item in trial" :label="item" :value="item"></el-option>
+          </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -130,15 +138,27 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="点宽" v-if="form.selectModel == '6motion'">
-          <el-input v-model="form.motionWidth" placeholder="请输入宽度"> </el-input>
+        <el-form-item label="闪烁间隔时长">
+          <el-input v-model="form.trialLantency" type="number" placeholder="请输入每次闪烁间隔休息时长：毫秒"></el-input>
+        </el-form-item>
+      </el-col>
+      <el-col :span="24" v-if="form.selectModel == '6motion'">
+        <h3>条件参数</h3>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="点数量" v-if="form.selectModel == '6motion'">
+          <el-input v-model="form.motionNumber" placeholder="请选择小球数量"> </el-input>
+        </el-form-item>
+      </el-col>
+    
+      <el-col :span="12">
+        <el-form-item label="中心距离" v-if="form.selectModel == '6motion'">
+          <el-input v-model="form.motionDistance" placeholder="请输入中心距离"> </el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="单次round数量">
-          <el-select v-model="form.trialNumber" placeholder="请选择一个round显示的照片数量">
-            <el-option v-for="item in trial" :label="item" :value="item"></el-option>
-          </el-select>
+        <el-form-item label="点宽" v-if="form.selectModel == '6motion'">
+          <el-input v-model="form.motionWidth" placeholder="请输入宽度"> </el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -146,16 +166,7 @@
           <el-input v-model="form.motionHeight" placeholder="请输入高度"> </el-input>
         </el-form-item>
       </el-col>
-      <el-col :span="12">
-        <el-form-item label="刺激持续时长">
-          <el-input v-model="form.instance" type="number" placeholder="请输入每次刺激持续的时长：毫秒"></el-input>
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item label="间隔时长">
-          <el-input v-model="form.lantency" type="number" placeholder="请输入每次刺激间隔休息时长：毫秒"></el-input>
-        </el-form-item>
-      </el-col>
+      
       <el-col :span="12">
         <el-form-item label="oddball颜色" v-if="form.selectModel == '3color'">
           <el-select v-model="form.colorObject" placeholder="请选择oddball颜色">

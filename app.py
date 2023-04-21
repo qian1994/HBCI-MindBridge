@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
         self.content = QHBoxLayout()
         self.content.setSpacing(0)
         self.widget.setLayout(self.content)
-        self.setWindowTitle('MindBridge')
+        self.setWindowTitle('视觉功能评估')
         screenRect = app.primaryScreen().geometry().getRect()
         self.width = screenRect[2] - screenRect[0]
         self.height = screenRect[3] - screenRect[1]

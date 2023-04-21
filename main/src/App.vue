@@ -44,6 +44,10 @@ body {
   width: 100%;
   height: 100%;
   background: #F5F7FA;
+  -moz-user-select:none;  /* 火狐 */
+  -webkit-user-select:none; /* Safari 和 Chrome */
+  -ms-user-select:none; /* IE10+ */
+  user-select:none; /* 标准语法 */
 }
 
 </style>

@@ -10,6 +10,7 @@
     </div>
     <div class="create-report">
       <el-button @click="getReportByPationInfo">获取报告</el-button>
+      <el-button @click="homePage"> 返回</el-button>
     </div>
     <div>
       <el-table :data="tableContent" height="250" border style="width: 100%">
@@ -20,7 +21,7 @@
   </div>
 </template>
 <script>
-import { getReportFileListSSVEP, initDevTools, createFileReportSSVEP } from '../api/index'
+import { getReportFileListSSVEP, initDevTools, createFileReportSSVEP, homePage } from '../api/index'
 export default {
   data() {
     return {
@@ -99,6 +100,9 @@ export default {
     }, 300);
   },
   methods: {
+    homePage() {
+      homePage()
+    },  
     handleNodeClick(checkedKeys) {
       if (checkedKeys) {
         this.checkedid = checkedKeys.id

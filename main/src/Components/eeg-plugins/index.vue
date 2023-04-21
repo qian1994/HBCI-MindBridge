@@ -1,5 +1,5 @@
 <template>
-    <div class="eeg-plugins" @click="open(info.name)">
+    <div class="eeg-plugins" @click="open(info.name)" v-if="info.name != 'custom'">
         <div class="icon">
             <img :src="info && info.icon" alt="">
         </div>
@@ -64,13 +64,13 @@ export default {
                             return
                         }
                         if (name == 'custom') {
-                            this.$router.push({ 'name': "Custom" })
+                            // this.$router.push({ 'name': "Custom" })
                             return
                         }
-                        if (name == 'impedence') {
-                            this.$router.push({ 'name': "Custom" })
-                            return
-                        }
+                        // if (name == 'impedence') {
+                        //     this.$router.push({ 'name': "Custom" })
+                        //     return
+                        // }
                         const data = await openHtml(name)
                     } else {
                         this.loading.close()
