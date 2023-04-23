@@ -604,13 +604,9 @@ class MainWindow(QMainWindow):
     def endTotalTask(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
-        print(message)
         # try:
         self.paradigms.close()
         self.stopStream('')
-        if self.timmer != None:
-            self.timmer.stop()
-            self.killTimer(self.timmer.timerId())
         if self.brainflow_file_name == None or self.brainflow_file_name == '':
             self.brainflow_file_name = self.dir_path+"/data/" + \
                 self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
@@ -621,6 +617,7 @@ class MainWindow(QMainWindow):
         data = self.board.get_board_data()
         if self.currentApp == 'svp1_2':
             self.saveDataInfo(info, data.T)
+            return
         datafilter = DataFilter()
         datafilter.write_file(
             data=data, file_name=self.brainflow_file_name, file_mode='w')

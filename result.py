@@ -218,7 +218,7 @@ class Result(object):
             selectComputedChannel = message['data']['selectComputedChannel']
             rereference = message['data']['rereference']
             xtick = message['data']['frequency']
-            baseFrequency = message['data']['basefrequency']
+            baseFrequency = message['data']['baseFrequency']
             numMeanPlus = message['data']['number']
             labels = signals[-1]
             signals = signals[1: 33]
@@ -295,7 +295,7 @@ class Result(object):
                 zScore = zScore.tolist()
                 for id in range(len(zScore)):
                     stringScore.append([xtick[id], round(zScore[id], 2)])
-                base, odd = self.count164z(stringScore,channels, float(message['data']['basefrequency']), float(message['data']['ZScore']))
+                base, odd = self.count164z(stringScore,channels, float(message['data']['baseFrequency']), float(message['data']['ZScore']))
                 channel_data['base'] = base
                 channel_data['odd'] = odd
                 channel_data["zScore"] = stringScore

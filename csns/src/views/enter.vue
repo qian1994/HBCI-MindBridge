@@ -63,7 +63,6 @@ export default {
         }
     },
     mounted() {
-        initDevTools()
         this.preload()
         msgListener.add(this.getMessageFromServe)
         this.openWindow()

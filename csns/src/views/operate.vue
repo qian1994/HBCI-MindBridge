@@ -69,7 +69,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="基础频率">
-                            <el-select v-model="form.basefrequency" placeholder="请选择">
+                            <el-select v-model="form.baseFrequency" placeholder="请选择">
                                 <el-option v-for="item in options" :key="item.value" :label="item.label"
                                     :value="item.value">
                                 </el-option>
@@ -90,7 +90,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="Z分数计算的窗口时间点 (整数)">
-                            <el-input v-model="form.count" placeholder="请选择计算信噪比的前后值"></el-input>
+                            <el-input v-model="form.number" placeholder="请选择计算信噪比的前后值"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -172,7 +172,7 @@ export default {
                 config: [],
                 number: 10,
                 ZScore: 1.64,
-                basefrequency: 6,
+                baseFrequency: 6,
                 frequency: [1.2, 2.4, 3.6, 4.8, 6, 7.2],
                 filter: 100,
                 rereference: "0",

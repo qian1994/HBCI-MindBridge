@@ -84,7 +84,8 @@ import {
   stopStream, 
   filterBoardData, 
   openFFTWindow, 
-  closeTimeSeriseWindow
+  closeTimeSeriseWindow,
+  getTimeSeriseChannelShow
 } from '../api/index'
 export default {
   data() {

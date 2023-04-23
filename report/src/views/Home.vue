@@ -18,7 +18,7 @@
         </el-table-column>
       </el-table>
     </div>
-    <div>数据平均值：基础频率  <span>{{basePscore['base']}}</span>  <span> {{basePscore['odd']}} </span>  <span>{{basePscore['avg']}}</span></div>
+    <div class="create-report-pScore">PScore平均值：基础频率  <span>{{avgPscore['base']}}</span>  奇异频率：<span> {{avgPscore['odd']}} </span> 奇异平均频率： <span>{{avgPscore['avg']}}</span></div>
   </div>
 </template>
 <script>
@@ -94,18 +94,6 @@ export default {
         'avg': 0
       }
       this.tableData.filter((item, index) => index != 0).map(row => {
-        // return {
-        //   'pationCode': row[0],
-        //   'time': row[1],
-        //   'mode': row[2],
-        //   'base': parseInt(row[3]) >= 5? '显著': '不显著',
-        //   'odd':  parseInt(row[4]) >= 5? '显著': '不显著',
-        //   'basePScore': row[5],
-        //   'oddPScore': row[6],
-        //   'avgPScore': row[7],
-        //   'remarks': row[8]
-        // }
-
         avgPscore['base'] += row[5] 
         avgPscore['odd'] += row[6] 
         avgPscore['avg'] += row[7]
@@ -169,6 +157,16 @@ export default {
 
 </script>
 <style>
+.create-report-pScore {
+  margin: 30px 0;
+  padding: 10px 0;
+
+}
+
+.create-report-pScore span{
+  display: inline-block;
+  margin: 0 5px 30px;
+}
 .ssvep-report {
   max-width: 800px;
   margin: 5px auto;

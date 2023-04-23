@@ -252,7 +252,6 @@ export default {
     }
   },
   created() {
-    // initDevTools()
     const config = localStorage.getItem('mindbridgeinfo')
     if (config) {
       const infor = JSON.parse(config)
