@@ -7,9 +7,12 @@
             </p>
         </div>
         <div class="warning-header" v-if="show">
-            <el-button class="enter-button" :disabled="!stopFlashed" @click="start" v-if="currentTrial == 0">开始实验</el-button>
-            <el-button class="enter-button" :disabled="!stopFlashed" @click="nextTrial" v-if="currentTrial != 0">下一轮</el-button>
-            <el-button class="enter-button" :disabled="!stopFlashed" v-if="currentTrial > 0" @click="endTotal" type="primary">实验结束</el-button>
+            <el-button class="enter-button" :disabled="!stopFlashed" @click="start"
+                v-if="currentTrial == 0">开始实验</el-button>
+            <el-button class="enter-button" :disabled="!stopFlashed" @click="nextTrial"
+                v-if="currentTrial != 0">下一轮</el-button>
+            <el-button class="enter-button" :disabled="!stopFlashed" v-if="currentTrial > 0" @click="endTotal"
+                type="primary">实验结束</el-button>
         </div>
         <div class="">
             <div class="total-trial">
@@ -18,14 +21,32 @@
                     }}</el-button>
             </div>
         </div>
+        <div>
+            <h3>通道选择：</h3>
+            <ElectrodePositions :show-info="showChannels" :radius="radius" @point-click="toggle"></ElectrodePositions>
+        </div>
     </div>
 </template>
 <script>
 import Vue from 'vue'
-import { startFlashTask, msgListener, endTotalTask, startSession, initDevTools , openParamsWindow} from '../api/index'
+import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
+
+import {
+    startFlashTask,
+    msgListener,
+    endTotalTask,
+    startSession,
+    initDevTools,
+    openParamsWindow,
+    getConfigFromServe,
+    postSelectChannel,
+    getTimeSeriseChannelShow
+
+} from '../api/index'
 export default {
     data() {
         return {
+            radius: 400,
             images: [],
             show: true,
             selectral: 0,
@@ -35,25 +56,80 @@ export default {
             badTrial: [],
             goodTrial: [],
             params: {},
-            stopFlashed: true
+            stopFlashed: true,
+            channels: [],
+            products: [],
+            selectChannels: []
         }
     },
     mounted() {
+        initDevTools()
         this.preload()
         msgListener.add(this.getMessageFromServe)
         this.openWindow()
+        setTimeout(async () => {
+            const data = await getConfigFromServe("msg")
+            this.channels = JSON.parse(data)['channels']
+            this.products = JSON.parse(data)['products']
+            const channels = await getTimeSeriseChannelShow()
+            this.selectChannels = channels
+        }, 300);
+    },
+    components: {
+        ElectrodePositions
     },
     computed: {
         totalTrialButton() {
             return new Array(this.currentTrial).fill(0).map((item, index) => {
                 return index + 1
             })
+        },
+        showChannels() {
+            let channels = []
+            if (this.$router.currentRoute.params.productId == '5') {
+                channels = this.channels['8']
+            }
+            if (this.$router.currentRoute.params.productId == '516') {
+                channels = this.channels["16"]
+            }
+            if (this.$router.currentRoute.params.productId == '520') {
+                channels = this.channels["20"]
+            }
+            if (this.$router.currentRoute.params.productId == '532') {
+                channels = this.channels['32']
+            }
+            if (this.$router.currentRoute.params.productId == '564') {
+                channels = this.channels['64']
+            }
+            if (!channels || !channels.length) {
+                return []
+            }
+            let info = {}
+            this.currentChannels = channels
+            channels.forEach((item, index) => {
+                info[item] = {
+                    switch: this.selectChannels.indexOf(item) >= 0 ? true : false,
+                    label: item,
+                    show: 'switch',
+                    name: item,
+                }
+            })
+            return info
         }
     },
-    
+
     methods: {
         async openWindow() {
             const res = await openParamsWindow()
+        },
+        toggle(point) {
+            const channel = point['label']
+            if (this.selectChannels.indexOf(channel) >= 0) {
+                this.selectChannels = this.selectChannels.filter(item => item != channel)
+            } else {
+                this.selectChannels.push(channel)
+            }
+            postSelectChannel(this.selectChannels)
         },
         troggle(data) {
             let index = parseInt(data) - 1
@@ -85,7 +161,7 @@ export default {
                 params = JSON.parse(localStorage.getItem('config'))
             }
             this.params = params
-       
+
         },
         async start() {
             this.stopFlashed = false
@@ -101,7 +177,7 @@ export default {
             const trial = this.totalTrialButton.map(item => {
                 return this.goodTrial.indexOf(item - 1) >= 0 ? 1 : 0
             })
-            const res = await endTotalTask({...this.$router.currentRoute.params, trial: trial})
+            const res = await endTotalTask({ ...this.$router.currentRoute.params, trial: trial })
             if (res == 'ok') {
                 this.$message('数据保存成功')
                 localStorage.setItem('config', JSON.stringify(this.params))

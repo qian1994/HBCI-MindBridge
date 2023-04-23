@@ -7,8 +7,10 @@ from scipy import signal
 from pyedflib import highlevel
 import json
 import scipy.io as sio
-
-
+from scipy.io import loadmat
+import math
+from util import *
+mode = ['1contrast', '2size', '3color', '4direction', '5spatial frequency', '6motion', '7object recognition', '8face', '9tool', '10familiar', '11self', '18shape']
 class Result(object):
     def __init__(self):
         super(Result, self).__init__()
@@ -19,6 +21,52 @@ class Result(object):
     def readAllFiles(self):
         return os.listdir('./edfFile/svp1_2')
 
+    def getInfoByFileName(self, message):
+        fileName = message['data']['fileName']
+        fileName = fileName.replace('.edf', '.mat')
+        fileName = fileName.replace('.bdf', '.mat')
+        info = sio.loadmat(fileName)
+        data_dict = {}
+        info['data'] = ''
+        for key in info.keys():
+            if key[0] != '_':
+                if isinstance(info[key], np.ndarray):
+                    data_dict[key] = info[key].tolist()
+                if key == 'badChannel':
+                    data_dict['badChannel'] = data_dict['badChannel'][0][0][0].tolist()
+        return data_dict
+
+    def getReportFileListSSVEP(self, message):
+        pations = os.listdir('test_data')
+        pationsTree = dict({})
+        for dir in pations:
+            if '.' in dir:
+                continue
+            files = []
+            for file in os.listdir('test_data/'+dir):
+                if '.' in file:
+                    continue
+                files.append(file)
+            pationsTree[dir] = files
+        return pationsTree
+
+    def getImageByFileName(self, message):
+        self.dir_path = os.getcwd()
+        self.dir_path = self.dir_path.replace("\\", "/", 5)
+        fileName = message['data'].replace('.edf', '')
+        if fileName == '':
+            return dict({"images": [], "trialInfo": ''})
+        edffile = self.dir_path + '/edfFile/svp1_2/' + fileName + '.edf'
+        signals, signal_headers, header = highlevel.read_edf(edffile)
+        trialInfo = header['recording_additional']
+        imagePath = self.dir_path + "/img/" + fileName + '/'
+        if not os.path.exists(imagePath):
+            return dict({"images": [], "trialInfo": trialInfo})
+        images = os.listdir(imagePath)
+        images = ','.join(
+            [self.dir_path + "/img/" + fileName + '/' + i for i in images])
+        return dict({"images": images, "trialInfo": trialInfo})
+    
     def zsnr(self, patpowavedata, foi_idx, number):
         # 计算z分数
         num_freq = len(patpowavedata)
@@ -69,13 +117,53 @@ class Result(object):
         print('csv file')
 
     def createReport(self, message):
-        print(message)
+        data = message['data']
+        if 'pationcode' not in data:
+            return 'fail'
+        pationcode = data['pationcode']
+        path = pationcode
+        if data['time'] != '':
+            path += '/' + data['time']
+        currentRootPath = os.getcwd() + '/test_data/' + path
+        paths = find_json_files(currentRootPath)
+        reports = []
+        for filepath in paths:
+            filepath = filepath.replace('\\', '/', 20)
+            dactData = ''
+            with open(filepath) as f:
+                dactData = json.load(f)
+            f.close()
+            base = 0
+            odd = 0
+            for key in dactData.keys():
+                if key == 'badChannel':
+                    continue
+                item = dactData[key]
+                if type(item) != dict:
+                    continue
+
+                pathDir = filepath.split('/')
+                pationcode = pathDir[len(pathDir) - 5]
+                etime = pathDir[len(pathDir) - 4]
+                mode = pathDir[len(pathDir) - 3]
+                if item['base'] > 0:
+                    base += 1
+                if item['odd'] > 0:
+                    odd+=1
+            pScore = self.computedPScore(filepath, 6, 1.2)
+            reports.append([pationcode, etime, mode,base, odd, pScore['base'], pScore['odd'], pScore['avg'],  ''])
+        storeData = [['pathoncode', 'time', 'mode', 'base', 'odd', "base pscore", 'odd pscore', 'avg pscore','remarks']]
+        storeData = np.concatenate((np.array(storeData), np.array(reports)), axis=0)
+        np.savetxt(os.getcwd() + '/test_data/' + path +'/report.csv', storeData, delimiter=',', fmt='%s')
+        return storeData.tolist()
 
     def getResultInfo(self, message):
         file = message['data']['fileName']
-        # file = 'C:/Users/admin/Desktop/mindBridgeSoftware/HBCI/test_data/32_12/2023_04_19_11_01_08/6motion/result/FPVS-result.mat'
         data = sio.loadmat(file)
         return data
+    
+    def createPScore(self, message):
+        print('this is create p score')
 
     def createImages(self, message):
         data = message['data']
@@ -113,6 +201,7 @@ class Result(object):
         #     plt.title(channels[index],loc='left')
             # plt.savefig(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
             # imagePath.append(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
+    
     def createInfoByColor(self, message):
         file = message['data']['fileName']
     
@@ -120,23 +209,12 @@ class Result(object):
             file = message['data']['fileName']
             startTrialTime = float(message['data']['startTrialTime'])
             endTrialTime = float(message['data']['endTrialTime'])
-            # imagesdir = self.dir_path +'/img/'+ file.replace('.edf', '') 
-            # signals, signal_headers, header = self.readEdfFile(file)
             info = sio.loadmat(file.replace('.bdf', '.mat'))
             fs = info["sampleRate"][0][0]
             signals = info['data']
-            # print(signals.shape)
             channels = [channel.replace(' ', '', 10) for channel in info['channels']]
             signals = signals.T
             signals = np.ascontiguousarray(signals)
-            # headerInfo = []
-            # sample_rate = []
-            # for head in signal_headers:
-            #     headerInfo.append(head['label'])
-            #     sample_rate.append(head['sample_rate'])
-            # if not os.path.exists(imagesdir):
-            #     os.makedirs(imagesdir)
-            # fs = sample_rate[0]
             selectComputedChannel = message['data']['selectComputedChannel']
             rereference = message['data']['rereference']
             xtick = message['data']['frequency']
@@ -205,7 +283,6 @@ class Result(object):
                 freq = freq[0: 150]
                 pxx = pxx[0: 150]
                 count = 0
-                # plt.cla()
                 for idx in range(len(freq)):
                     freqi = freq[idx]
                     if count >= len(xtick):
@@ -214,12 +291,6 @@ class Result(object):
                         count += 1
                         foi_idx.append(idx)
                 zScore, patsnr = self.zsnr(np.array(pxx), foi_idx, numMeanPlus)
-                # for i in foi_idx:
-                #     freqi = freq[i]
-                #     plt.axvline(freqi, linestyle='dashed', color='red')
-                # plt.ylim(0, np.max(patsnr))
-                # plt.plot(freq, patsnr)
-                
                 stringScore = []
                 zScore = zScore.tolist()
                 for id in range(len(zScore)):
@@ -234,20 +305,113 @@ class Result(object):
                 channel_data['xtick'] = xtick
                 channel_Score[channels[index]] = channel_data
                 channel_Score['channels'] = channels
-                # plt.xlabel(stringScore)
-                # plt.title(channels[index],loc='left')
-                # plt.show()
-                # plt.savefig(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
-                # imagePath.append(imagesdir+'/'+ str(index)+'-'+str(headerInfo[index]) + '.jpg')
-            # return imagePath
-            print('file', file)
+                channel_Score['base'] = message['data']['baseFrequency']
+                
             file = file.replace('/data/', '/result/').replace(".mat", '-result.json')
             with open(file, "w") as f:
                 json.dump(channel_Score, f)
             f.close()
-            # sio.savemat(file, json.dumps(channel_Score)) 
             return 'ok'
 
-if __name__ == '__main__':
-    res = Result()
-    res.drawImages('')
+
+    ##/
+    #   input: file, basefreq_number, oddFreq_number
+    #   output: pmin
+    # /
+    def computedPScore(self, fileName, basefreq_number, oddFreq_number):
+        #  1: 获取每个电极的snr
+        #  2: 计算 1.2hz的snr 于 基础的正常人的电极的个数
+        #  3：计算 6hz 的snr 于 基础的正常人的电极个数
+        #  4：计算 谐频率的均值  于 基础的正常人的 电极个数
+        #  每个电极除以对应的正常人的个数   50 - NAN 
+        #  将每个电极重新进行平均，然后 * 100 得到p分数
+        # basefreq = []
+        # oddbalfreq = []
+        # oddavg = []
+        basefreq_number = basefreq_number
+        oddFreq_number = oddFreq_number
+        hs_SNRdata = loadmat('./hs_SNRdata.mat')
+        # print(hs_SNRdata)
+        # for item in hs_SNRdata["hs_SNRdata"][0][0]:
+            # print(item.shape)
+        basefreq = hs_SNRdata["hs_SNRdata"][0][0][0]
+        oddbalfreq = hs_SNRdata["hs_SNRdata"][0][0][1]
+        oddavg = hs_SNRdata["hs_SNRdata"][0][0][6]
+        channels = hs_SNRdata["hs_SNRdata"][0][0][7]
+        info_channel = dict({})
+        count = 0
+        for channel in channels:
+            info_channel[channel[0][0]] = count
+            count += 1
+        # print(info_channel)
+        # fileName = message['data']['fileName']
+        fileName_array = fileName.split('/')
+        current_mode = mode.index(fileName_array[len(fileName_array) - 3])
+        with open(fileName) as f:
+            data = json.load(f)
+        pScoresByChannel = {}
+        for key in data:
+            if key in info_channel:
+                index = info_channel[key]
+                basefreq_current = basefreq[0][current_mode][index]
+                oddbalfreq_current = oddbalfreq[0][current_mode][index]
+                oddavg_current = oddavg[0][current_mode][index]
+                # print(basefreq_current.shape, oddbalfreq_current.shape, oddavg_current.shape)
+                # print(data[key]['zScore'])
+                pScorestand = dict({})
+                pScorestand['oddavg_avg'] = 0
+                for item in data[key]['zScore']:
+                    if item[0] == basefreq_number:
+                        pScorestand['basefreq_number'] = item[1]
+                    elif item[0] == oddFreq_number:
+                        pScorestand['oddFreq_number'] = item[1]
+                    else:
+                        pScorestand['oddavg_avg'] += item[1]
+
+                pScorestand['oddavg_avg'] /= (len(data[key]['zScore']) - 2)
+                current_data = 0
+                count = 0
+                pScores = {}
+                current_data = 0
+                for i in basefreq_current:
+                    if not math.isnan(i):
+                        if item[1] > i:
+                            current_data
+                        count += 1
+                pScores['base'] = [count, current_data]
+                current_data = 0
+                count = 0
+                for i in oddbalfreq_current:
+                    if not math.isnan(i):
+                        if item[1] > i:
+                            current_data
+                        count += 1
+                pScores['odd'] = [count, current_data]
+                current_data = 0
+                count = 0
+                for i in oddavg_current:
+                    if not math.isnan(i):
+                        if item[1] > i:
+                            current_data
+                        count += 1
+                pScores['avg'] = [count, current_data]
+                pScoresByChannel[key] = pScores
+        
+        p_min ={
+            'base': 0,
+            'odd': 0,
+            'avg': 0
+        }
+        for key in pScoresByChannel:
+            pScoresByChannelData = pScoresByChannel[key]
+            p_min['base'] += pScoresByChannelData['base'][1] / pScoresByChannelData['base'][0]
+            p_min['odd'] += pScoresByChannelData['odd'][1] / pScoresByChannelData['odd'][0]
+            p_min['avg'] += pScoresByChannelData['avg'][1] / pScoresByChannelData['avg'][0]
+        p_min['base'] /= len(pScoresByChannel.keys()) * 100
+        p_min['odd'] /= len(pScoresByChannel.keys()) * 100
+        p_min['avg'] /= len(pScoresByChannel.keys()) * 100
+        return p_min
+                                                                                            
+# if __name__ == '__main__':
+#     res = Result()
+#     res.computedPScore('')

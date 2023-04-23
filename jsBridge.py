@@ -89,7 +89,7 @@ class JsBridge(QtCore.QObject):
             data = self.drawImageByLabelSSVEP(message)
 
         if message['action'] == 'get-report-file-list-ssvep':
-            data = self.getRepoortFileListSSVEP(message)
+            data = self.getReportFileListSSVEP(message)
         if message['action'] == 'create-file-reaport-ssvep':
             data = self.createFileReportSSVEP(message)
 
@@ -158,6 +158,9 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'post-time-serise-channel-show':
             data = self.postTimeSeriseChannelShow(message)
+        
+        if message['action']  == 'get-time-serise-channel-show':
+            data = self.getTimeSeriseChannelShow(message)
 
         if message['action'] == 'init-board':
             data = self.initTestBoard(message)
@@ -306,21 +309,9 @@ class JsBridge(QtCore.QObject):
         return 'fail'
 
     def getimageByFileName(self, message):
-        self.dir_path = os.getcwd()
-        self.dir_path = self.dir_path.replace("\\", "/", 5)
-        fileName = message['data'].replace('.edf', '')
-        if fileName == '':
-            return dict({"images": [], "trialInfo": ''})
-        edffile = self.dir_path + '/edfFile/svp1_2/' + fileName + '.edf'
-        signals, signal_headers, header = highlevel.read_edf(edffile)
-        trialInfo = header['recording_additional']
-        imagePath = self.dir_path + "/img/" + fileName + '/'
-        if not os.path.exists(imagePath):
-            return dict({"images": [], "trialInfo": trialInfo})
-        images = os.listdir(imagePath)
-        images = ','.join(
-            [self.dir_path + "/img/" + fileName + '/' + i for i in images])
-        return dict({"images": images, "trialInfo": trialInfo})
+       res = Result()
+       data = res.getImageByFileName(message)
+       return data
 
     def getApplication(self, message):
         data = os.listdir('./web-app')
@@ -391,7 +382,7 @@ class JsBridge(QtCore.QObject):
         self.mainwindow.initDevTools()
 
     def getP300Dectation(self, message):
-        self.mainwindow.getP300Dectation(message)
+        self.mainwindow.getRelTimeDectation(message)
 
     def getCurrentBoardData(self, message):
         return self.mainwindow.getCurrentBoardData(message)
@@ -478,19 +469,9 @@ class JsBridge(QtCore.QObject):
         return self.mainwindow.updateBadChannel(message['data'])
 
     def getInfoByFileName(self, message):
-        fileName = message['data']['fileName']
-        fileName = fileName.replace('.edf', '.mat')
-        fileName = fileName.replace('.bdf', '.mat')
-        info = sio.loadmat(fileName)
-        data_dict = {}
-        info['data'] = ''
-        for key in info.keys():
-            if key[0] != '_':
-                if isinstance(info[key], np.ndarray):
-                    data_dict[key] = info[key].tolist()
-                if key == 'badChannel':
-                    data_dict['badChannel'] = data_dict['badChannel'][0][0][0].tolist()
-        return data_dict
+        res = Result()
+        data = res.getInfoByFileName(message)
+        return data
 
     def getEEGElectronPosition(self, message):
         # system = message['data']['system']
@@ -499,60 +480,22 @@ class JsBridge(QtCore.QObject):
                 coords['y'].tolist()]
         return data
 
-    def getRepoortFileListSSVEP(self, message):
-        pations = os.listdir('test_data')
-        pationsTree = dict({})
-        for dir in pations:
-            if '.' in dir:
-                continue
-            files = []
-            for file in os.listdir('test_data/'+dir):
-                if '.' in file:
-                    continue
-                files.append(file)
-            pationsTree[dir] = files
-        
-        return pationsTree
-
+    def getReportFileListSSVEP(self, message):
+        res = Result()
+        data = res.getReportFileListSSVEP(message)
+        return data
+    def getTimeSeriseChannelShow(self, message):
+        figure = self.mainwindow.figure
+        if figure != None:
+            channels = figure.getShowChannels()
+            print('channels', channels)
+            return channels
+        return []
     def createFileReportSSVEP(self, message):
-        data = message['data']
-        if 'pationcode' not in data:
-            return 'fail'
-        pationcode = data['pationcode']
-        path = pationcode
-        if data['time'] != '':
-            path += '/' + data['time']
-        currentRootPath = os.getcwd() + '/test_data/' + path
-        paths = find_json_files(currentRootPath)
-        reports = []
-        for filepath in paths:
-            filepath = filepath.replace('\\', '/', 20)
-            dactData = ''
-            with open(filepath) as f:
-                dactData = json.load(f)
-            f.close()
-            base = 0
-            odd = 0
-            for key in dactData.keys():
-                if key == 'badChannel':
-                    continue
-                item = dactData[key]
-                if type(item) != dict:
-                    continue
-
-                pathDir = filepath.split('/')
-                pationcode = pathDir[len(pathDir) - 5]
-                etime = pathDir[len(pathDir) - 4]
-                mode = pathDir[len(pathDir) - 3]
-                if item['base'] > 0:
-                    base += 1
-                if item['odd'] > 0:
-                    odd+=1
-            reports.append([pationcode, etime, mode,base, odd, ''])
-        storeData = [['pathoncode', 'time', 'mode', 'base', 'odd', 'remarks']]
-        storeData = np.concatenate((np.array(storeData), np.array(reports)), axis=0)
-        np.savetxt(os.getcwd() + '/test_data/' + path +'/report.csv', storeData, delimiter=',', fmt='%s')
-        return storeData.tolist()
+        res = Result()
+        data = res.createReport(message)
+        return data
+    
     def convertFileFormat(self, message):
         savePath = message['data']['savePath']
         files = message['data']['fileList']
@@ -564,7 +507,6 @@ class JsBridge(QtCore.QObject):
                 fileFormat.toTXT(file, savePath)
             elif message['data']['type'] == 'mne':
                 fileFormat.toMNE(file, savePath)
-
         return 'ok'
     # 生成p300 检测模型
 
@@ -581,14 +523,6 @@ class JsBridge(QtCore.QObject):
             print(e)
             return 'fail create p300 model'
         return 'ok'
-
-        # if fileName == '':
-        #     return dict({"images":[], "trialInfo": ''})
-        # edffile = self.dir_path + '/edfFile/p300/'+ fileName + '.edf'
-        # signals, signal_headers, header =  highlevel.read_edf(edffile)
-        # trialInfo = header['recording_additional']
-        # print(trialInfo)
-        # trainModel.createModels()
 
     def flush(self):
         pass

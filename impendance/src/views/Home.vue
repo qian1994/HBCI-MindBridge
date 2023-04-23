@@ -5,7 +5,7 @@
         <el-button v-if="!entered" type="primary" @click="impendences">测试设备</el-button>
         <el-button  @click="goToHomePage">返回</el-button>
         <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio> 
-        <el-radio border size="small" label='color' v-model="showLabel">脱落颜色</el-radio> 
+        <el-radio border size="small" label='color' v-model="showLabel">阻抗测试</el-radio> 
         <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio> 
 
       </div>

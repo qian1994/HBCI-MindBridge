@@ -15,7 +15,7 @@
           <div class="productBox-model">
             <img class="productBox-model-img" src="../assets/monitor.png" alt="">
             <el-form-item label="">
-              <el-select v-model="form.productId" disabled placeholder="请选择产品型号">
+              <el-select v-model="form.productId" placeholder="请选择产品型号">
                 <el-option v-for="item in products" :label="item.name" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
@@ -80,9 +80,19 @@ export default {
         }else if (item == 'p300') {
           paradigm.push(localConfig['p300'])
         }else {
+          let title = item
+          if (item == 'impendance') {
+            title = '阻抗测试'
+          }else if(item == 'timeSerise') {
+            title = '采集参数'
+          }else if(item == 'svp1_2') {
+            title = '脑视功能评估'
+          }else if (item == 'report') {
+            title = '评估报告'
+          }
           paradigm.push({
             name: item,
-            title: item,
+            title: title,
             id: index+ 6,
             config: ['open', 'delete'],
             icon: require('../assets/coustom'+(index%5 +1)+'.png')

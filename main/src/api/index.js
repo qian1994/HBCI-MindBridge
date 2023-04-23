@@ -25,6 +25,14 @@ function _removeMsgListener(callback) {
     apiClient.off("getFromServer", callback);
 } 
 
+
+export function getTimeSeriseChannelShow(msg) {
+    return apiClient.send({
+        action: 'get-time-serise-channel-show',
+        data: msg
+    })
+}
+
 export const msgListener = {
     add: _addMsgListener,
     remove: _removeMsgListener

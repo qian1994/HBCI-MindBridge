@@ -5,8 +5,8 @@
         <el-button  class="impedences-pass-btn" v-if="!entered" type="primary" @click="impendences">测试设备</el-button>
         <el-button class="impedences-pass-btn" v-else type="success"  @click="enter">测试通过进入实验</el-button>
         <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio> 
-        <el-radio border size="small" label='color' v-model="showLabel">脱落颜色</el-radio> 
-        <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio> 
+        <el-radio border size="small" label='color' v-model="showLabel">阻抗测试</el-radio> 
+        <el-radio border size="small" label='switch' v-model="showLabel">标注坏导</el-radio> 
       </div>
       <div class="impedences-bad-channel" v-if="badChannels.length">
         <div class="impedences-bad-channel-warning">选择相关坏导： </div>

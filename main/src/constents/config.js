@@ -1,7 +1,7 @@
 const config = {
     "timeSerise": {
         name: "timeSerise",
-        title: "实时分析",
+        title: "采集参数设置",
         id: 1,
         desc: "实时脑电数据分析",
         config: ["open"],

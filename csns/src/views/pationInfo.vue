@@ -1,7 +1,6 @@
 <template>
     <div class="container">
         <el-form ref="info" :model="info" label-width="120px">
-            
             <el-form-item>
                 <el-button type="primary" @click="saveEDFFile">添加被试信息存储edf文件</el-button>
             </el-form-item>

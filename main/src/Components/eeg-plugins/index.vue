@@ -6,7 +6,6 @@
         <div class="right">
             <div class="name" >
                 <span class="name-word">{{ info && info.title }} </span>
-               
             </div>
             <div class="desc" v-if="info && info.id > 1"><span>{{ info.desc }}</span></div>
             <div class="mask" v-if="showMask"></div>

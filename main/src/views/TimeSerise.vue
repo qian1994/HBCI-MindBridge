@@ -163,6 +163,8 @@ export default {
       const data = await getConfigFromServe("msg")
       this.channels = JSON.parse(data)['channels']
       this.products = JSON.parse(data)['products']
+      const channels = await getTimeSeriseChannelShow()
+      this.selectChannels = channels
     }, 300);
   },
   methods: {

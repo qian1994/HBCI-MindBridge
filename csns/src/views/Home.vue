@@ -128,11 +128,6 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="移动速度" v-if="form.selectModel == '6motion'">
-          <el-input v-model="form.motionSpeed" placeholder="请输入移动速度"> </el-input>
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
         <el-form-item label="round次数">
           <el-input v-model="form.totalTrial" type="number" placeholder="请输入进行的round 的总数"></el-input>
         </el-form-item>
@@ -150,7 +145,11 @@
           <el-input v-model="form.motionNumber" placeholder="请选择小球数量"> </el-input>
         </el-form-item>
       </el-col>
-    
+      <el-col :span="12" v-if="form.selectModel == '6motion'">
+        <el-form-item label="移动速度" >
+          <el-input v-model="form.motionSpeed" placeholder="请输入移动速度"> </el-input>
+        </el-form-item>
+      </el-col>
       <el-col :span="12">
         <el-form-item label="中心距离" v-if="form.selectModel == '6motion'">
           <el-input v-model="form.motionDistance" placeholder="请输入中心距离"> </el-input>

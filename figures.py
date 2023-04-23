@@ -38,23 +38,26 @@ class FigureWindow(QWidget, Ui_figureWidget):
         labels = []
         numbers = []
         for index in range(len(channels)):
-            # labels.append("200")
             labels.append(channels[len(channels)-1 - index])
-            # labels.append("200")
-            # numbers.append(index* 120 +240 - 40)
             numbers.append(index* 120 +240)
-            # numbers.append(index* 120 +240 + 40)
             self.scale.append(0)
             self.nowTime.append(0)
         self.numbers = numbers
         self.labels = labels
         self.channels = channels
+    def getShowChannels(self):
+        return self.showChannels
     def chooseShowChannel(self, channels):
         selectChannelsIndex = []
+        numbers = []
+        index = 0
         for channel in channels:
+            numbers.append(index* 120 +240)
             selectChannelsIndex.append(self.channels.index(channel))
-        
+            index +=1
         self.seletChannelIndex = selectChannelsIndex
+        self.showChannels = channels
+        self.numbers = numbers
     def set_matplotlib(self):
         self.fig = plt.figure()
         plt.tight_layout(w_pad=0, h_pad=-2)
@@ -79,8 +82,9 @@ class FigureWindow(QWidget, Ui_figureWidget):
     
     def update(self, data):
         self.ax.clear()
-        plt.yticks(self.numbers, self.labels, fontsize=9)
-        plt.ylim(120, len(self.scale)* 120+ 240)
+        plt.yticks(self.numbers, self.showChannels, fontsize=9)
+        plt.ylim(120, len(self.seletChannelIndex)* 120+ 240)
+        current_count = 0
         for i in range(len(data)):
             if i not in self.seletChannelIndex:
                 continue
@@ -92,32 +96,14 @@ class FigureWindow(QWidget, Ui_figureWidget):
                 if self.scale[i] < 3:
                     self.scale[i] = 3
                 self.nowTime[i] = datetime.now().timestamp()
-                # self.labels[i * 3 ] = str(int(min)) 
-                # self.labels[i*3 +2] = str(int(maxD))
             if abs(self.scale[i] ) != 0:
                 item /= self.scale[i]
             item *= 50
-            item = item + (len(data)-i)*120 + 120
+            item = item + (len(self.seletChannelIndex)-current_count)*120 + 120
             self.ax.plot(item)
+            current_count += 1
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
-    # def start(self):
-    #     channels = [str(i+1) for i in range(32)]
-    #     self.setChannels(channels)
-    #     self.timer = QTimer()
-    #     self.timer.timeout.connect(self.timeDownCount)
-    #     self.timer.start(100)
-    # def timeDownCount(self):
-    #     data = self.createData()
-    #     self.update(data)
-    # def createData(self):
-    #     data = []
-    #     for i in range(32):
-    #         sub = []
-    #         for j in range(3000):
-    #             sub.append(1850000 * random.randint(-1, 1))
-    #         data.append(sub)
-    #     return np.array(data, dtype=np.float64)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

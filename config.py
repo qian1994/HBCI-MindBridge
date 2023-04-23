@@ -21,7 +21,7 @@ impedence32 = ["O1", 'C3', "CP3", 'P3', "P7", "TP7", "T7","LPA",
 impedence8 = ["FP1", 'FP2', "T7", 'CZ', "T8", "O1", "O2", "OZ"]
 
 impedence16 = ["FP1", 'FP2', "FPZ","F7",  "FZ",  "F8",  
-               "T7", "CZ", "T8", "P7", "PZ", "P8", "O1", "O2", "OZ", "US"]
+               "T7", "CZ", "T8", "P7", "PZ", "P8", "O1", "O2", "OZ"]
 
 impedences = {
     "8": impedence8,

@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
         self.webViewlayout = QVBoxLayout()
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
-        # 调试工具
+        # # 调试工具
         html_path = QtCore.QUrl.fromLocalFile(
             QDir.currentPath() + "/mainPage/index.html")
         # html_path = QtCore.QUrl("http://localhost:8082/")
@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
             fftArray = self.dataprocessing.handleFFt(boardData, sampling_rate)
             self.figureFFT.update(fftArray)
 
-    def getP300Dectation(self, message):
+    def getRelTimeDectation(self, message):
         if self.boartStatus != 'startStream':
             return 'fail'
         numSeconds = 22
@@ -467,8 +467,8 @@ class MainWindow(QMainWindow):
         html_path = QtCore.QUrl.fromLocalFile(
             QDir.currentPath() + "/mainPage/index.html")
         self.webView.setUrl(html_path)
-        if self.timmerSession != None:
-            self.closeFigures()
+        # if self.timmerSession != None:
+        #     self.closeFigures()
 
     def openTimeSeriseWindow(self, message):
         try:

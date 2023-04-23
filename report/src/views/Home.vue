@@ -18,6 +18,7 @@
         </el-table-column>
       </el-table>
     </div>
+    <div>数据平均值：基础频率  <span>{{basePscore['base']}}</span>  <span> {{basePscore['odd']}} </span>  <span>{{basePscore['avg']}}</span></div>
   </div>
 </template>
 <script>
@@ -43,19 +44,26 @@ export default {
       }, {
         label: "实验时间",
         prop: 'time'
-
       }, {
         label: '条件',
         prop: 'mode'
-
       },{
-        label: '基础频率',
+        label: '视觉接收能力（基础频率',
         prop: 'base'
-
       }, {
-        label: '奇异评率',
+        label: '视觉分辨能力（奇异频率',
         prop: 'odd'
-
+      },
+      {
+        label: '视觉加工能力（6 Hz）',
+        prop: 'basePScore'
+      }, {
+        label: '视觉分辨能力（1.2 Hz）',
+        prop: 'oddPScore'
+      },
+      {
+        label: '视觉分辨能力（1.2 Hz 及谐频的平均）',
+        prop: 'avgPScore'
       }, {
         label: '备注',
         prop:  'remarks'
@@ -72,15 +80,47 @@ export default {
           'mode': row[2],
           'base': parseInt(row[3]) >= 5? '显著': '不显著',
           'odd':  parseInt(row[4]) >= 5? '显著': '不显著',
-          'remarks': row[5]
+          'basePScore': row[5],
+          'oddPScore': row[6],
+          'avgPScore': row[7],
+          'remarks': row[8]
         }
       })
+    },
+    avgPscore() {
+      const avgPscore = {
+        "base": 0,
+        "odd": 0,
+        'avg': 0
+      }
+      this.tableData.filter((item, index) => index != 0).map(row => {
+        // return {
+        //   'pationCode': row[0],
+        //   'time': row[1],
+        //   'mode': row[2],
+        //   'base': parseInt(row[3]) >= 5? '显著': '不显著',
+        //   'odd':  parseInt(row[4]) >= 5? '显著': '不显著',
+        //   'basePScore': row[5],
+        //   'oddPScore': row[6],
+        //   'avgPScore': row[7],
+        //   'remarks': row[8]
+        // }
+
+        avgPscore['base'] += row[5] 
+        avgPscore['odd'] += row[6] 
+        avgPscore['avg'] += row[7]
+      })
+
+      avgPscore['base'] = (avgPscore['base'] / (this.tableData.length -1)).toFixed(2)
+      avgPscore['odd'] = (avgPscore['odd'] / (this.tableData.length -1)).toFixed(2)
+      avgPscore['avg'] = (avgPscore['avg'] / (this.tableData.length -1)).toFixed(2)
+      return avgPscore
     }
   },
   mounted() {
+    // initDevTools()
     setTimeout(async () => {
       const res = await getReportFileListSSVEP(this.checkedKeys)
-      console.log(res)
       if (res) {
         const data = []
         for (let key in res) {

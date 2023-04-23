@@ -51,6 +51,21 @@ export function startStream(msg) {
     })
 }
 
+export function postSelectChannel(msg) {
+    return apiClient.send({
+        action: 'post-time-serise-channel-show',
+        data: msg
+    })
+}
+
+export function getTimeSeriseChannelShow(msg) {
+    return apiClient.send({
+        action: 'get-time-serise-channel-show',
+        data: msg
+    })
+}
+
+
 export function stopStream(msg) {
     return apiClient.send({
         action: 'stop-stream',

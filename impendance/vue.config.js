@@ -6,7 +6,7 @@ function resolve(dir) {
 }
 
 module.exports = {
-    outputDir: '../web-app/impedance',
+    outputDir: '../web-app/impendance',
     publicPath: process.env.NODE_ENV === 'production' ? './' : './',
     devServer: {
         // port: process.env.VUE_APP_DEVELOP_PORT
