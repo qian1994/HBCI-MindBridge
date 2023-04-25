@@ -147,7 +147,11 @@ export default {
       }
       const res = await createFileReportSSVEP(data)
       console.log(res)
-      if (res != 'fail') {
+      if (res == 'fail') {
+        this.$message('生成失败')
+      }else if(res == 'no file') {
+        this.$message('未计算结果，无法生成报告')
+      }else {
         this.tableData = res
       }
     }

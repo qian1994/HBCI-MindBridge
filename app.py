@@ -173,6 +173,7 @@ class MainWindow(QMainWindow):
             self.startSession(message)
             self.startTimeOutPrepareSession()
             self.openWindowsList = message['data']['checkList']
+            del mindBridge
         except Exception as e:
             print(e)
 
@@ -186,6 +187,8 @@ class MainWindow(QMainWindow):
     def closeTimeSeriseWindow(self):
         if self.figure != None:
             self.figure.close()
+            self.figure = None
+            del self.figure
 
     def postTimeSeriseChannelShow(self, message):
         try:
@@ -270,7 +273,7 @@ class MainWindow(QMainWindow):
 
     def startImpendenceTest(self, message):
         try:
-            if self.boartStatus == 'startStream':
+            if self.board != None :
                 return 'ok'
             data = message['data']
             boardId = int(data["productId"])
@@ -334,8 +337,8 @@ class MainWindow(QMainWindow):
         return railed
 
     def startSession(self, message):
-        try:
-            if self.boartStatus == 'startStream':
+        # try:
+            if self.boartStatus == 'startStream' or self.board != None:
                 return 'ok'
             data = message['data']
             boardId = int(data["productId"])
@@ -351,12 +354,15 @@ class MainWindow(QMainWindow):
             self.boardId = boardId
             self.ip_address = params.ip_address
             self.startStream(message)
-        except:
-            return 'fail'
-        return 'ok'
+        # except:
+        #     return 'fail'
+        # return 'ok'
 
     def startssvepTask(self, message):
-        try:
+        # try:
+            if self.boartStatus == 'startStream' or self.board != None:
+                return 'ok'
+            print(message)
             data = message['data']
             boardId = int(data["productId"])
             self.fileName = data['fileName']
@@ -372,9 +378,9 @@ class MainWindow(QMainWindow):
                 self.board.prepare_session()
                 self.boardId = int(boardId)
                 self.startStream(message)
-        except:
-            return 'fail'
-        return 'ok'
+        # except:
+        #     return 'fail'
+        # return 'ok'
 
     def startStream(self, message):
         if self.board == None:
@@ -423,8 +429,8 @@ class MainWindow(QMainWindow):
         self.currentTimeString = time_now.strftime("%Y_%m_%d_%H_%M_%S")
 
     def startFlashTask(self, data):
-        if self.boartStatus != "startStream":
-            self.startStream('')
+        # if self.boartStatus != "startStream":
+        #     self.startStream('')
         if data['selectModel'] == "6motion":
             self.paradigms.startWindow(data)
         else:
@@ -500,7 +506,7 @@ class MainWindow(QMainWindow):
         eegSaveData = EEGSAVEDATA()
         eegSaveData.saveFile(fileName=fileName, data=originData,
                              channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
-
+        
     def saveDataInfo(self, info, originData):
         patientcode = info['patientcode']
         userName = info['userName']
@@ -594,7 +600,8 @@ class MainWindow(QMainWindow):
         self.brainflow_file_name = dataDir +'/data/'+ info['fileName']+ '.csv'
         self.edf_file_name = dataDir +'/data/'+ info['fileName']+ '.bdf'
         self.mat_file_name = dataDir +'/data/'+ info['fileName']+ '.mat'
-        channels.extend(['marker'])
+        if "marker" not in channels:
+            channels.extend(['marker'])
         info['sampleRate'] = sampleRate
         info['channels'] = channels
         info['data'] = eeg_data.tolist()
@@ -609,13 +616,15 @@ class MainWindow(QMainWindow):
             data=originData.T, file_name=self.brainflow_file_name, file_mode='w')
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'sucess-save-data'}))
+        del mindBridge
+
     # 文件存储
     def endTotalTask(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
         # try:
         self.paradigms.close()
-        self.stopStream('')
+        # self.stopStream('')
         if self.brainflow_file_name == None or self.brainflow_file_name == '':
             self.brainflow_file_name = self.dir_path+"/data/" + \
                 self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'

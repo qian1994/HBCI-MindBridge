@@ -129,6 +129,8 @@ class Result(object):
             path += '/' + data['time']
         currentRootPath = os.getcwd() + '/test_data/' + path
         paths = find_json_files(currentRootPath)
+        if len(paths) == 0:
+            return "no file"
         reports = []
         for filepath in paths:
             filepath = filepath.replace('\\', '/', 20)

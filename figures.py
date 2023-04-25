@@ -14,11 +14,9 @@ from brainflow.data_filter import DataFilter, FilterTypes, WindowOperations, Det
 from signals import Signal
 from datetime import datetime
 
-import random
 class Ui_figureWidget(object):
     def setupUi(self, figureWidge):
         print('ui_figure widget')
-
 class FigureWindow(QWidget, Ui_figureWidget):
     def __init__(self):
         super(FigureWindow, self).__init__()
@@ -90,16 +88,16 @@ class FigureWindow(QWidget, Ui_figureWidget):
         plt.yticks(self.numbers, self.showChannels, fontsize=9)
         plt.ylim(120, len(self.seletChannelIndex)* 120+ 240)
         current_count = 0
-        # print(self.scale)
         for i in range(len(data)):
             if i not in self.seletChannelIndex:
                 continue
             item = data[i] 
+            if len(item) == 0:
+                continue
             if (datetime.now().timestamp() - self.nowTime[i]) > 0.05:
                 maxD = np.max(item)
                 min = np.min(item) 
                 self.scale[i] = maxD - min
-                # print(i, maxD - min)
                 if self.scale[i] < 3:
                     self.scale[i] = 3
                 self.nowTime[i] = datetime.now().timestamp()
@@ -112,8 +110,8 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    m = FigureWindow()
-    m.show()
-    sys.exit(app.exec_())
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     m = FigureWindow()
+#     m.show()
+#     sys.exit(app.exec_())

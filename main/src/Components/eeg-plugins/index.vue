@@ -31,7 +31,11 @@ export default {
         update(name) {
             console.log('this is update button', name)
         },
-        open(name) {
+        async open(name) {
+            if (name == 'report') {
+                const data = await openHtml(name)
+                return
+            }
             if (this.count >= 3) {
                 this.$alert('', "请确认wifi连接正常，wifi名为Mindbrige", {
                     confirmButtonText: '确定',
