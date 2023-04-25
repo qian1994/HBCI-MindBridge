@@ -33,7 +33,8 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.showChannels = []
         self.seletChannelIndex = []
         self.channels = []
-        
+        plt.ioff()
+
     def setChannels(self, channels):
         labels = []
         numbers = []
@@ -45,12 +46,15 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.numbers = numbers
         self.labels = labels
         self.channels = channels
+    
     def getShowChannels(self):
         return self.showChannels
+    
     def chooseShowChannel(self, channels):
         selectChannelsIndex = []
         numbers = []
         index = 0
+
         for channel in channels:
             numbers.append(index* 120 +240)
             selectChannelsIndex.append(self.channels.index(channel))
@@ -58,12 +62,13 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.seletChannelIndex = selectChannelsIndex
         self.showChannels = channels
         self.numbers = numbers
+       
     def set_matplotlib(self):
         self.fig = plt.figure()
         plt.tight_layout(w_pad=0, h_pad=-2)
         plt.margins(0, 0)
         plt.margins(0, tight=True)
-        plt.xlim(0, 5000)
+        # plt.xlim(0, 1000)
         plt.ylim(0, 120)
         self.fig.tight_layout(w_pad=0, h_pad=0)
         self.canvas = FigureCanvas(self.fig)
@@ -85,6 +90,7 @@ class FigureWindow(QWidget, Ui_figureWidget):
         plt.yticks(self.numbers, self.showChannels, fontsize=9)
         plt.ylim(120, len(self.seletChannelIndex)* 120+ 240)
         current_count = 0
+        # print(self.scale)
         for i in range(len(data)):
             if i not in self.seletChannelIndex:
                 continue
@@ -93,6 +99,7 @@ class FigureWindow(QWidget, Ui_figureWidget):
                 maxD = np.max(item)
                 min = np.min(item) 
                 self.scale[i] = maxD - min
+                # print(i, maxD - min)
                 if self.scale[i] < 3:
                     self.scale[i] = 3
                 self.nowTime[i] = datetime.now().timestamp()

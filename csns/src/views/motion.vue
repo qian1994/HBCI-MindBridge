@@ -36,8 +36,10 @@ export default {
     methods:{
         getPageParams(res) {
             const params = JSON.parse(res)
-            console.log(params)
             if (params && params['data'] == 'stop-flash') {
+                return
+            }
+            if(!params || !params['motionNumber']) {
                 return
             }
             this.timeDownCount = 3

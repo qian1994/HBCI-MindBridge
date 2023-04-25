@@ -1,4 +1,5 @@
-from brainflow.data_filter import DataFilter, FilterTypes, WindowOperations, DetrendOperations
+from brainflow.data_filter import DataFilter, FilterTypes, WindowOperations, DetrendOperations, AggOperations
+import numpy as np 
 class DataProcessing(object):
     def __init__(self) :
         super(DataProcessing, self).__init__()
@@ -17,8 +18,9 @@ class DataProcessing(object):
         return fftArray
     # 滤波处理
     def handleFilter(self, boardData, sampling_rate, low, high, order, filter):
+        data = []
         for channel in range(len(boardData)):
-            DataFilter.detrend(boardData[channel], DetrendOperations.NO_DETREND.value)
+            DataFilter.detrend(boardData[channel], DetrendOperations.LINEAR.value)
             DataFilter.remove_environmental_noise(boardData[channel], sampling_rate, noise_type=1)
             DataFilter.perform_bandpass(boardData[channel], sampling_rate, low, high, order,
                                                     filter, ripple= 0)
@@ -26,6 +28,7 @@ class DataProcessing(object):
                                         FilterTypes.BUTTERWORTH.value, 0)
             DataFilter.perform_bandstop(boardData[channel], sampling_rate, 58.0, 62.0, 2,
                                                 FilterTypes.BUTTERWORTH.value, 0)
-            
+            data.append(DataFilter.perform_downsampling(boardData[channel], 20, AggOperations.EACH.value))
+        return data
         return boardData
     

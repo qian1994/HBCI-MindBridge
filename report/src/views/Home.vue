@@ -13,7 +13,7 @@
       <el-button @click="homePage"> 返回</el-button>
     </div>
     <div>
-      <el-table :data="tableContent" height="250" border style="width: 100%">
+      <el-table :data="tableContent" border style="width: 100%">
         <el-table-column v-for="item in tableHead" :prop="item.prop" :label="item.label" >
         </el-table-column>
       </el-table>
@@ -80,9 +80,9 @@ export default {
           'mode': row[2],
           'base': parseInt(row[3]) >= 5? '显著': '不显著',
           'odd':  parseInt(row[4]) >= 5? '显著': '不显著',
-          'basePScore': row[5],
-          'oddPScore': row[6],
-          'avgPScore': row[7],
+          'basePScore': parseFloat(row[5]).toFixed(2),
+          'oddPScore': parseFloat(row[6]).toFixed(2),
+          'avgPScore': parseFloat(row[7]).toFixed(2),
           'remarks': row[8]
         }
       })
@@ -94,11 +94,11 @@ export default {
         'avg': 0
       }
       this.tableData.filter((item, index) => index != 0).map(row => {
-        avgPscore['base'] += row[5] 
-        avgPscore['odd'] += row[6] 
-        avgPscore['avg'] += row[7]
+        avgPscore['base'] += parseFloat(row[5]) 
+        avgPscore['odd'] += parseFloat(row[6] )
+        avgPscore['avg'] += parseFloat(row[7])
       })
-
+      console.log(avgPscore)
       avgPscore['base'] = (avgPscore['base'] / (this.tableData.length -1)).toFixed(2)
       avgPscore['odd'] = (avgPscore['odd'] / (this.tableData.length -1)).toFixed(2)
       avgPscore['avg'] = (avgPscore['avg'] / (this.tableData.length -1)).toFixed(2)
@@ -106,7 +106,6 @@ export default {
     }
   },
   mounted() {
-    // initDevTools()
     setTimeout(async () => {
       const res = await getReportFileListSSVEP(this.checkedKeys)
       if (res) {
@@ -168,7 +167,7 @@ export default {
   margin: 0 5px 30px;
 }
 .ssvep-report {
-  max-width: 800px;
+  max-width: 900px;
   margin: 5px auto;
   min-height: 500px;
   background-color: white;

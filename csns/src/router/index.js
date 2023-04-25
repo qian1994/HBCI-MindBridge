@@ -32,10 +32,6 @@ const routes = [
     path: '/pationInfo',
     name: 'pationInfo',
     component:() => import('../views/pationInfo.vue')
-   }, {
-    path: '/operate',
-    name: 'operate',
-    component:() => import('../views/operate.vue')
    },{
     path: '/create-image',
     name: 'create-image',
@@ -44,10 +40,6 @@ const routes = [
     path: '/motion',
     name: 'motion',
     component:() => import('../views/motion.vue')
-   },{
-    path: '/result',
-    name: 'result',
-    component:() => import('../views/result.vue')
    }
 ]
 

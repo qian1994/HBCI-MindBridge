@@ -33,7 +33,10 @@ class Result(object):
                 if isinstance(info[key], np.ndarray):
                     data_dict[key] = info[key].tolist()
                 if key == 'badChannel':
-                    data_dict['badChannel'] = data_dict['badChannel'][0][0][0].tolist()
+                    if data_dict['badChannel'] and data_dict['badChannel'][0]:
+                        data_dict['badChannel'] = data_dict['badChannel'][0][0][0].tolist()
+                    else:
+                        data_dict['badChannel'] = []
         return data_dict
 
     def getReportFileListSSVEP(self, message):
@@ -367,7 +370,6 @@ class Result(object):
                         pScorestand['oddFreq_number'] = item[1]
                     else:
                         pScorestand['oddavg_avg'] += item[1]
-
                 pScorestand['oddavg_avg'] /= (len(data[key]['zScore']) - 2)
                 current_data = 0
                 count = 0
@@ -376,7 +378,7 @@ class Result(object):
                 for i in basefreq_current:
                     if not math.isnan(i):
                         if item[1] > i:
-                            current_data
+                            current_data +=1
                         count += 1
                 pScores['base'] = [count, current_data]
                 current_data = 0
@@ -384,7 +386,7 @@ class Result(object):
                 for i in oddbalfreq_current:
                     if not math.isnan(i):
                         if item[1] > i:
-                            current_data
+                            current_data +=1
                         count += 1
                 pScores['odd'] = [count, current_data]
                 current_data = 0
@@ -392,24 +394,30 @@ class Result(object):
                 for i in oddavg_current:
                     if not math.isnan(i):
                         if item[1] > i:
-                            current_data
+                            current_data +=1
                         count += 1
                 pScores['avg'] = [count, current_data]
+                print(pScores)
                 pScoresByChannel[key] = pScores
-        
         p_min ={
             'base': 0,
             'odd': 0,
             'avg': 0
         }
+        print(pScoresByChannel)
         for key in pScoresByChannel:
             pScoresByChannelData = pScoresByChannel[key]
-            p_min['base'] += pScoresByChannelData['base'][1] / pScoresByChannelData['base'][0]
+            p_min['base'] += pScoresByChannelData['base'][1] / pScoresByChannelData['base'][0] 
             p_min['odd'] += pScoresByChannelData['odd'][1] / pScoresByChannelData['odd'][0]
             p_min['avg'] += pScoresByChannelData['avg'][1] / pScoresByChannelData['avg'][0]
-        p_min['base'] /= len(pScoresByChannel.keys()) * 100
-        p_min['odd'] /= len(pScoresByChannel.keys()) * 100
-        p_min['avg'] /= len(pScoresByChannel.keys()) * 100
+        p_min['base'] /= len(pScoresByChannel.keys()) 
+        p_min['odd'] /= len(pScoresByChannel.keys()) 
+        p_min['avg'] /= len(pScoresByChannel.keys()) 
+
+        p_min['base'] *= 100
+        p_min['odd'] *= 100
+        p_min['avg'] *= 100
+
         return p_min
                                                                                             
 # if __name__ == '__main__':

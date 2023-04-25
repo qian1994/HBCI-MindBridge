@@ -82,8 +82,8 @@ class MainWindow(QMainWindow):
             "order": 2,
             "filterType": 0,
         })
-        self.paradigms = Paradigms()
         self.badChannel = None
+        self.paradigms = None
 
     def createWebEng(self):
         self.webView = QWebEngineView()
@@ -110,7 +110,9 @@ class MainWindow(QMainWindow):
         self.python_bridge.responseSignal.emit('this is from serve')
 
     def openParamsWindow(self, message):
-        self.paradigms.init(self.python_bridge, self.width,
+        if self.paradigms == None:
+            self.paradigms = Paradigms()
+            self.paradigms.init(self.python_bridge, self.width,
                             self.height, self.trigger)
 
     def closeParamWindow(self, message):
@@ -198,9 +200,8 @@ class MainWindow(QMainWindow):
 
     def showTimeSerise(self):
         self.timmerSession = QTimer()  # 创建定时器
-        self.timmerSession.setTimerType(Qt.PreciseTimer)
         self.timmerSession.timeout.connect(self.updateRealTimePlot)
-        self.timmerSession.start(40)
+        self.timmerSession.start(80)
 
     def closeFigures(self):
         self.timmerSession.stop()
@@ -261,7 +262,7 @@ class MainWindow(QMainWindow):
     def getRelTimeDectation(self, message):
         if self.boartStatus != 'startStream':
             return 'fail'
-        numSeconds = 22
+        numSeconds = 10
         sampleRate = self.board.get_sampling_rate(self.boardId)
         numPoints = numSeconds * sampleRate
         boardData = self.board.get_current_board_data(numPoints)
@@ -283,6 +284,7 @@ class MainWindow(QMainWindow):
         except:
             return 'fail'
         return 'ok'
+    
     def updateBadChannel(self, message):
         self.badChannel = message
 
@@ -414,6 +416,7 @@ class MainWindow(QMainWindow):
 
     def endFlashTask(self, data):
         self.board.insert_marker(1123)
+    
 
     def startNewExpriment(self):
         time_now = datetime.datetime.now()
@@ -535,6 +538,9 @@ class MainWindow(QMainWindow):
             }))
         file.close()
         with open(dataDir +'/info/'+ 'exprimentInfo.txt','w')as file:
+            badChannel = []
+            if self.badChannel != None:
+                badChannel = self.badChannel
             file.write(json.dumps({
                 'motionNumber': info['motionNumber'], 
                 'motionDistance': info['motionDistance'],
@@ -556,7 +562,7 @@ class MainWindow(QMainWindow):
                 'trialLantency': info['trialLantency'],
                 'equipment': info['equipment'], 
                 'trial': info['trial'],
-                'badChannel': self.badChannel
+                'badChannel': badChannel 
             }))
         file.close()
         data = info
@@ -583,7 +589,7 @@ class MainWindow(QMainWindow):
                 array.append(str(count))
                 count += 1
         marker_data = np.array([originData[:, mar_channel]]).T
-        originData = np.concatenate((eeg_data, marker_data), axis=1)
+        eeg_data = np.concatenate((eeg_data, marker_data), axis=1)
         data['recording_additional'] = json.dumps(data['patient_additional'])
         self.brainflow_file_name = dataDir +'/data/'+ info['fileName']+ '.csv'
         self.edf_file_name = dataDir +'/data/'+ info['fileName']+ '.bdf'
@@ -591,9 +597,12 @@ class MainWindow(QMainWindow):
         channels.extend(['marker'])
         info['sampleRate'] = sampleRate
         info['channels'] = channels
-        info['data'] = originData
-        info['badChannel'] = self.badChannel
-        self.saveToEDF(self.edf_file_name,info, originData, sampleRate, channels)
+        info['data'] = eeg_data.tolist()
+        badChannel = []
+        if self.badChannel != None:
+            badChannel = self.badChannel
+        info['badChannel'] = badChannel
+        self.saveToEDF(self.edf_file_name,info, eeg_data, sampleRate, channels)
         sio.savemat(self.mat_file_name, info)
         datafilter = DataFilter()
         datafilter.write_file(
@@ -628,6 +637,8 @@ class MainWindow(QMainWindow):
         #     return 'fail'
         # return 'ok'
     # 弹出对话框，选取文件
+        self.figure.close()
+        self.paradigms = None
 
     def openFileDialog(self, message):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件")

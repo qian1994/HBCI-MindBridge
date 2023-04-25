@@ -72,7 +72,10 @@ export default {
             this.products = JSON.parse(data)['products']
             const channels = await getTimeSeriseChannelShow()
             this.selectChannels = channels
+            this.selectChannels = ['O1']
+            postSelectChannel(this.selectChannels)
         }, 300);
+    
     },
     components: {
         ElectrodePositions
@@ -124,9 +127,11 @@ export default {
         toggle(point) {
             const channel = point['label']
             if (this.selectChannels.indexOf(channel) >= 0) {
-                this.selectChannels = this.selectChannels.filter(item => item != channel)
+                // this.selectChannels = this.selectChannels.filter(item => item != channel)
+                this.selectChannels = []
             } else {
-                this.selectChannels.push(channel)
+                // this.selectChannels.push(channel)
+                this.selectChannels = [channel]
             }
             postSelectChannel(this.selectChannels)
         },
@@ -190,7 +195,7 @@ export default {
             this.currentTrial += 1
             this.troggle(this.currentTrial)
             startFlashTask({ ...this.params, images: [] })
-        }
+        },
     }
 }
 </script>
