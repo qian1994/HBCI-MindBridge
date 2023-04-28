@@ -14,7 +14,6 @@ import scipy.io as sio
 import numpy as np
 import base64
 from util import *
-
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
@@ -210,6 +209,11 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'create-new-expriment':
             data = self.createNewExpriment(message)
 
+        if message['action'] == 'start-custom-paradigm':
+            data = self.startCustomParadigm(message)
+
+        if message['action'] == 'stop-custom-paradigm':
+            data = self.endCustomParadigm(message)
         message['data'] = data
         return self.responseSignal.emit(json.dumps(message))
 
@@ -510,6 +514,12 @@ class JsBridge(QtCore.QObject):
         return 'ok'
     # 生成p300 检测模型
 
+    def startCustomParadigm(self, message):
+        self.mainwindow.startCustomParadigm(message)
+
+    def endCustomParadigm(self, message):
+        self.mainwindow.endCustomParadigm(message)
+    
     def createMechainLearnP300(self, message):
         try:
             trainModel = P300Model()

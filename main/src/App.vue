@@ -19,6 +19,7 @@ export default {
   mounted() {
     setTimeout(async () => {
       const config = await getApplications()
+      console.log('adfasdfasdf', config)
       this.config = config
     }, 100);
   },

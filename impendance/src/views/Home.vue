@@ -56,7 +56,6 @@ export default {
     ElectrodePositions
   },
   created() {
-    startSession()
   },
   destroyed() {
     if (this.timmer) {

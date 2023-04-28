@@ -399,14 +399,12 @@ class Result(object):
                             current_data +=1
                         count += 1
                 pScores['avg'] = [count, current_data]
-                print(pScores)
                 pScoresByChannel[key] = pScores
         p_min ={
             'base': 0,
             'odd': 0,
             'avg': 0
         }
-        print(pScoresByChannel)
         for key in pScoresByChannel:
             pScoresByChannelData = pScoresByChannel[key]
             p_min['base'] += pScoresByChannelData['base'][1] / pScoresByChannelData['base'][0] 

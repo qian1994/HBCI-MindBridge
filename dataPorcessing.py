@@ -8,7 +8,8 @@ class DataProcessing(object):
     def handleFFt(self, boardData, sampling_rate):
         psd_size = DataFilter.get_nearest_power_of_two(sampling_rate)
         fftArray = []
-        if boardData.shape[1] < psd_size:
+        boardData = np.array(boardData)
+        if  boardData.shape[1] < psd_size:
             return []
         for channel in range(len(boardData)):
             psd_data = DataFilter.get_psd_welch(boardData[channel], psd_size, psd_size // 2,

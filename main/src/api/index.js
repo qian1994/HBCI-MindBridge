@@ -319,6 +319,15 @@ export function openFileDialog(msg){
     })
 }
 
+export function openDirDialog(msg){
+    return apiClient.send({
+        action: 'open-dir-dialog',
+        data: msg
+    })
+}
+
+
+
 export function openRealTimeFFT(msg) {
     return apiClient.send({
         action: 'open-real-time-fft',
@@ -359,5 +368,18 @@ export function getEEGElectronPosition(msg) {
     return apiClient.send({
         action: "get-eeg-electron-position",
         data: msg
+    })
+}
+
+export function startCustomParadigm(msg) {
+    return apiClient.send({
+        action: 'start-custom-paradigm',
+        data: msg
+    })
+}
+
+export function stopCustomParadigm(msg) {
+    return apiClient.send({
+        action: 'stop-custom-paradigm'
     })
 }

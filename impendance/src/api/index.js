@@ -39,12 +39,12 @@ export function getEEGElectronPosition(msg) {
 
 
 
-export function startSession(msg){
-    return apiClient.send({
-        action: 'start-session',
-        data: msg
-    })
-}
+// export function startSession(msg){
+//     return apiClient.send({
+//         action: 'start-session',
+//         data: msg
+//     })
+// }
 
 export function stopSession(msg) {
     return apiClient.send({

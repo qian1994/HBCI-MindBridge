@@ -23,6 +23,7 @@ from signals import Signal
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from dataPorcessing import DataProcessing
 import scipy.io as sio
+from startSocketClient import SocketCustomClient
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -84,7 +85,7 @@ class MainWindow(QMainWindow):
         })
         self.badChannel = None
         self.paradigms = None
-
+        self.SocketCustomClient = None
     def createWebEng(self):
         self.webView = QWebEngineView()
         self.webView.settings().setAttribute(
@@ -99,9 +100,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl("http://localhost:8082/")
+        # html_path = QtCore.QUrl.fromLocalFile(
+            # QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl("http://localhost:8082/")
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -356,13 +357,12 @@ class MainWindow(QMainWindow):
             self.startStream(message)
         # except:
         #     return 'fail'
-        # return 'ok'
+            return 'ok'
 
     def startssvepTask(self, message):
         # try:
             if self.boartStatus == 'startStream' or self.board != None:
                 return 'ok'
-            print(message)
             data = message['data']
             boardId = int(data["productId"])
             self.fileName = data['fileName']
@@ -380,7 +380,7 @@ class MainWindow(QMainWindow):
                 self.startStream(message)
         # except:
         #     return 'fail'
-        # return 'ok'
+            return 'ok'
 
     def startStream(self, message):
         if self.board == None:
@@ -649,6 +649,23 @@ class MainWindow(QMainWindow):
         self.figure.close()
         self.paradigms = None
 
+
+    def endTaskSaveData(self, message):
+        info = message['data']
+        info['productId'] = int(info['productId'])
+    
+        if self.brainflow_file_name == None or self.brainflow_file_name == '':
+            self.brainflow_file_name = self.dir_path+"/data/" + \
+                self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
+            self.bci_file_name = self.dir_path+"/data/" + \
+                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
+            self.edf_file_name = self.dir_path+"/edfFile/" + \
+                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
+        data = self.board.get_board_data()
+        datafilter = DataFilter()
+        datafilter.write_file(
+            data=data, file_name=self.brainflow_file_name, file_mode='w')
+      
     def openFileDialog(self, message):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件")
         return fileName
@@ -664,6 +681,28 @@ class MainWindow(QMainWindow):
         directory = QFileDialog.getExistingDirectory(None, "选取文件夹")
         return directory
 
+    def startCustomParadigm(self, message):
+        try:
+            self.SocketCustomClient = SocketCustomClient(self)
+            self.SocketCustomClient.init(message['data']['customIp'], message['data']['customPort'])
+            self.SocketCustomClient.start()
+            return 'ok'
+        except:
+            print('ss')
+            return 'fail'
+        return 'fail'
+
+    def endCustomParadigm(self, message):
+        print('message')
+        if self.SocketCustomClient != None:
+            self.SocketCustomClient.end()
+            self.SocketCustomClient = None
+            self.endTaskSaveData(message)
+        return 'ok'
+
+    def getCustomInsertMarker(self, message):
+        print(message)
+        
     # 获取实时数据
     def getCurrentBoardData(self, message):
         data = message['data']
@@ -680,6 +719,5 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     m = MainWindow()
-    m.currentApp = 'svp1_2'
     m.show()
     sys.exit(app.exec_())

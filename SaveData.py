@@ -66,7 +66,7 @@ class EEGSAVEDATA(object):
             equipment = ''
             admincode = ''
             gender = ''
-            birthdate= datetime.datetime(1900, 1, 1).strftime('%d %b %Y')
+            # birthdate= datetime.datetime(1900, 1, 1).strftime('%d %b %Y')
             keys = list(otherInfo.keys())
             if 'technician' in keys:
                 technician = otherInfo["technician"]
@@ -82,8 +82,8 @@ class EEGSAVEDATA(object):
                 equipment = otherInfo['equipment']
             if 'admincode' in keys:
                 admincode=otherInfo['admincode']
-            if 'birthdate' in keys:
-                birthdate = otherInfo['birthdate']
+            # if 'birthdate' in keys:
+            #     birthdate = otherInfo['birthdate']
             header = highlevel.make_header(technician=technician, 
                                         recording_additional=recording_additional,
                                         patientname=patientname,
@@ -91,8 +91,7 @@ class EEGSAVEDATA(object):
                                         patientcode=patientcode, 
                                         equipment=equipment, 
                                         admincode=admincode,
-                                        gender=gender, 
-                                        birthdate=birthdate)
+                                        gender=gender)
             print(signals.shape, len(signalHeaders))
             res = highlevel.write_edf(fileName, signals=signals, signal_headers=signalHeaders, digital=False,file_type=3, header=header)
         # except Exception as e :

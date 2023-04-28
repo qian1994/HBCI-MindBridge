@@ -1,10 +1,10 @@
 <template>
-    <div class="eeg-plugins" @click="open(info.name)" v-if="info.name != 'custom'">
+    <div class="eeg-plugins" @click="open(info.name)">
         <div class="icon">
             <img :src="info && info.icon" alt="">
         </div>
         <div class="right">
-            <div class="name" >
+            <div class="name">
                 <span class="name-word">{{ info && info.title }} </span>
             </div>
             <div class="desc" v-if="info && info.id > 1"><span>{{ info.desc }}</span></div>
@@ -26,7 +26,9 @@ export default {
             showMask: false
         }
     },
-
+    mounted() {
+        console.log('info', this.info)
+    },
     methods: {
         update(name) {
             console.log('this is update button', name)
@@ -67,7 +69,7 @@ export default {
                             return
                         }
                         if (name == 'custom') {
-                            // this.$router.push({ 'name': "Custom" })
+                            this.$router.push({ 'name': "Custom", params: {...this.form} })
                             return
                         }
                         // if (name == 'impedence') {
