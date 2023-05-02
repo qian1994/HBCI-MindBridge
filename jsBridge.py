@@ -29,6 +29,10 @@ class JsBridge(QtCore.QObject):
     def requestFromClient(self, message):
         message = json.loads(message)
         data = None
+
+        if message['action'] == 'save-pation-data':
+            data = self.savePationData(message)
+
         if message["action"] == 'trigger':
             data = self.trigger(message)
 
@@ -228,6 +232,9 @@ class JsBridge(QtCore.QObject):
         return message
 
     def handleMessage(self, message):
+        print(message)
+
+    def savePationData(self, message):
         print(message)
 
     def getModels(self, message):
