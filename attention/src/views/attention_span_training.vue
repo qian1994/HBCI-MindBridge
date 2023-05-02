@@ -1,7 +1,8 @@
 <template>
     <div class="attention_span_train-widget">
         <h2>注意力广度训练</h2>
-        <div v-if="start"> <span>用时: {{ timmerShow }}</span> <span>次数： {{ currentCount }}</span></div>
+        <div v-if="start"> <span>用时: {{ timmerShow }}</span> <span>次数： {{ currentCount }}</span> <span>剩余： {{ formData.count
+            - currentCount }}</span></div>
         <div v-if="start"> <span>错误次数: {{ currentTrainResult.errorNumber }}</span> </div>
         <div class="attention_span_train-config" v-if="!start">
             <el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
@@ -27,6 +28,9 @@
             <div v-for="item in cards" :class="['card', rightArray.indexOf(item) >= 0 ? 'active' : '']" :style="cardStyle"
                 @click="choose(item)"> {{ item }}</div>
         </div>
+        <div class="attention_span_train-time-count" v-if="timeCountShow">
+            {{ count }}
+        </div>
     </div>
 </template>
 
@@ -40,9 +44,11 @@ export default {
             currentIndex: 1,
             rightArray: [],
             cards: [],
+            timeCountShow: false,
+            count: 3,
             formData: {
                 level: 1,
-                count: 5
+                count: 3
             },
             currentTrainResult: {
                 errorNumber: 0,
@@ -69,11 +75,12 @@ export default {
                 return 15
             }
         },
-      
+
         cardStyle() {
             let number = parseInt(600 / Math.sqrt(this.cards.length))
             return `width:${number}px;height:${number}px; line-height: ${number}px;`
         },
+
         timmerShow() {
             const time = parseInt(this.currentTrainResult.time / 1000) || 0
             const mSecond = this.currentTrainResult.time % 1000 || 0
@@ -86,31 +93,49 @@ export default {
         submit() {
             this.start = true
             this.cards = new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => index + 1).sort(() => Math.random() - 0.5);
-
-            this.timmer = setInterval(() => {
-                this.currentTrainResult.time += 100
-            }, 100);
+            this.timeCount()
         },
         goBack() {
             this.$router.go(-1)
         },
         endTotalTask() {
-            console.log('end total task')
+            this.start = false
+            console.log(this.trainResultTotal)
+            // this is place to upload the total result 
         },
-        reStart() {
-            console.log('this is re start')
-            if (this.timmer) {
-                clearInterval(this.timmer)
-            }
-            this.currentTrainResult.time = {
-                time: 0,
-                errorNumber: 0
-            }
-            this.rightArray = []
-            this.cards = new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => index + 1).sort(() => Math.random() - 0.5);
+
+        timerRuning() {
             this.timmer = setInterval(() => {
                 this.currentTrainResult.time += 100
             }, 100);
+        },
+        reStart() {
+            if (this.timmer) {
+                clearInterval(this.timmer)
+            }
+            this.currentTrainResult = {
+                time: 0,
+                errorNumber: 0
+            }
+            this.currentIndex = 1
+            this.rightArray = []
+            this.cards = new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => index + 1).sort(() => Math.random() - 0.5);
+            this.timeCount()
+        },
+        timeCount() {
+            this.count = 3
+            this.timeCountShow = true
+            clearInterval(this.timmer)
+            setTimeout(() => {
+                clearInterval(this.timmer)
+                this.timeCountShow = false
+                this.timerRuning()
+                
+            }, 3000);
+
+            this.timmer = setInterval(() => {
+                this.count -=1
+            }, 1000);
         },
         choose(item) {
             if (this.currentIndex == item) {
@@ -118,16 +143,20 @@ export default {
                 this.currentIndex += 1
                 if (this.numberCards * this.numberCards == this.rightArray.length) {
                     clearInterval(this.timmer)
-                    this.currentCount += 1
                     this.trainResultTotal.push({
-                        time: this.currentTrainResult.time/1000,
+                        pationId: this.$router.currentRoute.params.pationId,
+                        mode: 'span',
+                        currentTime: +new Date(),
+                        level: this.formData.level,
+                        time: this.currentTrainResult.time / 1000,
                         errorNumber: this.currentTrainResult.errorNumber
                     })
-                    if (this.currentCount > this.formData.count) {
+                    if (this.currentCount >= this.formData.count) {
                         this.endTotalTask()
                         return
                     }
                     this.reStart()
+                    this.currentCount += 1
                 }
                 return
             }
@@ -138,10 +167,10 @@ export default {
 </script>
 
 <style>
-
 .attention_span_train-widget h2 {
     margin-bottom: 15px;
 }
+
 .attention_span_train-widget {
     max-width: 800px;
     margin: 5px auto;
@@ -173,5 +202,18 @@ export default {
 
 .card:hover {
     background: #ddd;
+}
+.attention_span_train-time-count {
+    position: fixed;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    text-align: center;
+    top: 0;
+    left: 0;
+    color: red;
+    line-height: 500px;
+    font-size: 100px;
 }
 </style>

@@ -1,8 +1,11 @@
 <template>
     <div class="attention_concentration-widget">
-        <div v-if="start" class="choose-info"> <span>用时: {{ timmerShow }}</span> <span>总共： {{ findPairs.length }}</span>
+        <div v-if="start" class="choose-info"> <span>用时: {{ timmerShow }}</span>
+            <span>轮数： {{ formData.count }} </span>
+            <span>此刻： {{ currentIndex }} </span> <span>总共： {{ findPairs.length }}</span>
             <span>剩余： {{ findPairs.length - rightArray.length / 2 }}</span> <span>错误次数: {{ currentTrainResult.errorNumber
-            }}</span></div>
+            }}</span>
+        </div>
         <div class="attention_concentration-config" v-if="!start">
             <el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                 <el-form-item label="难度级别" prop="name">
@@ -14,17 +17,15 @@
                 <el-form-item>
                     <el-button size="large" @click="submit"> 开始 </el-button>
                 </el-form-item>
-                <el-form-item>
-                    <div>
-
-                    </div>
-                </el-form-item>
             </el-form>
         </div>
         <div class="attention_concentration-content" v-if="start">
             <div v-for="item, index in cards"
                 :class="['card', rightArray.indexOf(index) >= 0 ? 'active' : '', currentChooseArray.indexOf(index) >= 0 ? 'active' : '']"
                 :style="cardStyle" @click="choose(index)"> {{ item }}</div>
+        </div>
+        <div class="attention_concentration_train-time-count" v-if="timeCountShow">
+            {{ count }}
         </div>
     </div>
 </template>
@@ -34,11 +35,12 @@ export default {
     data() {
         return {
             time: "00: 00: 00",
-            currentCount: 1,
             start: false,
             currentIndex: 1,
             rightArray: [],
             cards: [],
+            count: 3,
+            timeCountShow: false,
             formData: {
                 level: 1,
                 count: 5
@@ -69,9 +71,6 @@ export default {
                 return 40
             }
         },
-        // cards() {
-        //     return new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => parseInt(9 * Math.random() + 1)).sort(() => Math.random() - 0.5);
-        // },
         findPairs() {
             let used = []; // 用于记录已经使用过的元素
             let pairs = []; // 用于记录满足条件的元素对
@@ -105,33 +104,47 @@ export default {
         submit() {
             this.start = true
             this.cards = new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => parseInt(9 * Math.random() + 1)).sort(() => Math.random() - 0.5);
+            this.timeCount()
+        },
+        endTotalTask() {
+            console.log('end total task')
+            console.log(this.trainResultTotal)
+            this.start = false
+            clearInterval(this.timmer)
+        },
+
+        timerRuning() {
             this.timmer = setInterval(() => {
                 this.currentTrainResult.time += 100
             }, 100);
         },
-        endTotalTask() {
-            console.log('end total task')
+        timeCount() {
+            this.count = 3
+            this.timeCountShow = true
+            clearInterval(this.timmer)
+            setTimeout(() => {
+                clearInterval(this.timmer)
+                this.timeCountShow = false
+                this.timerRuning()
+
+            }, 3000);
+
+            this.timmer = setInterval(() => {
+                this.count -= 1
+            }, 1000);
         },
         reStart() {
             console.log('this is re start')
             if (this.timmer) {
                 clearInterval(this.timmer)
             }
-            this.trainResultTotal.push({
-                time: this.currentTrainResult.time,
-                errorNumber: this.currentTrainResult.errorNumber,
-                paris: this.paris.length
-            })
             this.currentTrainResult.time = {
                 time: 0,
                 errorNumber: 0
             }
             this.rightArray = []
             this.cards = new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => parseInt(9 * Math.random() + 1)).sort(() => Math.random() - 0.5);
-
-            this.timmer = setInterval(() => {
-                this.currentTrainResult.time += 100
-            }, 100);
+            this.timeCount()
         },
         choose(index) {
             if (this.currentChooseArray.length == 0) {
@@ -145,9 +158,18 @@ export default {
                 this.currentTrainResult.errorNumber += 1
                 this.currentChooseArray = []
             }
-
+            console.log(this.findPairs, this.rightArray)
             if (this.findPairs.length == this.rightArray.length / 2) {
-                if (this.currentIndex > this.currentCount) {
+                this.trainResultTotal.push({
+                    pationId: this.$router.currentRoute.params.pationId,
+                    mode: 'concentration',
+                    currentTime: +new Date(),
+                    level: this.formData.level,
+                    time: this.currentTrainResult.time / 1000,
+                    errorNumber: this.currentTrainResult.errorNumber,
+                    totalNumber: this.findPairs.length
+                })
+                if (this.currentIndex >= this.formData.count) {
                     this.endTotalTask()
                 } else {
                     this.currentIndex += 1
@@ -170,10 +192,9 @@ export default {
             }
             return arr;
         },
-        getRandomHeight(start,totalHeight) {
+        getRandomHeight(start, totalHeight) {
             console.log(start, totalHeight)
         }
-
     }
 }
 </script>
@@ -216,4 +237,19 @@ export default {
 
 .card:hover {
     background: #ddd;
-}</style>
+}
+
+.attention_concentration_train-time-count {
+    position: fixed;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    text-align: center;
+    top: 0;
+    left: 0;
+    color: red;
+    line-height: 500px;
+    font-size: 100px;
+}
+</style>

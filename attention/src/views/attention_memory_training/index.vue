@@ -27,6 +27,10 @@
 			<!-- <card-component class="memory-card" :img-pwd="imgPwd" alt="angular" front="angular.svg" /> -->
 			<!-- End 2 Set of Cards -->
 		</section>
+
+		<div class="attention_memory_training-count" v-if="timeCountShow">
+			{{ count }}
+		</div>
 	</div>
 </template>
 <script>
@@ -37,30 +41,32 @@ export default {
 	components: { CardComponent },
 	data() {
 		return {
+			timeCountShow: false,
+			count: 3,
 			cards: [
 				{
 					name: "react",
-					front: require("./img/react.svg"),
+					front: require("./img/cherry.png"),
 				},
 				{
 					name: "ember",
-					front: require("./img/ember.svg"),
+					front: require("./img/banana.png"),
 				},
 				{
 					name: "vue",
-					front: require("./img/vue.svg"),
+					front: require("./img/coconut.png"),
 				},
 				{
 					name: "node",
-					front: require("./img/node.svg"),
+					front: require("./img/grape.png"),
 				},
 				{
 					name: "svelte",
-					front: require("./img/svelte.svg"),
+					front: require("./img/mango.png"),
 				},
 				{
 					name: "angular",
-					front: require("./img/angular.svg"),
+					front: require("./img/peach.png"),
 				},
 			],
 			formData: {
@@ -80,14 +86,6 @@ export default {
 		}
 	},
 	mounted() {
-		const cards = document.querySelectorAll('.memory-card')
-
-		cards.forEach((card) => {
-			const randomPos = Math.floor(Math.random() * cards.length)
-			card.style.order = randomPos
-		})
-
-		cards.forEach((card) => card.addEventListener('click', this.flipCard))
 	},
 	computed: {
 		timmerShow() {
@@ -100,16 +98,46 @@ export default {
 	},
 	methods: {
 		submit() {
-			this.start = true
 			setTimeout(() => {
 				const cards = document.querySelectorAll('.memory-card')
 				cards.forEach((card) => {
 					const randomPos = Math.floor(Math.random() * cards.length)
 					card.style.order = randomPos
 				})
-
 				cards.forEach((card) => card.addEventListener('click', this.flipCard))
 			}, 100);
+			this.timeCount()
+			this.start = true
+			this.timeCountShow = true
+		},
+		timerRuning() {
+			const cards = document.querySelectorAll('.memory-card')
+			cards.forEach((card) => card.addEventListener('click', this.flipCard))
+			cards.forEach((card) => {
+				card.classList.add('flip')
+			})
+			setTimeout(() => {
+				cards.forEach((card) => {
+					card.classList.remove('flip')
+				})
+			}, 1500);
+			this.timmer = setInterval(() => {
+				this.currentTrainResult.time += 100
+			}, 100);
+		},
+		timeCount() {
+			this.count = 3
+			this.timeCountShow = true
+			clearInterval(this.timmer)
+			setTimeout(() => {
+				clearInterval(this.timmer)
+				this.timeCountShow = false
+				this.timerRuning()
+			}, 3000);
+
+			this.timmer = setInterval(() => {
+				this.count -= 1
+			}, 1000);
 		},
 		flipCard(event) {
 			if (this.lockBoard) {
@@ -134,6 +162,55 @@ export default {
 		checkForMatch() {
 			let isMatch = this.firstCard.dataset['framework'] === this.secondCard.dataset['framework']
 			isMatch ? this.disableCards() : this.unflipCards()
+			console.log('isMath', isMatch)
+			if (!isMatch) {
+				return
+			}
+			if (document.querySelectorAll('.memory-card').length != document.querySelectorAll('.flip').length) {
+				console.log('asdfasdf this is memory-card not equal')
+				return
+			}
+
+			this.trainResultTotal.push({
+				pationId: this.$router.currentRoute.params.pationId,
+				mode: 'memory',
+				currentTime: +new Date(),
+				level: this.formData.level,
+				time: this.currentTrainResult.time / 1000,
+				errorNumber: this.currentTrainResult.errorNumber
+			})
+
+			if(this.trainResultTotal.length >= this.formData.count) {
+				this.endTotalTask()
+			}
+
+			this.restart()
+		},
+
+		endTotalTask() {
+			console.log('this is total task end')
+			console.log(this.trainResultTotal)
+		},
+		restart() {
+			clearInterval(this.timmer)
+			setTimeout(() => {
+				const cards = document.querySelectorAll('.memory-card')
+				cards.forEach((card) => {
+					const randomPos = Math.floor(Math.random() * cards.length)
+					card.style.order = randomPos
+					card.classList.remove('flip')
+				})
+				cards.forEach((card) => card.addEventListener('click', this.flipCard))
+			}, 100);
+			this.currentTrainResult = {
+				time: '',
+				errorNumber: ''
+			}
+			this.hasFlippedCard = false
+			this.lockBoard = false
+			this.firstCard = false
+			this.secondCard = false
+			this.timeCount()
 		},
 		disableCards() {
 			this.firstCard.removeEventListener('click', this.flipCard)
@@ -147,6 +224,7 @@ export default {
 				this.secondCard.classList.remove('flip')
 				this.resetBoard()
 			}, 1500)
+			this.currentTrainResult.errorNumber += 1
 		},
 		resetBoard() {
 			this.hasFlippedCard = this.lockBoard = false
@@ -209,5 +287,19 @@ export default {
 
 .memory-card.flip {
 	transform: rotateY(180deg);
+}
+
+.attention_memory_training-count {
+	position: fixed;
+	z-index: 100;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.2);
+	text-align: center;
+	top: 0;
+	left: 0;
+	color: red;
+	line-height: 500px;
+	font-size: 100px;
 }
 </style>
