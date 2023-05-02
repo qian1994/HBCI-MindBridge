@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import { savePationData } from '../api/index'
 export default {
     data() {
         return {
@@ -194,18 +195,18 @@ export default {
                 clearInterval(this.timmer)
                 this.timeCountShow = false
                 this.timerRuning()
-
             }, 3000);
 
             this.timmer = setInterval(() => {
                 this.count -= 1
             }, 1000);
         },
-        endTotalTask() {
+        async endTotalTask() {
             console.log('end total task')
             this.start = false
             clearInterval(this.timmer)
             console.log(this.trainResultTotal)
+            const res = await savePationData(this.trainResultTotal)
         },
         reStart() {
             console.log('this is re start')

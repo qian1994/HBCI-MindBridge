@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import { savePationData } from '../api/index'
+
 export default {
     data() {
         return {
@@ -98,10 +100,11 @@ export default {
         goBack() {
             this.$router.go(-1)
         },
-        endTotalTask() {
+        async endTotalTask() {
             this.start = false
             console.log(this.trainResultTotal)
             // this is place to upload the total result 
+            const res = await savePationData(this.trainResultTotal)
         },
 
         timerRuning() {

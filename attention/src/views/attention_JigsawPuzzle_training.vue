@@ -26,21 +26,24 @@
         <li :class="{ 'puzzle': true, 'puzzle-empty': !puzzle }" v-for="puzzle, index in puzzles" v-text="puzzle"
           @click="moveFn(index)"></li>
       </ul>
-      <!-- <button class="btn btn-warning btn-block btn-reset" @click="render">重置游戏</button> -->
     </div>
   </div>
 </template>
 
 <script>
 import vue from "vue"
+import { savePationData } from '../api/index'
+
 export default {
   data() {
     return {
       start: false,
       puzzles: [],
+      timeCountShow: false,
+      count: 3,
       formData: {
         level: 1,
-        count: 5
+        count: 3
       },
       currentTrainResult: {
         errorNumber: 0,
@@ -117,10 +120,44 @@ export default {
           alert('恭喜，闯关成功！')
         }
       }
-    }
-  },
-  ready() {
-    this.render()
+    },
+
+    async endTotalTask() {
+      this.start = false
+      console.log(this.trainResultTotal)
+      // this is place to upload the total result 
+      const res = await savePationData(this.trainResultTotal)
+    },
+    timerRuning() {
+      this.timmer = setInterval(() => {
+        this.currentTrainResult.time += 100
+      }, 100);
+    },
+    reStart() {
+      if (this.timmer) {
+        clearInterval(this.timmer)
+      }
+      this.currentTrainResult = {
+        time: 0,
+        errorNumber: 0
+      }
+      this.rightArray = []
+      this.cards = new Array(this.numberCards * this.numberCards).fill(15).map((item, index) => index + 1).sort(() => Math.random() - 0.5);
+      this.timeCount()
+    },
+    timeCount() {
+      this.count = 3
+      this.timeCountShow = true
+      clearInterval(this.timmer)
+      setTimeout(() => {
+        clearInterval(this.timmer)
+        this.timeCountShow = false
+        this.timerRuning()
+      }, 3000);
+      this.timmer = setInterval(() => {
+        this.count -= 1
+      }, 1000);
+    },
   }
 }
 </script>
