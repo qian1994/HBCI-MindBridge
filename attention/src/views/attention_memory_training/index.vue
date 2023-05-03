@@ -1,19 +1,29 @@
 <template>
 	<div class="attention_memory_training">
+		<h2>注意力与记忆训练</h2>
 		<div v-if="start" class="choose-info"> <span>用时: {{ timmerShow }}</span> <span>总共： {{ 1 }}</span>
 			<span>剩余：</span> <span>错误次数: {{ currentTrainResult.errorNumber
 			}}</span>
 		</div>
 		<div class="attention_concentration-config" v-if="!start">
 			<el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-				<el-form-item label="难度级别" prop="name">
-					<el-input v-model="formData.level"></el-input>
-				</el-form-item>
-				<el-form-item label="次数" prop="count">
-					<el-input v-model="formData.count"></el-input>
-				</el-form-item>
+				<el-form-item label="等级" prop="count">
+                    <el-select v-model="formData.level" placeholder="请选择">
+                        <el-option label="初级" value="1" key="1"> </el-option>
+                        <el-option label="中级" value="2" key="2"> </el-option>
+                        <el-option label="高级" value="3" key="3"> </el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item label="次数" prop="count">
+                    <el-select v-model="formData.count" placeholder="请选择">
+                        <el-option v-for="item, index in new Array(10).fill(0)" :label="index+1" :value="index+1" :key="'key' + index"> </el-option>
+                    </el-select>
+                </el-form-item>
 				<el-form-item>
 					<el-button size="large" @click="submit"> 开始 </el-button>
+                    <el-button size="large" @click="$router.go(-1)"> 返回 </el-button>
+
 				</el-form-item>
 			</el-form>
 		</div>
@@ -35,6 +45,7 @@
 </template>
 <script>
 import CardComponent from './CardComponent.vue'
+import { savePationData } from '../../api/index'
 
 export default {
 	/* TODO:  #32 Implement a 2D dimencional array to place the card on the grid  */
@@ -187,9 +198,12 @@ export default {
 			this.restart()
 		},
 
-		endTotalTask() {
+		async endTotalTask() {
 			console.log('this is total task end')
 			console.log(this.trainResultTotal)
+			this.start = true
+            const res = await savePationData(this.trainResultTotal)
+
 		},
 		restart() {
 			clearInterval(this.timmer)

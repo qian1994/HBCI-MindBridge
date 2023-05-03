@@ -1,21 +1,27 @@
 <template>
     <div :class="['attention_inhibition-widget', start ? 'active' : '']">
+        <h2>注意力与大脑抑制功能训练</h2>
         <div v-if="start" class="choose-info"> <span>用时: {{ timmerShow }}</span> <span>总共： {{ formData.count }}</span>
-            <span>剩余： {{ formData.count - trainResultTotal.length }}</span> </div>
+            <span>剩余： {{ formData.count - trainResultTotal.length }}</span>
+        </div>
         <div class="attention_stable-config" v-if="!start">
             <el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-                <el-form-item label="次数" prop="count">
-                    <el-input v-model="formData.count"></el-input>
+                <el-form-item label="等级" prop="count">
+                    <el-select v-model="formData.level" placeholder="请选择">
+                        <el-option label="初级" value="easy" key="1"> </el-option>
+                        <el-option label="中级" value="normal" key="2"> </el-option>
+                        <el-option label="高级" value="hard" key="3"> </el-option>
+                    </el-select>
                 </el-form-item>
-                <el-form-item label="难度等级" prop="count">
-                    <el-select v-model="difficulty" placeholder="请选择">
-                        <el-option key="easy" value="easy" label="easy"></el-option>
-                        <el-option key="normal" value="normal" label="normal"></el-option>
-                        <el-option key="hard" value="hard" label="hard"></el-option>
+                <el-form-item label="次数" prop="count">
+                    <el-select v-model="formData.count" placeholder="请选择">
+                        <el-option v-for="item, index in new Array(10).fill(0)" :label="index + 1" :value="index + 1"
+                            :key="'key' + index"> </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
                     <el-button size="large" @click="submit"> 开始 </el-button>
+                    <el-button size="large" @click="$router.go(-1)"> 返回 </el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -31,6 +37,9 @@
 
 <script>
 import Maze from './Maze.vue'
+import { savePationData } from '../../api/index'
+
+
 // type Difficulty = "easy" | "normal" | "hard";
 // type Strategy = "cluster" | "dig";
 export default {
@@ -81,10 +90,12 @@ export default {
             console.log('this is on onStart')
 
         },
-        endTotalTask() {
+        async endTotalTask() {
             console.log('this is place end totalTask')
             console.log(this.trainResultTotal)
             this.start = false
+            const res = await savePationData(this.trainResultTotal)
+
         },
         onFinish() {
             console.log('this is on finish')
@@ -96,14 +107,14 @@ export default {
                 time: this.currentTrainResult.time / 1000,
                 errorNumber: this.currentTrainResult.errorNumber,
             })
-            this.currentTrainResult ={
+            this.currentTrainResult = {
                 errorNumber: 0,
                 time: 0,
             },
-            clearInterval(this.timmer)
-            if(this.trainResultTotal.length < this.formData.count) {
+                clearInterval(this.timmer)
+            if (this.trainResultTotal.length < this.formData.count) {
                 this.timeCount()
-            }else{
+            } else {
                 this.endTotalTask()
             }
         },

@@ -1,20 +1,26 @@
 <template>
     <div class="attention_span_train-widget">
         <h2>注意力广度训练</h2>
-        <div v-if="start"> <span>用时: {{ timmerShow }}</span> <span>次数： {{ currentCount }}</span> <span>剩余： {{ formData.count
-            - currentCount }}</span></div>
+        <div v-if="start"> <span>用时: {{ timmerShow }}</span> <span>次数： {{ trainResultTotal.length }} / {{formData.count}}</span> </div>
         <div v-if="start"> <span>错误次数: {{ currentTrainResult.errorNumber }}</span> </div>
         <div class="attention_span_train-config" v-if="!start">
             <el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-                <el-form-item label="难度级别" prop="name">
-                    <el-input v-model="formData.level"></el-input>
+                <el-form-item label="等级" prop="count">
+                    <el-select v-model="formData.level" placeholder="请选择">
+                        <el-option label="初级" value="1" key="1"> </el-option>
+                        <el-option label="中级" value="2" key="2"> </el-option>
+                        <el-option label="高级" value="3" key="3"> </el-option>
+                    </el-select>
                 </el-form-item>
+
                 <el-form-item label="次数" prop="count">
-                    <el-input v-model="formData.count"></el-input>
+                    <el-select v-model="formData.count" placeholder="请选择">
+                        <el-option v-for="item, index in new Array(10).fill(0)" :label="index+1" :value="index+1" :key="'key' + index"> </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item>
                     <el-button size="large" @click="submit"> 开始 </el-button>
-                    <el-button class="back" @click="goBack"> 返回 </el-button>
+                    <el-button size="large" @click="$router.go(-1)"> 返回 </el-button>
                 </el-form-item>
                 <el-form-item>
                     <div>
@@ -41,7 +47,6 @@ export default {
     data() {
         return {
             time: "00: 00: 00",
-            currentCount: 1,
             start: false,
             currentIndex: 1,
             rightArray: [],
@@ -154,12 +159,11 @@ export default {
                         time: this.currentTrainResult.time / 1000,
                         errorNumber: this.currentTrainResult.errorNumber
                     })
-                    if (this.currentCount >= this.formData.count) {
+                    if (this.trainResultTotal.length >= this.formData.count) {
                         this.endTotalTask()
                         return
                     }
                     this.reStart()
-                    this.currentCount += 1
                 }
                 return
             }

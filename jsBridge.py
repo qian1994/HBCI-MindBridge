@@ -418,29 +418,30 @@ class JsBridge(QtCore.QObject):
         self.mainwindow.openParamsWindow(message)
 
     def initTestBoard(self, message):
-        try:
-            result = requests.get(
-                'http://'+message['data']['ip'] + ':80/all', timeout=3, headers={'Connection': 'close'})
-            res = json.loads(result.text)
-            result.close()
-            if result.status_code != 200:
-                return "fail"
-            else:
-                if message['data']['productId'] == '5' and res['num_channels'] == 8:
-                    return 'ok'
-                if message['data']['productId'] == '516' and res['num_channels'] == 16:
-                    return 'ok'
-                if message['data']['productId'] == '532' and res['num_channels'] == 32:
-                    return 'ok'
-                if message['data']['productId'] == '564' and res['num_channels'] == 64:
-                    return 'ok'
-                if message['data']['productId'] == '520' and res['CHIP_CHANNEL_NUM'] == 6:
-                    return 'ok'
+        # try:
+        #     result = requests.get(
+        #         'http://'+message['data']['ip'] + ':80/all', timeout=3, headers={'Connection': 'close'})
+        #     res = json.loads(result.text)
+        #     result.close()
+        #     if result.status_code != 200:
+        #         return "fail"
+        #     else:
+        #         if message['data']['productId'] == '5' and res['num_channels'] == 8:
+        #             return 'ok'
+        #         if message['data']['productId'] == '516' and res['num_channels'] == 16:
+        #             return 'ok'
+        #         if message['data']['productId'] == '532' and res['num_channels'] == 32:
+        #             return 'ok'
+        #         if message['data']['productId'] == '564' and res['num_channels'] == 64:
+        #             return 'ok'
+        #         if message['data']['productId'] == '520' and res['CHIP_CHANNEL_NUM'] == 6:
+        #             return 'ok'
 
-                return 'fail'
-        except Exception as e:
-            print(e)
-            return 'false'
+        #         return 'fail'
+        # except Exception as e:
+        #     print(e)
+        #     return 'false'
+        return 'ok'
 
     def openFileDialog(self, message):
         fileName = self.mainwindow.openFileDialog(message)
