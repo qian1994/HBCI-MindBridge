@@ -56,7 +56,7 @@ export default {
 <style>
 .login-container {
   width: 500px;
-  margin: 300px auto;
+  margin: 100px auto;
   background-color: white;
   padding: 30px ;
   box-sizing: border-box;

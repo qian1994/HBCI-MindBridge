@@ -7,17 +7,18 @@
       <el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="等级" prop="count">
           <el-select v-model="formData.level" placeholder="请选择">
-              <el-option label="初级" value="1" key="1"> </el-option>
-              <el-option label="中级" value="2" key="2"> </el-option>
-              <el-option label="高级" value="3" key="3"> </el-option>
+            <el-option label="初级" value="1" key="1"> </el-option>
+            <el-option label="中级" value="2" key="2"> </el-option>
+            <el-option label="高级" value="3" key="3"> </el-option>
           </el-select>
-      </el-form-item>
+        </el-form-item>
 
-      <el-form-item label="次数" prop="count">
+        <el-form-item label="次数" prop="count">
           <el-select v-model="formData.count" placeholder="请选择">
-              <el-option v-for="item, index in new Array(10).fill(0)" :label="index+1" :value="index+1" :key="'key' + index"> </el-option>
+            <el-option v-for="item, index in new Array(10).fill(0)" :label="index + 1" :value="index + 1"
+              :key="'key' + index"> </el-option>
           </el-select>
-      </el-form-item>
+        </el-form-item>
         <el-form-item>
           <el-button size="large" @click="submit"> 开始 </el-button>
           <el-button size="large" @click="$router.go(-1)"> 返回 </el-button>
@@ -126,9 +127,29 @@ export default {
       if (this.puzzles[15] === '') {
         const newPuzzles = this.puzzles.slice(0, 15)
         const isPass = newPuzzles.every((e, i) => e === i + 1)
-        if (isPass) {
-          alert('恭喜，闯关成功！')
+        if (!isPass)
+          return
+
+        this.trainResultTotal.push({
+          pationId: this.$router.currentRoute.params.id,
+          mode: 'maze',
+          currentTime: +new Date(),
+          level: this.formData.level,
+          time: this.currentTrainResult.time / 1000,
+          errorNumber: this.currentTrainResult.errorNumber,
+          totalNumber: this.findPairs.length
+        })
+        this.currentTrainResult = {
+          time: 0,
+          errorNumber: 0
         }
+
+        clearInterval(this.timmer)
+        if(this.formData.count <= this.trainResultTotal.length) {
+          this.endTotalTask()
+          return
+        }
+        this.reStart()
       }
     },
 
@@ -137,6 +158,8 @@ export default {
       console.log(this.trainResultTotal)
       // this is place to upload the total result 
       const res = await savePationData(this.trainResultTotal)
+      this.$router.go(-1)
+
     },
     timerRuning() {
       this.timmer = setInterval(() => {

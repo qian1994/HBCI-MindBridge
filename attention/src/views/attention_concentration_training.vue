@@ -124,7 +124,7 @@ export default {
             this.start = false
             clearInterval(this.timmer)
             const res = await savePationData(this.trainResultTotal)
-
+            this.$router.go(-1)
         },
 
         timerRuning() {
@@ -175,7 +175,7 @@ export default {
             console.log(this.findPairs, this.rightArray)
             if (this.findPairs.length == this.rightArray.length / 2) {
                 this.trainResultTotal.push({
-                    pationId: this.$router.currentRoute.params.pationId,
+                    pationId: this.$router.currentRoute.params.id,
                     mode: 'concentration',
                     currentTime: +new Date(),
                     level: this.formData.level,

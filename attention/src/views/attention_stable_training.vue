@@ -124,7 +124,6 @@ export default {
             return `${minute}:${second}:${mSecond}`
         },
     },
-
     methods: {
         submit() {
             this.start = true
@@ -217,6 +216,7 @@ export default {
             clearInterval(this.timmer)
             console.log(this.trainResultTotal)
             const res = await savePationData(this.trainResultTotal)
+            this.$router.go(-1)
         },
         reStart() {
             console.log('this is re start')
@@ -224,7 +224,7 @@ export default {
                 clearInterval(this.timmer)
             }
             this.trainResultTotal.push({
-                pationId: this.$router.currentRoute.params.pationId,
+                pationId: this.$router.currentRoute.params.id,
                 mode: 'stable',
                 currentTime: +new Date(),
                 level: this.formData.level,
@@ -260,7 +260,7 @@ export default {
             this.currentIndex += 1
             if (this.currentIndex > this.formData.count) {
                 this.trainResultTotal.push({
-                pationId: this.$router.currentRoute.params.pationId,
+                pationId: this.$router.currentRoute.params.id,
                 mode: 'stable',
                 currentTime: +new Date(),
                 level: this.formData.level,

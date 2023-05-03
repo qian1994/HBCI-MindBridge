@@ -235,7 +235,27 @@ class JsBridge(QtCore.QObject):
         print(message)
 
     def savePationData(self, message):
-        print(message)
+        data = message['data']
+        print(data)
+        for item in data:
+            if "pationId" not in item:
+                return 'no pation info'
+            pationId = item['pationId']
+            mode = item['mode']
+            currentTime = item['currentTime']
+            level = item['level']
+            time = item['time']
+            errorNumber = item['errorNumber']
+            goodNumber = 0
+            if goodNumber in item:
+                goodNumber = item['goodNumber']
+            new_data = [pationId, mode, level, currentTime, time, errorNumber, goodNumber]
+            if os.path.exists('./attentionDir/'+pationId + '.csv'):
+                with open('./attentionDir/'+pationId + '.csv', 'a') as f:
+                    np.savetxt(f, np.array([new_data]), delimiter=",", fmt='%s',)   
+            else:
+                title = ["用户id", "条件", "难度", "时间", "用时", "错误次数", "正确次数"]
+                np.savetxt('./attentionDir/' + pationId + '.csv',  np.array([title, new_data]),fmt='%s', delimiter=",", encoding='utf-8')     
 
     def getModels(self, message):
         models = os.listdir('./assets')

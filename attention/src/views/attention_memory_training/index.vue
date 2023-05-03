@@ -183,7 +183,7 @@ export default {
 			}
 
 			this.trainResultTotal.push({
-				pationId: this.$router.currentRoute.params.pationId,
+				pationId: this.$router.currentRoute.params.id,
 				mode: 'memory',
 				currentTime: +new Date(),
 				level: this.formData.level,
@@ -193,17 +193,17 @@ export default {
 
 			if(this.trainResultTotal.length >= this.formData.count) {
 				this.endTotalTask()
+				return
 			}
-
 			this.restart()
 		},
 
 		async endTotalTask() {
 			console.log('this is total task end')
 			console.log(this.trainResultTotal)
-			this.start = true
+			this.start = false
             const res = await savePationData(this.trainResultTotal)
-
+            this.$router.go(-1)
 		},
 		restart() {
 			clearInterval(this.timmer)

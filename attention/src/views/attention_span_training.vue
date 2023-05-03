@@ -110,6 +110,8 @@ export default {
             console.log(this.trainResultTotal)
             // this is place to upload the total result 
             const res = await savePationData(this.trainResultTotal)
+            this.$router.go(-1)
+
         },
 
         timerRuning() {
@@ -152,7 +154,7 @@ export default {
                 if (this.numberCards * this.numberCards == this.rightArray.length) {
                     clearInterval(this.timmer)
                     this.trainResultTotal.push({
-                        pationId: this.$router.currentRoute.params.pationId,
+                        pationId: this.$router.currentRoute.params.id,
                         mode: 'span',
                         currentTime: +new Date(),
                         level: this.formData.level,
@@ -169,6 +171,9 @@ export default {
             }
             this.currentTrainResult.errorNumber += 1
         }
+    },
+    mounted() {
+        console.log(this.$router.currentRoute.params)
     }
 }
 </script>

@@ -95,12 +95,12 @@ export default {
             console.log(this.trainResultTotal)
             this.start = false
             const res = await savePationData(this.trainResultTotal)
-
+            this.$router.go(-1)
         },
         onFinish() {
             console.log('this is on finish')
             this.trainResultTotal.push({
-                pationId: this.$router.currentRoute.params.pationId,
+                pationId: this.$router.currentRoute.params.id,
                 mode: 'inhibition',
                 currentTime: +new Date(),
                 level: this.difficulty,

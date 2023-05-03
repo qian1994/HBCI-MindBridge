@@ -1,7 +1,6 @@
 <template>
   <div class="attention_reaction_train">
     <h2>注意力与反应训练</h2>
-
     <div class="attention_reaction_train-config" v-if="!start">
       <el-form :model="formData" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="等级" prop="count">
@@ -29,8 +28,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div v-if="start"> <span>用时: {{ timmerShow }}</span> <span>次数： {{ trainResultTotal.length + 1 }}/{{ currentCount }} </span> <span> </span> <span>选中次数： {{ currentCount -
-      greenCounter }}</span></div>
+    <div v-if="start"> <span>用时: {{ timmerShow }}</span>  <span>选中次数： {{ greenCounter }}</span></div>
     <div v-if="start"> <span>错误次数: {{ currentTrainResult.errorNumber }}</span> </div>
     <div v-if="start">
       <Shape @close="stopShape" :shape="currentShape" :color="currentColor" />
@@ -174,7 +172,7 @@ export default {
       // this.showResults = true; //showing the end game DOM
 
       this.trainResultTotal.push({
-        pationId: this.$router.currentRoute.params.pationId,
+        pationId: this.$router.currentRoute.params.id,
         mode: 'reaction',
         currentTime: +new Date(),
         level: this.formData.level,
@@ -191,8 +189,10 @@ export default {
       this.reStart()
     },
     async endTotalTask() {
-      this.start = true
+      this.start = false
       const res = await savePationData(this.trainResultTotal)
+      this.$router.go(-1)
+
     },
     reStart() {
       this.currentTrainResult = {
