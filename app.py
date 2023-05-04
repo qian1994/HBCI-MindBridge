@@ -24,6 +24,9 @@ from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from dataPorcessing import DataProcessing
 import scipy.io as sio
 from startSocketClient import SocketCustomClient
+from threading import Thread, current_thread
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -86,6 +89,8 @@ class MainWindow(QMainWindow):
         self.badChannel = None
         self.paradigms = None
         self.SocketCustomClient = None
+        self.MindBridgefileName = ''
+
     def createWebEng(self):
         self.webView = QWebEngineView()
         self.webView.settings().setAttribute(
@@ -114,7 +119,7 @@ class MainWindow(QMainWindow):
         if self.paradigms == None:
             self.paradigms = Paradigms()
             self.paradigms.init(self.python_bridge, self.width,
-                            self.height, self.trigger)
+                                self.height, self.trigger)
 
     def closeParamWindow(self, message):
         self.paradigms.close()
@@ -274,21 +279,13 @@ class MainWindow(QMainWindow):
 
     def startImpendenceTest(self, message):
         try:
-            if self.board != None :
+            if self.board != None:
                 return 'ok'
-            data = message['data']
-            boardId = int(data["productId"])
-            params = BrainFlowInputParams()
-            params.ip_port = 9521 + random.randint(1, 100)
-            params.ip_address = data['ip']
-            self.board = BoardShim(int(boardId), params)
-            self.board.prepare_session()
-            self.boardId = boardId
-            self.startStream(message)
+            self.startSession(message)
         except:
             return 'fail'
         return 'ok'
-    
+
     def updateBadChannel(self, message):
         self.badChannel = message
 
@@ -337,50 +334,77 @@ class MainWindow(QMainWindow):
         railed = ','.join([str(i) for i in railed])
         return railed
 
+    # 创建保存数据线程
+
+    def saveBoardDataThread(self):
+        while 1:
+            # time.sleep(120)
+            time.sleep(10)
+            if self.board == None:
+                return
+            if self.MindBridgefileName == '':
+                return
+            if not os.path.exists(self.MindBridgefileName):
+                open(self.MindBridgefileName, 'w').close()
+
+            data = self.board.get_board_data()
+            with open(self.MindBridgefileName, 'a+') as file:
+                DataFilter.write_file(data, self.MindBridgefileName, 'a+')
+            file.close()
+    # 建立连接
+
     def startSession(self, message):
         # try:
-            if self.boartStatus == 'startStream' or self.board != None:
-                return 'ok'
-            data = message['data']
-            boardId = int(data["productId"])
-            params = BrainFlowInputParams()
-            params.ip_port = 9521 + random.randint(1, 100)
-            params.ip_address = data['ip']
-            if self.ip_address == params.ip_address and self.boardId == boardId:
-                return 'ok'
-            if self.board != None:
-                self.board.release_all_sessions()
-            self.board = BoardShim(int(boardId), params)
-            self.board.prepare_session()
-            self.boardId = boardId
-            self.ip_address = params.ip_address
-            self.startStream(message)
+        if self.boartStatus == 'startStream' or self.board != None:
+            return 'ok'
+        data = message['data']
+        boardId = int(data["productId"])
+        params = BrainFlowInputParams()
+        params.ip_port = 9521 + random.randint(1, 100)
+        params.ip_address = data['ip']
+
+        if self.ip_address == params.ip_address and self.boardId == boardId:
+            return 'ok'
+        if self.board != None:
+            self.board.release_all_sessions()
+        self.board = BoardShim(int(boardId), params)
+        self.board.prepare_session()
+        self.boardId = boardId
+        self.ip_address = params.ip_address
+        self.startStream(message)
+        time_now = datetime.datetime.now()
+        time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
+        self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
+        if not os.path.exists(self.MindBridgefileName):
+            open(self.MindBridgefileName, 'w').close()
+        threadSaveData = Thread(target=self.saveBoardDataThread)
+        threadSaveData.setDaemon(True)
+        threadSaveData.start()
         # except:
         #     return 'fail'
-            return 'ok'
+        return 'ok'
 
     def startssvepTask(self, message):
         # try:
-            if self.boartStatus == 'startStream' or self.board != None:
-                return 'ok'
-            data = message['data']
-            boardId = int(data["productId"])
-            self.fileName = data['fileName']
-            self.model = data['selectModel']
-            time_now = datetime.datetime.now()
-            time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
-            # self.fileName = self.dir_path+"/data/" + self.fileName + '_' + self.model + '_' + time_string
-            if self.boartStatus != 'startStream':
-                params = BrainFlowInputParams()
-                params.ip_port = 9521 + random.randint(1, 100)
-                params.ip_address = data['ip']
-                self.board = BoardShim(int(boardId), params)
-                self.board.prepare_session()
-                self.boardId = int(boardId)
-                self.startStream(message)
+        if self.boartStatus == 'startStream' or self.board != None:
+            return 'ok'
+        data = message['data']
+        boardId = int(data["productId"])
+        self.fileName = data['fileName']
+        self.model = data['selectModel']
+
+        if self.boartStatus != 'startStream':
+            # params = BrainFlowInputParams()
+            # params.ip_port = 9521 + random.randint(1, 100)
+            # params.ip_address = data['ip']
+            # self.board = BoardShim(int(boardId), params)
+            # self.board.prepare_session()
+            # self.boardId = int(boardId)
+            # self.startStream(message)
+            self.startSession(message)
         # except:
         #     return 'fail'
-            return 'ok'
+        return 'ok'
 
     def startStream(self, message):
         if self.board == None:
@@ -422,7 +446,6 @@ class MainWindow(QMainWindow):
 
     def endFlashTask(self, data):
         self.board.insert_marker(1123)
-    
 
     def startNewExpriment(self):
         time_now = datetime.datetime.now()
@@ -501,37 +524,39 @@ class MainWindow(QMainWindow):
         self.showNormal()
 
     # 添加edf 信息
-    def saveToEDF(self, fileName,info, originData,  sampleRate, channels):
+    def saveToEDF(self, fileName, info, originData,  sampleRate, channels):
         otherInfo = info
         eegSaveData = EEGSAVEDATA()
         eegSaveData.saveFile(fileName=fileName, data=originData,
                              channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
-        
+
     def saveDataInfo(self, info, originData):
+        originData = np.ascontiguousarray(np.array(originData).T)
+
         patientcode = info['patientcode']
         userName = info['userName']
         mode = info['selectModel']
-        dataDir = QDir.currentPath() +'/test_data/' + patientcode+'_'+userName
+        dataDir = QDir.currentPath() + '/test_data/' + patientcode+'_'+userName
         if not os.path.exists(dataDir):
             os.makedirs(dataDir)
-        if not os.path.exists(dataDir + '/' +self.currentTimeString) :
-            os.makedirs(dataDir + '/' +self.currentTimeString)
+        if not os.path.exists(dataDir + '/' + self.currentTimeString):
+            os.makedirs(dataDir + '/' + self.currentTimeString)
         dataDir = dataDir + '/' + self.currentTimeString
-        if not os.path.exists(dataDir + '/' +mode) :
-            os.makedirs(dataDir + '/' +mode) 
+        if not os.path.exists(dataDir + '/' + mode):
+            os.makedirs(dataDir + '/' + mode)
             dataDir = dataDir + '/' + mode
         else:
             count = 0
             dirs = os.listdir(dataDir)
             for dir in dirs:
                 if mode in dir:
-                    count+=1
+                    count += 1
             dataDir = dataDir + '/' + mode+'-' + str(count)
             os.makedirs(dataDir)
         os.makedirs(dataDir + '/' + 'info')
         os.makedirs(dataDir + '/' + 'data')
         os.makedirs(dataDir + '/' + 'result')
-        with open(dataDir +'/info/'+ 'pationInfo.txt','w')as file:
+        with open(dataDir + '/info/' + 'pationInfo.txt', 'w')as file:
             file.write(json.dumps({
                 "birthdate": info['birthdate'],
                 "patient_additional": info['patient_additional'],
@@ -543,32 +568,32 @@ class MainWindow(QMainWindow):
                 "technician": info["technician"]
             }))
         file.close()
-        with open(dataDir +'/info/'+ 'exprimentInfo.txt','w')as file:
+        with open(dataDir + '/info/' + 'exprimentInfo.txt', 'w')as file:
             badChannel = []
             if self.badChannel != None:
                 badChannel = self.badChannel
             file.write(json.dumps({
-                'motionNumber': info['motionNumber'], 
+                'motionNumber': info['motionNumber'],
                 'motionDistance': info['motionDistance'],
-                'motionWidth': info['motionWidth'], 
+                'motionWidth': info['motionWidth'],
                 'motionHeight': info['motionHeight'],
-                'motionSpeed': info['motionSpeed'], 
-                'selectModel': info['selectModel'], 
-                'colorObject': info['colorObject'], 
-                'colorTarget': info['colorTarget'], 
-                'triggerTrialStart': info['triggerTrialStart'], 
-                'productId': info['productId'], 
-                'marker': info['marker'], 
+                'motionSpeed': info['motionSpeed'],
+                'selectModel': info['selectModel'],
+                'colorObject': info['colorObject'],
+                'colorTarget': info['colorTarget'],
+                'triggerTrialStart': info['triggerTrialStart'],
+                'productId': info['productId'],
+                'marker': info['marker'],
                 'passedImpedence': info['passedImpedence'],
                 'targetIndex': info['targetIndex'],
                 'trialNumber': info['trialNumber'],
-                'totalTrial': info['totalTrial'], 
-                'lantency': info['lantency'], 
-                'instance': info['instance'], 
+                'totalTrial': info['totalTrial'],
+                'lantency': info['lantency'],
+                'instance': info['instance'],
                 'trialLantency': info['trialLantency'],
-                'equipment': info['equipment'], 
+                'equipment': info['equipment'],
                 'trial': info['trial'],
-                'badChannel': badChannel 
+                'badChannel': badChannel
             }))
         file.close()
         data = info
@@ -597,9 +622,9 @@ class MainWindow(QMainWindow):
         marker_data = np.array([originData[:, mar_channel]]).T
         eeg_data = np.concatenate((eeg_data, marker_data), axis=1)
         data['recording_additional'] = json.dumps(data['patient_additional'])
-        self.brainflow_file_name = dataDir +'/data/'+ info['fileName']+ '.csv'
-        self.edf_file_name = dataDir +'/data/'+ info['fileName']+ '.bdf'
-        self.mat_file_name = dataDir +'/data/'+ info['fileName']+ '.mat'
+        self.brainflow_file_name = dataDir + '/data/' + info['fileName'] + '.csv'
+        self.edf_file_name = dataDir + '/data/' + info['fileName'] + '.bdf'
+        self.mat_file_name = dataDir + '/data/' + info['fileName'] + '.mat'
         if "marker" not in channels:
             channels.extend(['marker'])
         info['sampleRate'] = sampleRate
@@ -609,11 +634,10 @@ class MainWindow(QMainWindow):
         if self.badChannel != None:
             badChannel = self.badChannel
         info['badChannel'] = badChannel
-        self.saveToEDF(self.edf_file_name,info, eeg_data, sampleRate, channels)
+        self.saveToEDF(self.edf_file_name, info,
+                       eeg_data, sampleRate, channels)
         sio.savemat(self.mat_file_name, info)
-        datafilter = DataFilter()
-        datafilter.write_file(
-            data=originData.T, file_name=self.brainflow_file_name, file_mode='w')
+     
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'sucess-save-data'}))
         del mindBridge
@@ -632,13 +656,23 @@ class MainWindow(QMainWindow):
                 self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
             self.edf_file_name = self.dir_path+"/edfFile/" + \
                 self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
-        data = self.board.get_board_data()
+        dataNow = self.board.get_board_data()
+        data = np.loadtxt(self.MindBridgefileName).T
+        data = np.ascontiguousarray(np.array(data))
+        originData = []
+        if len(data) != 0:
+            originData = np.concatenate((data, dataNow), axis=1)
+        else: 
+            originData = dataNow
+        time_now = datetime.datetime.now()
+        time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
+        self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
         if self.currentApp == 'svp1_2':
-            self.saveDataInfo(info, data.T)
-            return
+            self.saveDataInfo(info, originData)
+            # return
         datafilter = DataFilter()
         datafilter.write_file(
-            data=data, file_name=self.brainflow_file_name, file_mode='w')
+            data=originData, file_name=self.brainflow_file_name, file_mode='w')
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'sucess-save-data'}))
         # except Exception as e:
@@ -646,14 +680,12 @@ class MainWindow(QMainWindow):
         #     return 'fail'
         # return 'ok'
     # 弹出对话框，选取文件
-        self.figure.close()
+        # self.figure.close()
         self.paradigms = None
-
 
     def endTaskSaveData(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
-    
         if self.brainflow_file_name == None or self.brainflow_file_name == '':
             self.brainflow_file_name = self.dir_path+"/data/" + \
                 self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
@@ -661,11 +693,12 @@ class MainWindow(QMainWindow):
                 self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
             self.edf_file_name = self.dir_path+"/edfFile/" + \
                 self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
-        data = self.board.get_board_data()
+        # data = self.board.get_board_data()
+        data = np.loadtxt(self.MindBridgefileName)
         datafilter = DataFilter()
         datafilter.write_file(
             data=data, file_name=self.brainflow_file_name, file_mode='w')
-      
+
     def openFileDialog(self, message):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件")
         return fileName
@@ -684,7 +717,8 @@ class MainWindow(QMainWindow):
     def startCustomParadigm(self, message):
         try:
             self.SocketCustomClient = SocketCustomClient(self)
-            self.SocketCustomClient.init(message['data']['customIp'], message['data']['customPort'])
+            self.SocketCustomClient.init(
+                message['data']['customIp'], message['data']['customPort'])
             self.SocketCustomClient.start()
             return 'ok'
         except:
@@ -702,7 +736,7 @@ class MainWindow(QMainWindow):
 
     def getCustomInsertMarker(self, message):
         print(message)
-        
+
     # 获取实时数据
     def getCurrentBoardData(self, message):
         data = message['data']
@@ -715,6 +749,7 @@ class MainWindow(QMainWindow):
             if len(data):
                 return json.dumps(data.tolist())
         return "[]"
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
