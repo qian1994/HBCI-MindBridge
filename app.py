@@ -265,7 +265,7 @@ class MainWindow(QMainWindow):
             self.figure.update(boardData)
         # fft 数据显示
         if self.figureFFT != None:
-            fftArray = self.dataprocessing.handleFFt(boardData, sampling_rate)
+            fftArray = self.dataprocessing.handleFFt(data.copy(), sampling_rate)
             self.figureFFT.update(fftArray)
 
     def getRelTimeDectation(self, message):
@@ -338,8 +338,7 @@ class MainWindow(QMainWindow):
 
     def saveBoardDataThread(self):
         while 1:
-            # time.sleep(120)
-            time.sleep(10)
+            time.sleep(5*60)
             if self.board == None:
                 return
             if self.MindBridgefileName == '':
@@ -693,11 +692,12 @@ class MainWindow(QMainWindow):
                 self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
             self.edf_file_name = self.dir_path+"/edfFile/" + \
                 self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
-        # data = self.board.get_board_data()
-        data = np.loadtxt(self.MindBridgefileName)
+        dataNow = self.board.get_board_data()
+        data = np.loadtxt(self.MindBridgefileName).T
+        data = np.ascontiguousarray(np.array(data))
+        data = np.concatenate((data, dataNow), axis=1)
         datafilter = DataFilter()
-        datafilter.write_file(
-            data=data, file_name=self.brainflow_file_name, file_mode='w')
+        datafilter.write_file(data=data, file_name=self.brainflow_file_name, file_mode='w')
 
     def openFileDialog(self, message):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件")
@@ -707,7 +707,6 @@ class MainWindow(QMainWindow):
     def openFilesDialog(self, message):
         fileNames, fileType = QFileDialog.getOpenFileNames(self, "选取文件")
         return fileNames
-
     # 选取文件夹
 
     def openDirectory(self, message):
