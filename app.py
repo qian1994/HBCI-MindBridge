@@ -86,6 +86,7 @@ class MainWindow(QMainWindow):
         self.badChannel = None
         self.paradigms = None
         self.SocketCustomClient = None
+
     def createWebEng(self):
         self.webView = QWebEngineView()
         self.webView.settings().setAttribute(
@@ -134,7 +135,9 @@ class MainWindow(QMainWindow):
                     json.dumps({"id": 0, "action": 'close-time-serise'}))
 
     def closefftWindow(self, message):
-        self.figureFFT.close()
+        if self.figureFFT != None:
+            self.figureFFT.close()
+            self.figureFFT = None
 
     def openPSDWindow(self, message):
         print('openPsdWIndow')
@@ -189,7 +192,6 @@ class MainWindow(QMainWindow):
         if self.figure != None:
             self.figure.close()
             self.figure = None
-            del self.figure
 
     def postTimeSeriseChannelShow(self, message):
         try:
@@ -205,7 +207,7 @@ class MainWindow(QMainWindow):
     def showTimeSerise(self):
         self.timmerSession = QTimer()  # 创建定时器
         self.timmerSession.timeout.connect(self.updateRealTimePlot)
-        self.timmerSession.start(80)
+        self.timmerSession.start(40)
 
     def closeFigures(self):
         self.timmerSession.stop()
@@ -338,7 +340,7 @@ class MainWindow(QMainWindow):
         return railed
 
     def startSession(self, message):
-        # try:
+        try:
             if self.boartStatus == 'startStream' or self.board != None:
                 return 'ok'
             data = message['data']
@@ -355,9 +357,9 @@ class MainWindow(QMainWindow):
             self.boardId = boardId
             self.ip_address = params.ip_address
             self.startStream(message)
-        # except:
-        #     return 'fail'
-            return 'ok'
+        except:
+            return 'fail'
+        return 'ok'
 
     def startssvepTask(self, message):
         # try:
@@ -422,7 +424,6 @@ class MainWindow(QMainWindow):
 
     def endFlashTask(self, data):
         self.board.insert_marker(1123)
-    
 
     def startNewExpriment(self):
         time_now = datetime.datetime.now()
@@ -649,7 +650,6 @@ class MainWindow(QMainWindow):
         self.figure.close()
         self.paradigms = None
 
-
     def endTaskSaveData(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
@@ -688,7 +688,6 @@ class MainWindow(QMainWindow):
             self.SocketCustomClient.start()
             return 'ok'
         except:
-            print('ss')
             return 'fail'
         return 'fail'
 
