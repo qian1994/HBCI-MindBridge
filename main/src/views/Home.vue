@@ -90,6 +90,8 @@ export default {
             title = '脑视功能评估'
           } else if (item == 'report') {
             title = '评估报告'
+          }else if (item == 'transfile') {
+            title = '转换文件格式'
           }
           paradigm.push({
             name: item,

@@ -16,7 +16,6 @@ from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from jsBridge import JsBridge
 from figures import FigureWindow
 from figuresFFT import FiguresFFTWindow
-from drawParamsWindow import Paradigms
 from SaveData import EEGSAVEDATA
 from config import MindBridge
 from signals import Signal
@@ -84,7 +83,6 @@ class MainWindow(QMainWindow):
             "filterType": 0,
         })
         self.badChannel = None
-        self.paradigms = None
         self.SocketCustomClient = None
 
     def createWebEng(self):
@@ -111,14 +109,8 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setContentsMargins(0, 0, 0, 0)
         self.python_bridge.responseSignal.emit('this is from serve')
 
-    def openParamsWindow(self, message):
-        if self.paradigms == None:
-            self.paradigms = Paradigms()
-            self.paradigms.init(self.python_bridge, self.width,
-                            self.height, self.trigger)
 
-    def closeParamWindow(self, message):
-        self.paradigms.close()
+ 
 
     def initDevTools(self):
         if self.devToolsStatus == True:
@@ -422,34 +414,9 @@ class MainWindow(QMainWindow):
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-flash'}))
 
-    def endFlashTask(self, data):
-        self.board.insert_marker(1123)
-
     def startNewExpriment(self):
         time_now = datetime.datetime.now()
         self.currentTimeString = time_now.strftime("%Y_%m_%d_%H_%M_%S")
-
-    def startFlashTask(self, data):
-        # if self.boartStatus != "startStream":
-        #     self.startStream('')
-        if data['selectModel'] == "6motion":
-            self.paradigms.startWindow(data)
-        else:
-            self.paradigms.start(data)
-        if self.currentTimeString == '' or self.pationCode != data['pationCode']:
-            time_now = datetime.datetime.now()
-            self.currentTimeString = time_now.strftime("%Y_%m_%d_%H_%M_%S")
-
-    def showDialog(self):
-        fname = QFileDialog.getOpenFileName(self, 'open file', '/')
-        if fname[0]:
-            try:
-                f = open(fname[0], 'r')
-                with f:
-                    data = f.read()
-                    self.textEdit.setText(data)
-            except:
-                self.textEdit.setText("打开文件失败，可能是文件内型错误")
 
     def openHtml(self, data):
         if data == 'timeSerise':
@@ -508,152 +475,9 @@ class MainWindow(QMainWindow):
         eegSaveData.saveFile(fileName=fileName, data=originData,
                              channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
         
-    def saveDataInfo(self, info, originData):
-        patientcode = info['patientcode']
-        userName = info['userName']
-        mode = info['selectModel']
-        dataDir = QDir.currentPath() +'/test_data/' + patientcode+'_'+userName
-        if not os.path.exists(dataDir):
-            os.makedirs(dataDir)
-        if not os.path.exists(dataDir + '/' +self.currentTimeString) :
-            os.makedirs(dataDir + '/' +self.currentTimeString)
-        dataDir = dataDir + '/' + self.currentTimeString
-        if not os.path.exists(dataDir + '/' +mode) :
-            os.makedirs(dataDir + '/' +mode) 
-            dataDir = dataDir + '/' + mode
-        else:
-            count = 0
-            dirs = os.listdir(dataDir)
-            for dir in dirs:
-                if mode in dir:
-                    count+=1
-            dataDir = dataDir + '/' + mode+'-' + str(count)
-            os.makedirs(dataDir)
-        os.makedirs(dataDir + '/' + 'info')
-        os.makedirs(dataDir + '/' + 'data')
-        os.makedirs(dataDir + '/' + 'result')
-        with open(dataDir +'/info/'+ 'pationInfo.txt','w')as file:
-            file.write(json.dumps({
-                "birthdate": info['birthdate'],
-                "patient_additional": info['patient_additional'],
-                "age":  info['age'],
-                "gender": info['gender'],
-                "userName": info['userName'],
-                "startData": info["startDate"],
-                "patientcode": info["patientcode"],
-                "technician": info["technician"]
-            }))
-        file.close()
-        with open(dataDir +'/info/'+ 'exprimentInfo.txt','w')as file:
-            badChannel = []
-            if self.badChannel != None:
-                badChannel = self.badChannel
-            file.write(json.dumps({
-                'motionNumber': info['motionNumber'], 
-                'motionDistance': info['motionDistance'],
-                'motionWidth': info['motionWidth'], 
-                'motionHeight': info['motionHeight'],
-                'motionSpeed': info['motionSpeed'], 
-                'selectModel': info['selectModel'], 
-                'colorObject': info['colorObject'], 
-                'colorTarget': info['colorTarget'], 
-                'triggerTrialStart': info['triggerTrialStart'], 
-                'productId': info['productId'], 
-                'marker': info['marker'], 
-                'passedImpedence': info['passedImpedence'],
-                'targetIndex': info['targetIndex'],
-                'trialNumber': info['trialNumber'],
-                'totalTrial': info['totalTrial'], 
-                'lantency': info['lantency'], 
-                'instance': info['instance'], 
-                'trialLantency': info['trialLantency'],
-                'equipment': info['equipment'], 
-                'trial': info['trial'],
-                'badChannel': badChannel 
-            }))
-        file.close()
-        data = info
-        mindBridge = MindBridge()
-        channels = []
-        if str(data['productId']) == '5':
-            channels = mindBridge.channelImpedences["8"]
-        elif str(data['productId']) == '516':
-            channels = mindBridge.channelImpedences["16"]
-        elif str(data['productId']) == '520':
-            channels = mindBridge.channelImpedences["20"]
-        elif str(data['productId']) == '532':
-            channels = mindBridge.channelImpedences["32"]
-        else:
-            channels = mindBridge.channelImpedences["64"]
-        eeg_channel = BoardShim.get_eeg_channels(data['productId'])
-        mar_channel = BoardShim.get_marker_channel(data['productId'])
-        sampleRate = BoardShim.get_sampling_rate(data['productId'])
-        eeg_data = originData[:, eeg_channel]
-        array = []
-        count = 0
-        for i in originData[:, mar_channel]:
-            if int(i) == -1:
-                array.append(str(count))
-                count += 1
-        marker_data = np.array([originData[:, mar_channel]]).T
-        eeg_data = np.concatenate((eeg_data, marker_data), axis=1)
-        data['recording_additional'] = json.dumps(data['patient_additional'])
-        self.brainflow_file_name = dataDir +'/data/'+ info['fileName']+ '.csv'
-        self.edf_file_name = dataDir +'/data/'+ info['fileName']+ '.bdf'
-        self.mat_file_name = dataDir +'/data/'+ info['fileName']+ '.mat'
-        if "marker" not in channels:
-            channels.extend(['marker'])
-        info['sampleRate'] = sampleRate
-        info['channels'] = channels
-        info['data'] = eeg_data.tolist()
-        badChannel = []
-        if self.badChannel != None:
-            badChannel = self.badChannel
-        info['badChannel'] = badChannel
-        self.saveToEDF(self.edf_file_name,info, eeg_data, sampleRate, channels)
-        sio.savemat(self.mat_file_name, info)
-        datafilter = DataFilter()
-        datafilter.write_file(
-            data=originData.T, file_name=self.brainflow_file_name, file_mode='w')
-        self.python_bridge.getFromServer.emit(
-            json.dumps({"id": 0, "data": 'sucess-save-data'}))
-        del mindBridge
-
-    # 文件存储
-    def endTotalTask(self, message):
-        info = message['data']
-        info['productId'] = int(info['productId'])
-        # try:
-        self.paradigms.close()
-        # self.stopStream('')
-        if self.brainflow_file_name == None or self.brainflow_file_name == '':
-            self.brainflow_file_name = self.dir_path+"/data/" + \
-                self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
-            self.bci_file_name = self.dir_path+"/data/" + \
-                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
-            self.edf_file_name = self.dir_path+"/edfFile/" + \
-                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
-        data = self.board.get_board_data()
-        if self.currentApp == 'svp1_2':
-            self.saveDataInfo(info, data.T)
-            return
-        datafilter = DataFilter()
-        datafilter.write_file(
-            data=data, file_name=self.brainflow_file_name, file_mode='w')
-        self.python_bridge.getFromServer.emit(
-            json.dumps({"id": 0, "data": 'sucess-save-data'}))
-        # except Exception as e:
-        #     print(e)
-        #     return 'fail'
-        # return 'ok'
-    # 弹出对话框，选取文件
-        self.figure.close()
-        self.paradigms = None
-
     def endTaskSaveData(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
-    
         if self.brainflow_file_name == None or self.brainflow_file_name == '':
             self.brainflow_file_name = self.dir_path+"/data/" + \
                 self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
@@ -665,7 +489,7 @@ class MainWindow(QMainWindow):
         datafilter = DataFilter()
         datafilter.write_file(
             data=data, file_name=self.brainflow_file_name, file_mode='w')
-      
+        self.SocketCustomClient.send(json.dumps({"filePath": self.brainflow_file_name}))
     def openFileDialog(self, message):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件")
         return fileName
@@ -692,11 +516,10 @@ class MainWindow(QMainWindow):
         return 'fail'
 
     def endCustomParadigm(self, message):
-        print('message')
         if self.SocketCustomClient != None:
+            self.endTaskSaveData(message)
             self.SocketCustomClient.end()
             self.SocketCustomClient = None
-            self.endTaskSaveData(message)
         return 'ok'
 
     def getCustomInsertMarker(self, message):

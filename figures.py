@@ -41,7 +41,7 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.slider.setTickInterval(1)
         self.slider.valueChanged.connect(self.scrollBar)
         self.resize(1200, 750)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
+        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
         # self.upScrollHeight = 0.3
     def setChannels(self, channels):
         labels = []
