@@ -104,7 +104,7 @@ export default {
       })
       paradigm.push({
         name: 'custom',
-        title: '自定义范式',
+        title: '打标入口',
         id: this.config.length + 1,
         config: ['open'],
         icon: require('../assets/coustom' +1 + '.png')

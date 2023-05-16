@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
         self.content = QHBoxLayout()
         self.content.setSpacing(0)
         self.widget.setLayout(self.content)
-        self.setWindowTitle('视觉功能评估')
+        self.setWindowTitle('MindBridge')
         screenRect = app.primaryScreen().geometry().getRect()
         self.width = screenRect[2] - screenRect[0]
         self.height = screenRect[3] - screenRect[1]
@@ -70,8 +70,7 @@ class MainWindow(QMainWindow):
         self.createWebEng()
         self._signal = Signal()
         self._signal._mainClose[str].connect(self._sub_close)
-        self.currentApp = 'p300'
-        self.p300Model = None
+        self.currentApp = ''
         self.devToolsStatus = None
         self.dataprocessing = DataProcessing()
         self.currentTimeString = ''
@@ -101,7 +100,6 @@ class MainWindow(QMainWindow):
         # # 调试工具
         html_path = QtCore.QUrl.fromLocalFile(
             QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl("http://localhost:8082/")
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)

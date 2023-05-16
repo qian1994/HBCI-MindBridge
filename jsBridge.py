@@ -121,8 +121,6 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'init-dev-tools':
             data = self.initDevTools(message)
 
-        if message['action'] == 'get-p300-dectation':
-            data = self.getP300Dectation(message)
 
         if message['action'] == 'get-current-board-data':
             data = self.getCurrentBoardData(message)
@@ -132,9 +130,6 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'open-dir-dialog':
             data = self.openDirectory(message)
-
-        if message['action'] == 'create-mechain-learn-p300':
-            data = self.createMechainLearnP300(message)
 
         if message['action'] == 'filter-board-dta':
             data = self.filterBoardData(message)
@@ -270,9 +265,6 @@ class JsBridge(QtCore.QObject):
     def initDevTools(self, message):
         self.mainwindow.initDevTools()
 
-    def getP300Dectation(self, message):
-        self.mainwindow.getRelTimeDectation(message)
-
     def getCurrentBoardData(self, message):
         return self.mainwindow.getCurrentBoardData(message)
 
@@ -371,20 +363,6 @@ class JsBridge(QtCore.QObject):
 
     def endCustomParadigm(self, message):
         self.mainwindow.endCustomParadigm(message)
-    
-    def createMechainLearnP300(self, message):
-        try:
-            trainModel = P300Model()
-            self.dir_path = os.getcwd()
-            self.dir_path = self.dir_path.replace("\\", "/", 5)
-            fileLists = message['data']['fileList']
-            if len(fileLists) == '0':
-                return 'no file'
-            trainModel.createModels(fileLists, message['data'])
-        except Exception as e:
-            print(e)
-            return 'fail create p300 model'
-        return 'ok'
 
     def flush(self):
         pass
