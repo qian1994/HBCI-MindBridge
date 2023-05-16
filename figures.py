@@ -115,7 +115,7 @@ class FigureWindow(QWidget, Ui_figureWidget):
             item = data[i] 
             if len(item) == 0:
                 continue
-            self.ax.plot(item*0.00006 + ( 0.95 - 0.08 * i) + self.upScrollData, color='lightgrey')
+            self.ax.plot(item*0.0005 + ( 0.95 - 0.08 * i) + self.upScrollData, color='lightgrey')
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
 

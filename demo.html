@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real-time EEG Plot</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <canvas id="eegChart"></canvas>
+
+  <script>
+    // 创建一个空的数据数组
+    var eegData = [];
+
+    // 创建一个Chart对象
+    var ctx = document.getElementById('eegChart').getContext('2d');
+    var chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'EEG Data',
+          borderColor: 'blue',
+          backgroundColor: 'rgba(0, 0, 255, 0.1)',
+          fill: true,
+          data: eegData
+        }]
+      },
+      options: {
+        animation: false,
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom'
+          },
+          y: {
+            type: 'linear',
+            position: 'left',
+            suggestedMin: 0,
+            suggestedMax: 100
+          }
+        }
+      }
+    });
+
+    // 模拟实时数据更新
+    setInterval(function() {
+      // 生成随机的脑电数据
+      var newData = Math.random() * 100;
+
+      // 添加新数据到数组中
+      eegData.push({x: Date.now(), y: newData});
+
+      // 限制数据数组的长度，只保留最近的数据
+      if (eegData.length > 100) {
+        eegData.shift();
+      }
+
+      // 更新图表
+      chart.update();
+    }, 100);
+  </script>
+</body>
+</html>
