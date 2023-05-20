@@ -14,6 +14,7 @@ import scipy.io as sio
 import numpy as np
 import base64
 from util import *
+from processing import Processsing
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
@@ -214,6 +215,13 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'stop-custom-paradigm':
             data = self.endCustomParadigm(message)
+
+        if message['action'] == 'get-file-labels-by-file-name':
+            data = self.getFileLabelsByFileName(message)
+
+        if message['action'] == 'processing-origin-data':
+            data = self.processingOriginData(message)
+ 
         message['data'] = data
         return self.responseSignal.emit(json.dumps(message))
 
@@ -519,6 +527,23 @@ class JsBridge(QtCore.QObject):
 
     def endCustomParadigm(self, message):
         self.mainwindow.endCustomParadigm(message)
+
+    def getFileLabelsByFileName(self, message):
+        filePath = message['data'][0]
+        data = np.loadtxt(filePath)
+        data = data.T
+        label = data[-1]
+        label = label[label != 0]
+        return label.tolist()
+
+    def processingOriginData(self, message):
+        data = message['data']
+        filePath = data['file']
+        channels = data['channels']
+        boardId = data['boardId']
+        process = Processsing()
+        res = process.plotEEGOriginData(filePath, channels, boardId)
+        return res
     
     def createMechainLearnP300(self, message):
         try:

@@ -67,11 +67,7 @@ export default {
           let color = this.getGradientColor("#00ff00", '#ff0000', this.showInfo[item].value/100)
           style = `background:${color}`
         } else if (this.showInfo[item].show == 'switch') {
-          if (this.showInfo[item].color) {
-            style = `background:${this.showInfo[item].color}`
-          }else{
-            style = `background:${this.showInfo[item].switch ? '#00ff00' : '#ff0000'}`
-          }
+          style = `background:${this.showInfo[item].switch ? '#00ff00' : '#ff0000'}`
         } else if (this.showInfo[item].show == 'label') {
           style = 'background:#ddd'
         } else if (this.showInfo[item].show == 'result') {

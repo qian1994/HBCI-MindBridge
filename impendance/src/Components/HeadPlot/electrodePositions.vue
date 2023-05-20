@@ -13,7 +13,6 @@
           <span :style="point['style']" @click="chooseBadChannel(point['label'])" v-show="point['show'] !== 'color'"
             :class="'point-out-color'"> {{ point['label'] }}</span>
 
-
           <!-- <span :style="point['style']" @click="chooseBadChannel(point['label'])" v-if="point['show'] == 'switch'"
             :class="'point-out-color'"> {{ point['label'] }}</span> -->
         </div>

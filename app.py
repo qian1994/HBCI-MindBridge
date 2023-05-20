@@ -25,8 +25,6 @@ from dataPorcessing import DataProcessing
 import scipy.io as sio
 from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
-
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -105,9 +103,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl("http://localhost:8082/")
+        # html_path = QtCore.QUrl.fromLocalFile(
+        #     QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl("http://localhost:8082/")
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
