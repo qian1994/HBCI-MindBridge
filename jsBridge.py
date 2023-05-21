@@ -6,13 +6,10 @@ from PyQt5.QtWidgets import *
 from config import MindBridge
 from result import Result
 import requests
-from pyedflib import highlevel
 from p300Model import P300Model
 from convertFileFormat import ConvertFileFormat
 from eeg_positions import get_elec_coords
-import scipy.io as sio
 import numpy as np
-import base64
 from util import *
 from processing import Processsing
 class JsBridge(QtCore.QObject):
@@ -158,8 +155,8 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'post-time-serise-channel-show':
             data = self.postTimeSeriseChannelShow(message)
-        
-        if message['action']  == 'get-time-serise-channel-show':
+
+        if message['action'] == 'get-time-serise-channel-show':
             data = self.getTimeSeriseChannelShow(message)
 
         if message['action'] == 'init-board':
@@ -221,7 +218,10 @@ class JsBridge(QtCore.QObject):
 
         if message['action'] == 'processing-origin-data':
             data = self.processingOriginData(message)
- 
+        
+        if message['action'] == 'plot-origin-data':
+            data = self.plotOriginData(message)
+
         message['data'] = data
         return self.responseSignal.emit(json.dumps(message))
 
@@ -321,9 +321,9 @@ class JsBridge(QtCore.QObject):
         return 'fail'
 
     def getimageByFileName(self, message):
-       res = Result()
-       data = res.getImageByFileName(message)
-       return data
+        res = Result()
+        data = res.getImageByFileName(message)
+        return data
 
     def getApplication(self, message):
         data = os.listdir('./web-app')
@@ -496,6 +496,7 @@ class JsBridge(QtCore.QObject):
         res = Result()
         data = res.getReportFileListSSVEP(message)
         return data
+
     def getTimeSeriseChannelShow(self, message):
         figure = self.mainwindow.figure
         if figure != None:
@@ -503,11 +504,12 @@ class JsBridge(QtCore.QObject):
             print('channels', channels)
             return channels
         return []
+
     def createFileReportSSVEP(self, message):
         res = Result()
         data = res.createReport(message)
         return data
-    
+
     def convertFileFormat(self, message):
         savePath = message['data']['savePath']
         files = message['data']['fileList']
@@ -538,12 +540,22 @@ class JsBridge(QtCore.QObject):
 
     def processingOriginData(self, message):
         data = message['data']
+        filePath = data['files']
+        channels = data['channels']
+        boardId = data['boardId']
+        config = data['config']
+        process = Processsing()
+        res = process.processing(filePath, channels, config, boardId)
+        return 'ok'
+
+    def plotOriginData(self, message):
+        data = message['data']
         filePath = data['file']
         channels = data['channels']
         boardId = data['boardId']
         process = Processsing()
         res = process.plotEEGOriginData(filePath, channels, boardId)
-        return res
+        return 'ok'
     
     def createMechainLearnP300(self, message):
         try:
@@ -558,6 +570,6 @@ class JsBridge(QtCore.QObject):
             print(e)
             return 'fail create p300 model'
         return 'ok'
-
+    
     def flush(self):
         pass

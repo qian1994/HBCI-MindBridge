@@ -29,12 +29,14 @@
       <el-form ref="form" :model="form" label-width="80px" size="mini">
         <h2> 预处理参数选择</h2>
         <el-form-item label="基线漂移" v-if="form.checkList.indexOf('detrend') >=0">
-          <el-radio v-model="form.detrend" border label="是" value="0"></el-radio>
-          <el-radio  v-model="form.detrend" border label="否" value="1"></el-radio>
+          <el-radio v-model="form.detrend" border label="0" value="0">是</el-radio>
+          <el-radio  v-model="form.detrend" border label="1" value="1">否</el-radio>
         </el-form-item>
         <el-form-item label="去噪" v-if="form.checkList.indexOf('wlt_denoising') >=0">
-          <el-radio v-model="form.wlt_denoising" border label="小波去噪" value="0"></el-radio>
-          <el-radio  v-model="form.wlt_denoising" border label="共频" value="1"></el-radio>
+          <el-radio v-model="form.wlt_denoising" border label="0" value="0">小波去噪</el-radio>
+          <el-radio  v-model="form.wlt_denoising" border label="1" value="1">公频干扰</el-radio>
+          <el-radio  v-model="form.wlt_denoising" border label="2" value="2">小波和公频</el-radio>
+
         </el-form-item>
         <el-form-item label="打标" v-if="form.checkList.indexOf('trigger') >=0">
           <el-select multiple  v-model="form.selectTriggers" placeholder="请选择有用打标">
@@ -126,7 +128,6 @@
         <el-form-item label="输出格式">
           <el-radio v-model="form.outPutType" border label="npy" value="0"></el-radio>
           <el-radio  v-model="form.outPutType" border label="mat" value="1"></el-radio>
-          <el-radio  v-model="form.outPutType" border label="csv" value="1"></el-radio>
         </el-form-item>
         <el-form-item size="large">
           <el-button type="primary" @click="onSubmit">确定</el-button>
@@ -163,13 +164,18 @@ export default {
             trigger: 0
           }
         ],
+        samplelow: 0.5,
+        samplehigh: 50,
+        sampleDetrendStart: '',
+        sampleDetrendEnd: '',
         sampleDetrend: '0',
-        downSample: 1000,
+        downSample: 200,
         outPutType: 'npy',
         ica: 0,
         productId: 5,
         badChannels: [],
-        refrenceChannel: []
+        refrenceChannel: [],
+        refrence: 0,
       },
       feture:{
       },
@@ -258,7 +264,6 @@ export default {
     }
   },
   mounted() {
-    initDevTools()
     setTimeout(async () => {
       const data = await getConfigFromServe("msg")
       this.channels = JSON.parse(data)['channels']
@@ -288,12 +293,16 @@ export default {
       this.files = this.files.filter(item => item != file)
     },
     async onSubmit() {
-      console.log(this.form)
       const res = await processingOriginData({
         config: this.form,
-        files: this.files
+        files: this.files,
+        channels:this.channelsName,
+        boardId: this.form.productId
       })
       console.log(res)
+      if (res == 'ok') {
+        this.$message('成功生成预处理数据')
+      }
     },
     async getLabelsByFileName(files) {
       print(files)
@@ -340,10 +349,10 @@ export default {
         return
       }
       if(this.form.refrenceChannel.indexOf(point['label']) >= 0) {
-        this.removeBadChannel(point['label'])
+        this.removeBadChannel(point['label'], 'refrence')
         return
       } 
-      this.form.refrenceChannel.push(point['label'], 'refrence')
+      this.form.refrenceChannel.push(point['label'])
     },
     removeBadChannel(label, type) {
       if (type == 'refrence') {
@@ -374,10 +383,14 @@ export default {
 .container {
   width: 900px;
   background-color: white;
-  margin: 5px auto;
   padding: 20px;
   box-sizing: border-box;
+  margin: 5px auto;
+}
 
+.container h2 {
+  margin: 10px;
+  font-size: 15px;
 }
 .split-line {
   text-align: center;

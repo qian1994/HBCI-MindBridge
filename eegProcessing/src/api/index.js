@@ -109,7 +109,7 @@ export function processingOriginData(msg) {
 
 export function plotOriginEEGDataByFile(msg) {
     return apiClient.send({
-        action: 'processing-origin-data',
+        action: 'plot-origin-data',
         data: msg
     })
 }

@@ -1,24 +1,10 @@
 <template>
   <div id="app">
-   
     <router-view />
   </div>
 </template>
 <script>
-import { msgListener  } from "./api";
-import { mapState } from "vuex" ;
 export default {
-  methods: {
-  },
-  created() {
-  },
-  beforeDestroy() {
-  },
-  components: {
-  },
-  computed:{
-    ...mapState(['timeSerise'])
-  }
 };
 </script>
 <style>
@@ -27,8 +13,12 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  overflow: hidden;
 }
-
+*{
+  margin: 0;
+  padding: 0;
+}
 html,
 body {
   width: 100%;
