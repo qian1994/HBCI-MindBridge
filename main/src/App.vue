@@ -17,6 +17,7 @@ export default {
     Header
   },
   mounted() {
+    initDevTools()
     setTimeout(async () => {
       const config = await getApplications()
       console.log('adfasdfasdf', config)

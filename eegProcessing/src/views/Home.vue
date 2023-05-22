@@ -9,23 +9,23 @@
     <div v-if="files.length">
       <div v-for="file in files"> <span> {{file}} </span>  <span class="remove-btn" @click="removeFiles(file)">X</span> <span class="remove-btn" @click="plotEEGData(file)">plot</span></div>
     </div>
-    <div class="">
+    <div class="" v-if="files.length">
       <h2> 选择预处理步骤</h2>
       <el-checkbox-group v-model="form.checkList">
         <el-checkbox label="detrend" value="detrend">基线漂移</el-checkbox>
         <el-checkbox label="wlt_denoising" value="wlt_denoising">去噪</el-checkbox>
-        <el-checkbox label="trigger" value="trigger">打标数据</el-checkbox>
         <el-checkbox label="badChannel" value="badChannel">去坏导</el-checkbox>
         <el-checkbox label="filter" value="">基础滤波</el-checkbox>
         <el-checkbox label="refrence" value="refrence">重参考</el-checkbox>
         <el-checkbox label="sample" value="sample">切片</el-checkbox>
+        <el-checkbox label="segmentation" value="segmentation">样本分段</el-checkbox>
         <el-checkbox label="sample_filter" value="sample_filter">样本滤波</el-checkbox>
         <el-checkbox label="sample_detrend" value="sample_detrend">样本矫正基线</el-checkbox>
         <el-checkbox label="down_sample" value="down_sample">降采样</el-checkbox>
         <el-checkbox disabled label="ica" value="ica"></el-checkbox>
       </el-checkbox-group>
     </div>
-    <div class="">
+    <div class=""  v-if="files.length">
       <el-form ref="form" :model="form" label-width="80px" size="mini">
         <h2> 预处理参数选择</h2>
         <el-form-item label="基线漂移" v-if="form.checkList.indexOf('detrend') >=0">
@@ -37,11 +37,6 @@
           <el-radio  v-model="form.wlt_denoising" border label="1" value="1">公频干扰</el-radio>
           <el-radio  v-model="form.wlt_denoising" border label="2" value="2">小波和公频</el-radio>
 
-        </el-form-item>
-        <el-form-item label="打标" v-if="form.checkList.indexOf('trigger') >=0">
-          <el-select multiple  v-model="form.selectTriggers" placeholder="请选择有用打标">
-            <el-option v-for="item in triggerNumbers" label="item" value="item"></el-option>
-          </el-select>
         </el-form-item>
         <el-form-item label="去坏导" v-if="form.checkList.indexOf('badChannel') >=0">
           <div  class="badChannel-pass">
@@ -72,7 +67,9 @@
         <el-form-item label="时间切片" v-if="form.checkList.indexOf('sample') >=0">
           <div  v-for="item in form.triggers" class="processing-slice">
             <el-col class="line" :span="8">
-              <span>打标数据： </span> <el-input v-model="item.trigger"> </el-input>
+              <span>打标数据： </span> <el-select v-model="item.trigger" placeholder="请选择有用打标">
+                <el-option v-for="item in triggerNumbers" :label="item" :value="item"></el-option>
+              </el-select>
             </el-col>
             <el-col :span="6">
               <span>开始时间： </span><el-input v-model="item.startTime"> </el-input>
@@ -92,6 +89,9 @@
             <el-button @click="addTrigger"> 添加 + </el-button>
           </el-col>
         </el-form-item> 
+        <el-form-item label="样本分段"  v-if="form.checkList.indexOf('segmentation') >=0">
+          <el-input v-model="form.segmentation"></el-input> <span>段</span>
+        </el-form-item>
         <el-form-item label="样本滤波" v-if="form.checkList.indexOf('sample_filter') >=0">
           <el-col :span="4">
            <el-input v-model="form.samplelow"> </el-input>
@@ -129,25 +129,32 @@
           <el-radio v-model="form.outPutType" border label="npy" value="0"></el-radio>
           <el-radio  v-model="form.outPutType" border label="mat" value="1"></el-radio>
         </el-form-item>
-        <el-form-item size="large">
-          <el-button type="primary" @click="onSubmit">确定</el-button>
-        </el-form-item> 
+        <el-form-item label="创建脚本">
+          <el-radio v-model="form.createScript" border label="1" value="1">是</el-radio>
+          <el-radio  v-model="form.createScript" border label="0" value="0">否</el-radio>
+        </el-form-item>
       </el-form>
     </div>
-    <div class="">
-      <el-form ref="form" :model="feture" label-width="80px" size="mini">
-        <h2> 特征提取  </h2>
-        <el-form-item size="large">
-          <el-button type="primary" @click="onSubmit">确定</el-button>
-        </el-form-item> 
-      </el-form>
+    <div class=""  v-if="files.length">
+      <Feature @saveFeatureData="getFeatureConfig"></Feature>
+    </div>
+    <div class="create-feature-btn" v-if="files.length">
+      <el-button type="primary" :disabled="form.checkList.length == 0" @click="onSubmit">确定</el-button>
     </div>
   </div>
 </template>
 <script>
-import { openFileDialog, openDirDialog, initDevTools,processingOriginData, getConfigFromServe, getLabelByFileName, plotOriginEEGDataByFile } from '../api/index'
+import { 
+  openFileDialog, 
+  openDirDialog, 
+  initDevTools,
+  processingOriginData, 
+  getConfigFromServe, 
+  getLabelByFileName, 
+  plotOriginEEGDataByFile 
+} from '../api/index'
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
-
+import Feature from '../Components/Feature/index.vue'
 export default {
   data() {
     return {
@@ -164,6 +171,8 @@ export default {
             trigger: 0
           }
         ],
+        segmentation: 1,
+        selectTriggers: [],
         samplelow: 0.5,
         samplehigh: 50,
         sampleDetrendStart: '',
@@ -173,12 +182,13 @@ export default {
         outPutType: 'npy',
         ica: 0,
         productId: 5,
-        badChannels: [],
+        badChannel: [],
         refrenceChannel: [],
         refrence: 0,
+        feature: {},
+        createScript: '0'
       },
-      feture:{
-      },
+     
       radius: 400,
       triggerNumbers: [],
       files: [],
@@ -187,12 +197,13 @@ export default {
     }
   },
   components:{
+    Feature,
     ElectrodePositions
   },
   watch:{
     async files(oldValue, newValue) {
       const res = await getLabelByFileName(newValue)
-      console.log(res)
+      this.triggerNumbers = [...new Set(res)];   
     }
   },
   computed:{
@@ -219,7 +230,7 @@ export default {
       let info = {}
       channels.forEach((item, index) => {
         info[item]={
-          switch: this.form.badChannels.indexOf(item) >=0 ? false: true,
+          switch: this.form.badChannel.indexOf(item) >=0 ? false: true,
           label: item,
           show: 'switch',
           name: item,
@@ -264,6 +275,7 @@ export default {
     }
   },
   mounted() {
+    initDevTools()
     setTimeout(async () => {
       const data = await getConfigFromServe("msg")
       this.channels = JSON.parse(data)['channels']
@@ -305,7 +317,7 @@ export default {
       }
     },
     async getLabelsByFileName(files) {
-      print(files)
+      console.log('this is labels', files)   
     },
     async chooseFile() {
       const res = await openFileDialog()
@@ -334,15 +346,18 @@ export default {
       }
       console.log(res)
     },
+    getFeatureConfig(feature) {
+      this.form.feature = feature
+    },
     cellClick(point) {
       if (point.show !== 'switch'&& point.show !== 'color') {
         return
       }
-      if(this.form.badChannels.indexOf(point['label']) >= 0) {
+      if(this.form.badChannel.indexOf(point['label']) >= 0) {
         this.removeBadChannel(point['label'])
         return
       } 
-      this.form.badChannels.push(point['label'])
+      this.form.badChannel.push(point['label'])
     },
     refrenceCellClick(point) {
       if (point.show !== 'switch'&& point.show !== 'color') {
@@ -359,11 +374,10 @@ export default {
         this.form.refrenceChannel =  this.form.refrenceChannel.filter(item => item != label)
         return
       }
-      this.form.badChannels =  this.form.badChannels.filter(item => item != label)
+      this.form.badChannel =  this.form.badChannel.filter(item => item != label)
     },
     async plotEEGData(file) {
       const res = await plotOriginEEGDataByFile({file: file, channels: this.channelsName, boardId: this.form.productId})
-      console.log(res)
     },
     addTrigger() {
       this.form.triggers.push( {
@@ -392,6 +406,7 @@ export default {
   margin: 10px;
   font-size: 15px;
 }
+
 .split-line {
   text-align: center;
 }
@@ -406,6 +421,10 @@ export default {
 }
 .processing-slice .el-color-picker__icon, .processing-slice .el-input, .processing-slice .el-textarea {
   margin-bottom: 10px;
+}
+
+.create-feature-btn {
+  margin-top: 10px;
 }
 
 </style>

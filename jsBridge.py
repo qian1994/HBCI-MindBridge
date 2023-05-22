@@ -222,6 +222,8 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'plot-origin-data':
             data = self.plotOriginData(message)
 
+        
+
         message['data'] = data
         return self.responseSignal.emit(json.dumps(message))
 
@@ -539,6 +541,7 @@ class JsBridge(QtCore.QObject):
         return label.tolist()
 
     def processingOriginData(self, message):
+        print('message', message)
         data = message['data']
         filePath = data['files']
         channels = data['channels']
