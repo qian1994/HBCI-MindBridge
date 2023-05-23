@@ -246,34 +246,111 @@ boardid = 5
 sample_rate = 1000
 
 # createProcessingScript(files, channels, configs, boardid, sample_rate)
+from scipy.signal import periodogram
+from brainflow import DataFilter
+def extract_statistic_feature(epoch_signal):
+    statistic_feature = []
+    temp_feature = []
+
+    for channel in range(epoch_signal.shape[0]):
+        X_1 = np.mean(epoch_signal[channel, :])
+        X_2 = np.std(epoch_signal[channel, :], ddof=1)
+        X_3 = 0
+        total_point = len(epoch_signal[channel, :])
+
+        for point in range(total_point - 1):
+            X_3 += abs(epoch_signal[channel, point + 1] - epoch_signal[channel, point]) / (total_point - 1)
+
+        X_4 = X_3 / X_2
+        X_5 = 0
+
+        for point in range(total_point - 2):
+            X_5 += abs(epoch_signal[channel, point + 2] - epoch_signal[channel, point]) / (total_point - 2)
+
+        X_6 = X_5 / X_2
+        X_1_6 = [X_1, X_2, X_3, X_4, X_5, X_6]
+        statistic_feature.append(X_1_6)
+
+        abs_X_1 = abs(X_1)
+        temp_feature.append(abs_X_1)
+
+    statistic_feature = np.array(statistic_feature)
+    temp_feature = np.array(temp_feature)
+
+    return statistic_feature, temp_feature
 
 
+def extract_PSD_new(epoch_data, Fs, bands):
+    # extract PSD feature from epoch_data
+    # epoch_data: channels * time data matrix
+    # Fs: scalar, sampling frequency
+    # PSD: feature vector
+    nfft = DataFilter.get_nearest_power_of_two(Fs)  # FFT 窗长
+    noverlap = 0  # 无重叠
+    # range = 'onesided'  # 频率范围为 [0 Fs/2]，只取一半频率
+    PSD = []
+
+    for index in range(epoch_data.shape[0]):
+        section_psd = []
+        for section in range(epoch_data.shape[1] // Fs):
+            section_data = epoch_data[index, section * Fs:(section + 1) * Fs]
+            f, Pxx = periodogram(section_data, window=np.hanning(Fs), nfft=nfft, fs=Fs)
+            section_psd.append(band_psd(Pxx, f, bands))
+        psd_mean = np.mean(section_psd, axis=0)
+        PSD.append(psd_mean)
+
+    psd = np.array(PSD)
+    psd = psd.transpose(0,2,1)
+    # psd = np.reshape(psd.T, (1, psd.size))
+    return psd
+    
+def band_psd(Pxx, f, bands):
+    # [[1, 3], [4, 7], [8, 13], [14, 30], [31, 48]]
+    band = np.array(bands)  # delta, theta, alpha, beta, gamma 频带
+    psd = np.zeros((1, band.shape[0]))
+    for i in range(band.shape[0]):
+        idx = np.where((f >= band[i, 0]) & (f <= band[i, 1]))[0]
+        psd[0, i] = np.mean(Pxx[idx])
+    return psd
 
 import numpy as np
-from scipy.linalg import eigh
+# from scipy.linalg import eigh
 
-def eeg_spatial_pattern(eegData):
-    # 计算协方差矩阵
-    cov_matrix = np.cov(eegData)
+# def eeg_spatial_pattern(eegData):
+#     # 计算协方差矩阵
+#     cov_matrix = np.cov(eegData)
     
-    # 计算特征值和特征向量
-    eigenvalues, eigenvectors = eigh(cov_matrix)
+#     # 计算特征值和特征向量
+#     eigenvalues, eigenvectors = eigh(cov_matrix)
     
-    # 排序特征值和特征向量
-    sorted_indices = np.argsort(eigenvalues)[::-1]
-    sorted_eigenvalues = eigenvalues[sorted_indices]
-    sorted_eigenvectors = eigenvectors[:, sorted_indices]
+#     # 排序特征值和特征向量
+#     sorted_indices = np.argsort(eigenvalues)[::-1]
+#     sorted_eigenvalues = eigenvalues[sorted_indices]
+#     sorted_eigenvectors = eigenvectors[:, sorted_indices]
     
-    # 提取主成分
-    eeg_pattern = sorted_eigenvectors[:]
+#     # 提取主成分
+#     eeg_pattern = sorted_eigenvectors[:]
     
-    return eeg_pattern
+#     return eeg_pattern
 
-# 输入数据
+# # 输入数据
 eegData = np.random.rand(32, 1000)  # 示例数据，32个通道，1000个时间点
 
-# 计算 EEG 共空间模式
-eeg_pattern = eeg_spatial_pattern(eegData)
+# # 计算 EEG 共空间模式
+# eeg_pattern = eeg_spatial_pattern(eegData)
 
-# 打印结果
-print(eeg_pattern.shape, eegData.shape)
+# # 打印结果
+# print(eeg_pattern.shape, eegData.shape)
+
+static_data = extract_PSD_new(eegData, 1000, [[1,3], [4, 45]])
+print(static_data.shape)
+
+import numpy as np
+
+# 假设有一个形状为 (a, b, c, d) 的数组
+arr = np.random.rand(2, 3, 4, 5)
+
+# 将最后两个维度合并为一个新的维度
+merged_arr = np.reshape(arr, (arr.shape[0], arr.shape[1], -1))
+
+print(merged_arr.shape)

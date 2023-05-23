@@ -9,7 +9,7 @@
                     <el-checkbox label="psd" value="psd">PSD特征</el-checkbox>
                     <el-checkbox label="DE" value="DE">差分熵特征</el-checkbox>
                     <el-checkbox label="statistic" value="statistic">统计特征</el-checkbox>
-                    <el-checkbox label="PLV" value="PLV">锁相值特征</el-checkbox>
+                    <el-checkbox disabled label="PLV" value="PLV">锁相值特征</el-checkbox>
                 </el-checkbox-group>
             </el-form-item>
             <el-form-item label="特征波">

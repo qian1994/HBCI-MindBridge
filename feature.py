@@ -52,13 +52,13 @@ def RASM(de):
 
 import numpy as np
 from scipy.signal import periodogram, hanning
-
+from brainflow import DataFilter
 def extract_PSD_new(epoch_data, Fs):
     # extract PSD feature from epoch_data
     # epoch_data: channels * time data matrix
     # Fs: scalar, sampling frequency
     # PSD: feature vector
-    nfft = 512  # FFT 窗长
+    nfft = DataFilter.get_nearest_power_of_two(Fs)  # FFT 窗长
     noverlap = 0  # 无重叠
     range = 'onesided'  # 频率范围为 [0 Fs/2]，只取一半频率
     PSD = []
@@ -173,3 +173,4 @@ def eeg_spatial_pattern(eegData):
     eeg_pattern = sorted_eigenvectors[:]
     
     return eeg_pattern
+
