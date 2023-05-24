@@ -23,3 +23,5 @@ web/*
 assets
 pyapp
 test_data
+
+__pycache__
