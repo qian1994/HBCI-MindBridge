@@ -43,7 +43,6 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.resize(1200, 750)
         # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
         # self.upScrollHeight = 0.3
-    
     def setChannels(self, channels):
         labels = []
         self.labels = labels
@@ -61,7 +60,6 @@ class FigureWindow(QWidget, Ui_figureWidget):
             index +=1
         self.seletChannelIndex = selectChannelsIndex
         self.showChannels = channels
-        
     def getShowChannels(self):
         return self.showChannels
     

@@ -34,6 +34,8 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
         self.channels = []
         self.psd_size = 1024
         self.sampling_rate = 1000
+        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
+
     def setChannels(self, channels):
         self.channels = channels
      

@@ -59,6 +59,16 @@ export default {
             });
             this.$nextTick(async () => {
                 try {
+                    
+                    if (name == 'custom') {
+                        this.$router.push({ 'name': "Custom", params: {...this.form} })
+                        return
+                    }
+
+                    if (name == 'processing') {
+                        const data = await openHtml(name)
+                        return
+                    }
                     const res = await initTestBoard(this.form)
                     if (res == 'ok') {
                         localStorage.setItem('mindbridgeinfo', JSON.stringify(this.form))
@@ -66,10 +76,6 @@ export default {
                         if (name == 'timeSerise') {
                             startSession(this.form)
                             this.$router.push({ 'name': "TimeSerise" })
-                            return
-                        }
-                        if (name == 'custom') {
-                            this.$router.push({ 'name': "Custom", params: {...this.form} })
                             return
                         }
                         // if (name == 'impedence') {

@@ -90,6 +90,10 @@ export default {
             title = '脑视功能评估'
           } else if (item == 'report') {
             title = '评估报告'
+          }else if (item == 'transfile') {
+            title = '转换文件格式'
+          }else if (item == 'processing') {
+            title = '数据处理'
           }
           paradigm.push({
             name: item,
@@ -102,7 +106,7 @@ export default {
       })
       paradigm.push({
         name: 'custom',
-        title: '自定义范式',
+        title: '打标入口',
         id: this.config.length + 1,
         config: ['open'],
         icon: require('../assets/coustom' +1 + '.png')

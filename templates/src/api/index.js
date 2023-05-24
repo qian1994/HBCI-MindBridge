@@ -64,25 +64,3 @@ export function openDataAnalysis(msg) {
         data: msg
     })
 }
-
-export function openSSVEP(msg) {
-    return apiClient.send({
-        action: 'open-ssvep',
-        data: msg
-    })
-}
-
-
-export function openP300(msg) {
-    return apiClient.send({
-        action: 'open-p300',
-        data: msg
-    })
-}
-
-export function openMI(msg) {
-    return apiClient.send({
-        action: 'open-mi',
-        data: msg
-    })
-}

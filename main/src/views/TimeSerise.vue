@@ -63,9 +63,6 @@
       </el-form>
       <div class="channel-button">
         <ElectrodePositions :show-info="showChannels" :radius="radius" @point-click="toggle"></ElectrodePositions>
-        <!-- <span>通道名：</span> <el-button class="" :type="showAll ? 'success' : ''" @click="showAllToggle">All</el-button>
-        <el-button v-for="item in showChannels" :type="selectChannels.includes(item) ? 'success' : ''"
-          @click="toggle(item)">{{ item }}</el-button> -->
       </div>
     </div>
   </div>
@@ -85,7 +82,8 @@ import {
   filterBoardData, 
   openFFTWindow, 
   closeTimeSeriseWindow,
-  getTimeSeriseChannelShow
+  getTimeSeriseChannelShow,
+closeFFTWindow
 } from '../api/index'
 export default {
   data() {
@@ -145,7 +143,7 @@ export default {
       this.currentChannels = channels
       channels.forEach((item, index) => {
         info[item]={
-          switch: this.selectChannels.indexOf(item) >=0 ? true: false,
+          switch: true,
           label: item,
           show: 'switch',
           name: item,
@@ -204,7 +202,7 @@ export default {
           this.showAllToggle(true)
         }, 1000);
       } else {
-        openFFTWindow()
+        closeFFTWindow()
       }
     },
     psdEvent(chacked) {
@@ -222,18 +220,18 @@ export default {
       postSelectChannel(this.selectChannels)
     },
     showAllToggle() {
-      if (this.form.checkList.length == 0) {
-        return
-      }
-      if (this.showAll == true) {
-        this.selectChannels = []
-        this.showAll = false
-        postSelectChannel(this.selectChannels)
-        return
-      }
-      this.showAll = true
-      this.selectChannels = this.currentChannels
-      postSelectChannel(this.selectChannels)
+      // if (this.form.checkList.length == 0) {
+      //   return
+      // }
+      // if (this.showAll == true) {
+      //   this.selectChannels = []
+      //   this.showAll = false
+      //   postSelectChannel(this.selectChannels)
+      //   return
+      // }
+      // this.showAll = true
+      // this.selectChannels = this.currentChannels
+      // postSelectChannel(this.selectChannels)
     }
   }
 };

@@ -6,6 +6,7 @@
       <el-button @click="addFiles">添加文件</el-button>
       <!-- <el-button @click="chooseDir">选择文件夹</el-button> -->
     </div>
+
     <div v-if="files.length">
       <div v-for="file in files"> <span> {{file}} </span>  <span class="remove-btn" @click="removeFiles(file)">X</span> <span class="remove-btn" @click="plotEEGData(file)">plot</span></div>
     </div>
@@ -27,6 +28,14 @@
     </div>
     <div class=""  v-if="files.length">
       <el-form ref="form" :model="form" label-width="80px" size="mini">
+        <el-form-item label="选择放大器型号">
+          <el-radio v-model="form.productId" border :label="5" value="0">MindBridge-8</el-radio>
+          <el-radio  v-model="form.productId" border :label="516" value="1">MindBridge-16</el-radio>
+          <el-radio  v-model="form.productId" border :label="520" value="2">MindBridge-20</el-radio>
+          <el-radio  v-model="form.productId" border :label="532" value="2">MindBridge-32</el-radio>
+          <el-radio  v-model="form.productId" border :label="564" value="2">MindBridge-64</el-radio>
+        </el-form-item>
+        
         <h2> 预处理参数选择</h2>
         <el-form-item label="基线漂移" v-if="form.checkList.indexOf('detrend') >=0">
           <el-radio v-model="form.detrend" border label="0" value="0">是</el-radio>
@@ -36,7 +45,6 @@
           <el-radio v-model="form.wlt_denoising" border label="0" value="0">小波去噪</el-radio>
           <el-radio  v-model="form.wlt_denoising" border label="1" value="1">公频干扰</el-radio>
           <el-radio  v-model="form.wlt_denoising" border label="2" value="2">小波和公频</el-radio>
-
         </el-form-item>
         <el-form-item label="去坏导" v-if="form.checkList.indexOf('badChannel') >=0">
           <div  class="badChannel-pass">
@@ -281,7 +289,7 @@ export default {
     }
   },
   mounted() {
-    initDevTools()
+    // initDevTools()
     setTimeout(async () => {
       const data = await getConfigFromServe("msg")
       this.channels = JSON.parse(data)['channels']

@@ -19,7 +19,7 @@ class DataProcessing(object):
         return fftArray
     # 滤波处理
     def handleFilter(self, boardData, sampling_rate, low, high, order, filter):
-        data = []
+        # data = []
         for channel in range(len(boardData)):
             DataFilter.detrend(boardData[channel], DetrendOperations.LINEAR.value)
             DataFilter.remove_environmental_noise(boardData[channel], sampling_rate, noise_type=1)
@@ -29,7 +29,7 @@ class DataProcessing(object):
                                         FilterTypes.BUTTERWORTH.value, 0)
             DataFilter.perform_bandstop(boardData[channel], sampling_rate, 58.0, 62.0, 2,
                                                 FilterTypes.BUTTERWORTH.value, 0)
-            data.append(DataFilter.perform_downsampling(boardData[channel], 20, AggOperations.EACH.value))
-        return data
+            # data.append(DataFilter.perform_downsampling(boardData[channel], 20, AggOperations.EACH.value))
+        # return data
         return boardData
     
