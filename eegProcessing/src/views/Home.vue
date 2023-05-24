@@ -4,7 +4,7 @@
       <h2> 选择文件</h2>
       <el-button @click="chooseFile">选择文件</el-button>
       <el-button @click="addFiles">添加文件</el-button>
-      <el-button @click="chooseDir">选择文件夹</el-button>
+      <!-- <el-button @click="chooseDir">选择文件夹</el-button> -->
     </div>
     <div v-if="files.length">
       <div v-for="file in files"> <span> {{file}} </span>  <span class="remove-btn" @click="removeFiles(file)">X</span> <span class="remove-btn" @click="plotEEGData(file)">plot</span></div>
@@ -125,18 +125,23 @@
           <el-radio v-model="form.ica" border label="0" value="0">是</el-radio>
           <el-radio  v-model="form.ica" border label="1" value="1">否</el-radio>
         </el-form-item>
-        <el-form-item label="输出格式">
-          <el-radio v-model="form.outPutType" border label="npy" value="0"></el-radio>
-          <el-radio  v-model="form.outPutType" border label="mat" value="1"></el-radio>
+        <el-form-item label="是否保存数据式">
+          <el-radio v-model="form.isOutPutData" border label="1" value="1">是</el-radio>
+          <el-radio  v-model="form.isOutPutData" border label="0" value="0">否</el-radio>
         </el-form-item>
+        
         <el-form-item label="创建脚本">
           <el-radio v-model="form.createScript" border label="1" value="1">是</el-radio>
           <el-radio  v-model="form.createScript" border label="0" value="0">否</el-radio>
         </el-form-item>
+        <div class=""  v-if="files.length">
+          <Feature @saveFeatureData="getFeatureConfig"></Feature>
+        </div>
+        <el-form-item label="存储地址">
+          <el-button @click="saveDataDir">选择文件夹</el-button>
+          <div> {{this.form.saveDataPath}}</div>
+        </el-form-item>
       </el-form>
-    </div>
-    <div class=""  v-if="files.length">
-      <Feature @saveFeatureData="getFeatureConfig"></Feature>
     </div>
     <div class="create-feature-btn" v-if="files.length">
       <el-button type="primary" :disabled="form.checkList.length == 0" @click="onSubmit">确定</el-button>
@@ -179,19 +184,20 @@ export default {
         sampleDetrendEnd: '',
         sampleDetrend: '0',
         downSample: 200,
-        outPutType: 'npy',
+        isOutPutData: '1',
         ica: 0,
         productId: 5,
         badChannel: [],
         refrenceChannel: [],
         refrence: 0,
         feature: {},
-        createScript: '0'
+        createScript: '0',
+        saveDataPath: '',
       },
      
       radius: 400,
       triggerNumbers: [],
-      files: [],
+      files: ['C:/Users/admin/Desktop/mindBridgeSoftware/cnsc/data/svp1_2/922_2size_2023_04_05_20_06_56.csv'],
       channels: [],
       channelsName: []
     }
@@ -345,6 +351,16 @@ export default {
         return
       }
       console.log(res)
+    },
+    async saveDataDir() {
+      console.log('this is choose dirs')
+      const res = await openDirDialog()
+      if (res == 'fail') {
+        this.$message('获取文件失败')
+        return
+      }
+      console.log(res)
+      this.form.saveDataPath = res
     },
     getFeatureConfig(feature) {
       this.form.feature = feature
