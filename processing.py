@@ -156,9 +156,11 @@ class Processsing(object):
         data = data.transpose(1, 0, 2)
 
     def processing(self, files, channel, config, boardId):
-        features = []
-        features_label = []
+        all_features = []
+        all_label = []
         for file in files:
+            features = []
+            features_label = []
             origin_data = np.loadtxt(file)
             origin_data = origin_data.T
             eeg_channel = brainflow.BoardShim.get_eeg_channels(int(boardId))
@@ -246,9 +248,12 @@ class Processsing(object):
                     if label in slice_trigger:
                         sub_data = eeg_data[:, index + int(self.sampling_rate * float(slice_trigger[label]['startTime'])): index + int(
                             self.sampling_rate * float(slice_trigger[label]['endTime']))]
-                        features.append(sub_data)
-                        features_label.append(int(label))
-
+                        if len(features) == 0:
+                            features.append(sub_data)
+                            features_label.append(int(label))
+                        elif len(sub_data[0]) == len(features[0][0]):
+                            features.append(sub_data)
+                            features_label.append(int(label))
             features = np.array(features)
             if 'segmentation' in config['checkList'] and 'sample' in config['checkList']:
                 segmentation_data = []
@@ -304,9 +309,12 @@ class Processsing(object):
                 features = down_sample_data
                 self.sampling_rate = int(config['downSample'])
 
+            all_features.extend(features.tolist())
+            all_label.extend(features_label)
+        all_features = np.array(all_features)
         characteristic_wave_Data = []
         if 'characteristicWave' in config['feature']['checkList']:
-            copied_feature = np.copy(features)
+            copied_feature = np.copy(all_features)
             sampling_rate = self.sampling_rate
             if 'down_sample_data' in config['checkList']:
                 sampling_rate = int(config['downSample'])
@@ -335,7 +343,7 @@ class Processsing(object):
         print('characteristic_wave_Data', characteristic_wave_Data.shape)
         spatial_pattern = []
         if 'spatialPattern' in config['feature']['checkList']:
-            copied_feature = np.copy(features)
+            copied_feature = np.copy(all_features)
             if len(features.shape) == 3:
                 for index in range(len(copied_feature)):
                     spatial_pattern.append(
@@ -349,7 +357,7 @@ class Processsing(object):
             bands = [1, 48]
             if len(config['feature']['characteristicWave']) > 0:
                 bands = config['feature']['characteristicWave']
-            copied_feature = np.copy(features)
+            copied_feature = np.copy(all_features)
             if len(features.shape) == 3:
                 for index in range(copied_feature.shape[0]):
                     psd_feature.append(self.extract_PSD_new(
@@ -364,7 +372,7 @@ class Processsing(object):
             bands = [1, 48]
             if len(config['feature']['characteristicWave']) > 0:
                 bands = config['feature']['characteristicWave']
-            copied_feature = np.copy(features)
+            copied_feature = np.copy(all_features)
             if len(features.shape) == 3:
                 for index in range(copied_feature.shape[0]):
                     de_feature.append(self.extract_DE_new(
@@ -380,7 +388,7 @@ class Processsing(object):
 
         statistic_feature = []
         if 'statistic' in config['feature']['checkList']:
-            copied_feature = np.copy(features)
+            copied_feature = np.copy(all_features)
             if len(features.shape) == 3:
                 statistic_feature = np.zeros(
                     (copied_feature.shape[0], copied_feature.shape[1], 6))
@@ -404,8 +412,8 @@ class Processsing(object):
         if config['isOutPutData'] == '1':
             save_mat_data = dict({})
             save_mat_data['origin_data'] = eeg_data.tolist()
-            save_mat_data['processing_data'] = features.tolist()
-            save_mat_data['processing_label'] = features_label
+            save_mat_data['processing_data'] = all_features.tolist()
+            save_mat_data['processing_label'] = all_label
             save_mat_data['characteristic_wave_Data'] = characteristic_wave_Data.tolist()
             save_mat_data['spatialPattern'] = spatial_pattern.tolist()
             save_mat_data['psd'] = psd_feature.tolist()
@@ -570,9 +578,11 @@ sampling_rate = 1000
 # 计算统计特征
 
 def get_features(files, channel, config, boardId):
-    features = []
-    features_label = []
+    all_features = []
+    all_label = []
     for file in files:
+        features = []
+        features_label = []
         origin_data = np.loadtxt(file)
         origin_data = origin_data.T
         eeg_channel = brainflow.BoardShim.get_eeg_channels(int(boardId))
@@ -679,8 +689,12 @@ def get_features(files, channel, config, boardId):
                 continue
             if label in slice_trigger:
                 sub_data = eeg_data[:, index + int(sampling_rate * float(slice_trigger[label]['startTime']) ): index + int(sampling_rate * float(slice_trigger[label]['endTime'] ))]
-                features.append(sub_data)
-                features_label.append(int(label))
+                if len(features) == 0:
+                    features.append(sub_data)
+                    features_label.append(int(label))
+                elif len(sub_data[0]) == len(features[0][0]):
+                    features.append(sub_data)
+                    features_label.append(int(label))
         features = np.array(features)
         
         """
@@ -746,7 +760,15 @@ def get_features(files, channel, config, boardId):
             down_sample_data[i] = signal.resample(features[i], int(config['downSample'] * len(features[i]) / sampling_rate))
         
         sampling_rate =  int(config['downSample'])
+
+      
                 """
+        script_extend_all = """
+        all_features.extend(features.tolist())
+        all_label.extend(features_label)
+    all_features = np.array(all_features)
+    
+        """
         script11 = """"""
         if 'characteristicWave' in config['feature']['checkList']:
             if 'sample' in config['checkList']:
@@ -855,7 +877,7 @@ def get_features(files, channel, config, boardId):
         """
         script = script_package + script_static_feature + script_de_new+script_static_feature+script_spatial_pattern+script_extract_PSD_new + script1 + script2 + \
             script3 + script4 + script5 + script6 + script7 + script_segment + script8 + \
-            script9 + script10 + script11 + script12 + script13 + script14 + script15
+            script9 + script10+script_extend_all + script11 + script12 + script13 + script14 + script15
         script += script_save
 
         filename = fileName  # 指定保存的文件名

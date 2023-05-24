@@ -9,6 +9,7 @@ from convertFileFormat import ConvertFileFormat
 from eeg_positions import get_elec_coords
 from util import *
 from processing import Processsing
+import numpy as np
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
@@ -279,15 +280,17 @@ class JsBridge(QtCore.QObject):
         return self.mainwindow.getCurrentBoardData(message)
     
     def getFileLabelsByFileName(self, message):
-        filePath = message['data'][0]
-        data = np.loadtxt(filePath)
-        data = data.T
-        label = data[-1]
-        label = label[label != 0]
-        return label.tolist()
+        filePath = message['data']
+        files_label = []
+        for file in filePath:
+            data = np.loadtxt(file)
+            data = data.T
+            label = data[-1]
+            label = label[label != 0]
+            files_label.extend(label.tolist())
+        return files_label
 
     def processingOriginData(self, message):
-        print('message', message)
         data = message['data']
         filePath = data['files']
         channels = data['channels']

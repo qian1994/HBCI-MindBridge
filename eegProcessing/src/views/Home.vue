@@ -160,7 +160,6 @@
 import { 
   openFileDialog, 
   openDirDialog, 
-  initDevTools,
   processingOriginData, 
   getConfigFromServe, 
   getLabelByFileName, 
@@ -205,7 +204,7 @@ export default {
      
       radius: 400,
       triggerNumbers: [],
-      files: ['C:/Users/admin/Desktop/mindBridgeSoftware/cnsc/data/svp1_2/922_2size_2023_04_05_20_06_56.csv'],
+      files: [],
       channels: [],
       channelsName: []
     }
