@@ -2,15 +2,6 @@
   <div class="timeSerise">
     <div class="channels-container">
       <el-form>
-        <el-form-item label="图像组件：">
-          <el-checkbox-group v-model="form.checkList">
-            <el-checkbox value="timeserise" label="timeserise" @change="timeSeriseEvent"></el-checkbox>
-            <el-checkbox label="fft" value="fft" @change="fftEvent"></el-checkbox>
-            <el-checkbox label="psd" disabled value="psd" @change="psdEvent"></el-checkbox>
-            <el-checkbox label="headplot" disabled value="headplot" @change="headPlotEvent"></el-checkbox>
-          </el-checkbox-group>
-          <el-button class="home-page-button" type="warning" @click="homePage">返回首页</el-button>
-        </el-form-item>
         <div class="filter-type">
           <el-col :span="12" class="time-fregament-col-6">
             <el-form-item label="滤波类型">
@@ -59,6 +50,8 @@
         </div>
           <div class="data-config-apply-container">
             <el-button class="data-config-apply" @click="apply" type="primary">应用</el-button>
+            <el-button class="home-page-button" type="warning" @click="homePage">返回首页</el-button>
+
           </div>
       </el-form>
       <div class="channel-button">
@@ -76,14 +69,8 @@ import {
   homePage, 
   getConfigFromServe, 
   postSelectChannel, 
-  initDevTools, 
-  startStream, 
-  stopStream, 
   filterBoardData, 
-  openFFTWindow, 
-  closeTimeSeriseWindow,
   getTimeSeriseChannelShow,
-closeFFTWindow
 } from '../api/index'
 export default {
   data() {
@@ -103,7 +90,6 @@ export default {
         high: 45,
         filter: 0,
         order: 2,
-        checkList: [],
       },
     }
   },
@@ -164,48 +150,20 @@ export default {
       this.products = JSON.parse(data)['products']
       const channels = await getTimeSeriseChannelShow()
       this.selectChannels = channels
+      this.timeSeriseEvent()
     }, 300);
+
   },
   methods: {
     homePage() {
       homePage()
     },
-    handleClick() {
-    },
+
     async home() {
       this.$router.back()
     },
-    timeSeriseEvent(chacked) {
-      if (chacked) {
-        openTimeSeriseWindow({...this.form, "currentFigure": 'timeserise'})
-        setTimeout(() => {
-          this.showAllToggle(true)
-        }, 1000);
-      } else {
-        closeTimeSeriseWindow()
-      }
-    },
-    headPlotEvent(chacked) {
-      if (chacked) {
-        if (!this.showAll) {
-          setTimeout(() => {
-            this.showAllToggle(true)
-          }, 1000);
-        }
-      } else {
-      }
-    },
-    fftEvent(chacked) {
-      if (chacked) {
-        openFFTWindow({...this.form, "currentFigure": 'fft'})
-        setTimeout(() => {
-          this.showAllToggle(true)
-        }, 1000);
-      } else {
-        closeFFTWindow()
-      }
-    },
-    psdEvent(chacked) {
+    timeSeriseEvent() {
+      openTimeSeriseWindow({...this.form, channels: this.currentChannels})
     },
     async apply() {
       const res =  await filterBoardData(this.form)
@@ -307,9 +265,8 @@ export default {
 }
 
 .home-page-button {
-  position: absolute;
-  right: 0;
-  top: 0;
+  width: 100px;
+
 }
 
 .filter-type {
@@ -322,7 +279,7 @@ export default {
 }
 
 .data-config-apply {
-  width: 400px;
+  width: 500px;
 }
 
 .data-config-apply-container {

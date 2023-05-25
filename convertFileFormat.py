@@ -24,7 +24,6 @@ class ConvertFileFormat(object):
     
     def getChannelsByFile(self, fileName):
         data = np.loadtxt(fileName).T
-        print(data.shape)
         if len(data) == 24:
             self.boardId = 5
         elif len(data) == 32:
@@ -61,12 +60,14 @@ class ConvertFileFormat(object):
         data = np.concatenate((data, np.array([markerData]).T), axis=1)
         saveData = EEGSAVEDATA()
         fileName = fileName.replace('.csv', '.bdf')
+        channels = np.array(self.channels).copy().tolist()
+        channels.append('trigger')
         if savePath:
             fileName = fileName.split('/')
             path = savePath+ '/'+fileName[len(fileName) -1]
-            saveData.saveFile(path, data, self.channels, self.sampling_rate, otherInfo)
+            saveData.saveFile(path, data, channels, self.sampling_rate, otherInfo)
         else:
-            saveData.saveFile(fileName, data, self.channels, self.sampling_rate, otherInfo)
+            saveData.saveFile(fileName, data, channels, self.sampling_rate, otherInfo)
         return 'ok'
 
     def toMNE(self, fileName, savePath):

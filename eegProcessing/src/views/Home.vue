@@ -4,6 +4,8 @@
       <h2> 选择文件</h2>
       <el-button @click="chooseFile">选择文件</el-button>
       <el-button @click="addFiles">添加文件</el-button>
+      <el-button @click="homePage">回到首页</el-button>
+      
       <!-- <el-button @click="chooseDir">选择文件夹</el-button> -->
     </div>
 
@@ -158,6 +160,7 @@
 </template>
 <script>
 import { 
+  homePage,
   openFileDialog, 
   openDirDialog, 
   processingOriginData, 
@@ -313,6 +316,9 @@ export default {
     }, 300);
   },
   methods:{
+    homePage() {
+      homePage()
+    },
     removeFiles(file) {
       console.log('this is remove file', file)
       this.files = this.files.filter(item => item != file)

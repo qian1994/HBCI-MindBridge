@@ -33,11 +33,12 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.channels = []
         self.numbers = []
         plt.ioff()
+        self.figureFFT = []
         self.slider = None
         self.upScrollData = 0
         self.slider = QSlider(Qt.Vertical, self)
         self.slider.setTickPosition(QSlider.TicksBelow)
-        self.slider.setGeometry(50, 350, 30, 200)
+        self.slider.setGeometry(10, 350, 15, 200)
         self.slider.setTickInterval(1)
         self.slider.valueChanged.connect(self.scrollBar)
         self.resize(1200, 750)
@@ -60,6 +61,7 @@ class FigureWindow(QWidget, Ui_figureWidget):
             index +=1
         self.seletChannelIndex = selectChannelsIndex
         self.showChannels = channels
+    
     def getShowChannels(self):
         return self.showChannels
     
@@ -75,10 +77,10 @@ class FigureWindow(QWidget, Ui_figureWidget):
        
     def set_matplotlib(self):
         self.fig = plt.figure()
-        plt.tight_layout(w_pad=0, h_pad=-2)
+        # plt.tight_layout(w_pad=-3, h_pad=-2)
         plt.margins(0, 0)
         plt.margins(0, tight=True)
-        self.fig.tight_layout(w_pad=0, h_pad=0)
+        # self.fig.tight_layout(w_pad=-3, h_pad=0)
         self.canvas = FigureCanvas(self.fig)
         self.vlayout = QVBoxLayout()
         self.vlayout.addWidget(self.canvas)
@@ -87,6 +89,7 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.ax.spines['right'].set_visible(False)
         self.ax.spines['left'].set_visible(False)
         self.ax.spines['top'].set_visible(False)
+        plt.subplots_adjust(left=0.05, right=1)
 
     def closeEvent(self, a0: QtGui.QCloseEvent):
         if self.signal and self.signal != None:
@@ -106,8 +109,10 @@ class FigureWindow(QWidget, Ui_figureWidget):
 
     def update(self, data):
         self.ax.clear()
-        plt.yticks(self.numbers, self.showChannels, fontsize=9)
-        plt.ylim(0, 1)
+        self.ax.set_yticks(self.numbers, self.showChannels, fontsize=9)
+        self.ax.set_ylim(0,1)
+        if len(data) != 0:
+            plt.xlim(0, len(data[0]))
         for i in range(len(data)):
             if i not in self.seletChannelIndex:
                 continue
@@ -117,7 +122,6 @@ class FigureWindow(QWidget, Ui_figureWidget):
             self.ax.plot(item*0.0005 + ( 0.95 - 0.08 * i) + self.upScrollData, color='lightgrey')
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
-
 # if __name__ == '__main__':
 #     app = QApplication(sys.argv)
 #     m = FigureWindow()

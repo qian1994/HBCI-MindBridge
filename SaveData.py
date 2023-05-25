@@ -45,12 +45,8 @@ class EEGSAVEDATA(object):
                 DataFilter.detrend(data[channel], DetrendOperations.NO_DETREND.value)
                 signals.append(data[channel]/1)
             signals = np.ascontiguousarray(np.array(signals))
-            channel_names = channels
-            list_of_labels = []
-            for i in range(len(channel_names)):
-                list_of_labels.append(str(channel_names[i]))
             signalHeaders = highlevel.make_signal_headers(
-                list_of_labels=list_of_labels,
+                list_of_labels=channels,
                 sample_frequency=sampleRate, 
                 sample_rate=sampleRate,
                 physical_max=187500,

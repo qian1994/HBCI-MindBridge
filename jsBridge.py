@@ -84,27 +84,6 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'close-time-serise-window':
             data = self.closeTimeSeriseWindow(message)
 
-        if message['action'] == 'open-psd-window':
-            data = self.openPSDWindow(message)
-
-        if message['action'] == 'close-psd-window':
-            data = self.closePSDWindow(message)
-
-        if message['action'] == 'open-head-plot-window':
-            data = self.openHeadPlotWindow(message)
-
-        if message['action'] == 'close-head-plot-window':
-            data = self.closeHeadPlotindow(message)
-
-        if message['action'] == 'open-fft-window':
-            data = self.openfftWindow(message)
-
-        if message['action'] == 'close-fft-window':
-            data = self.closefftWindow(message)
-
-        if message['action'] == 'open-real-time-fft':
-            data = self.openRealTimeFFTWindow(message)
-
         if message['action'] == 'post-time-serise-channel-show':
             data = self.postTimeSeriseChannelShow(message)
 
@@ -146,6 +125,7 @@ class JsBridge(QtCore.QObject):
             data = self.startCustomParadigm(message)
 
         if message['action'] == 'stop-custom-paradigm':
+            print('action', message)
             data = self.endCustomParadigm(message)
 
         if message['action'] == 'get-file-labels-by-file-name':
@@ -232,8 +212,6 @@ class JsBridge(QtCore.QObject):
     def openTimeSeriseWindow(self, message):
         return self.mainwindow.openTimeSeriseWindow(message)
 
-    def openRealTimeFFTWindow(self, message):
-        return self.mainwindow.openRealTimeFFTWindow(message)
 
     def postTimeSeriseChannelShow(self, message):
         data = self.mainwindow.postTimeSeriseChannelShow(message)
@@ -241,30 +219,6 @@ class JsBridge(QtCore.QObject):
 
     def closeTimeSeriseWindow(self, message):
         data = self.mainwindow.closeTimeSeriseWindow(message)
-        return data
-
-    def openfftWindow(self, message):
-        data = self.mainwindow.openfftWindow(message)
-        return data
-
-    def closefftWindow(self, message):
-        data = self.mainwindow.closefftWindow(message)
-        return data
-
-    def openPSDWindow(self, message):
-        data = self.mainwindow.openPSDWindow(message)
-        return data
-
-    def closePSDWindow(self, message):
-        data = self.mainwindow.closePSDWindow(message)
-        return data
-
-    def openHeadPlotWindow(self, message):
-        data = self.mainwindow.openHeadPlotWindow(message)
-        return data
-
-    def closeHeadPlotindow(self, message):
-        data = self.mainwindow.closeHeadPlotindow(message)
         return data
 
     def fullScreen(self, message):
@@ -403,6 +357,7 @@ class JsBridge(QtCore.QObject):
         self.mainwindow.startCustomParadigm(message)
 
     def endCustomParadigm(self, message):
+        print('message', message)
         self.mainwindow.endCustomParadigm(message)
 
     def flush(self):

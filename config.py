@@ -3,25 +3,25 @@ impedence64 = [
     'F7','F5','F3','F1','AF7','FPZ','AFZ','FP1',
     'FP2','FZ',"FCZ",'F2','AF8','F4','F6','F8',
     'F10','FT8','C6','FC6','C4','C2','FC4','FC2',
-    'O1','P1','P3','P5','PO7','P7','LPA', "US",
+    'O1','P1','P3','P5','PO7','P7','A1', "US",
     'P9','TP7','T7','CP5','CP3','CP1','CPZ','PZ',
     'POZ','CP2','CZ','CP4','CP6','T8 ','TP8','P10',
-    'LPA','P8','P6','PO8','P2','P4','O2','OZ']
+    'A2','P8','P6','PO8','P2','P4','O2','OZ']
 
-impedence23 = ["OZ", 'PZ','O1', "P3", "P7",'LPA',
+impedence23 = ["OZ", 'PZ','O1', "P3", "P7",'A1',
               "T7", "F7", "F3", "C3", "FP1", "FPZ",
               "FP2", "F4", 'FZ',"F8", "T8", "US", 
-              "P8", "O2", "P4", "C4", 'CZ', "RPA"]
+              "P8", "O2", "P4", "C4", 'CZ', "A2"]
 
-impedence32 = ["O1", 'C3', "CP3", 'P3', "P7", "TP7", "T7","LPA", 
+impedence32 = ["O1", 'C3', "CP3", 'P3', "P7", "TP7", "T7","A1", 
                "FT7", "F7", "FC3", "F3", "CZ", "FCZ", "FZ",'FP1',
-               "FP2", "F4", "C4", "FC4","F8", "FT8", "P8", "RPA",
+               "FP2", "F4", "C4", "FC4","F8", "FT8", "P8", "A2",
                "TP8", "T8", "CP4", "P4", "O2", "CPZ", "PZ", "OZ"]
 
 impedence8 = ["FP1", 'FP2', "T7", 'CZ', "T8", "O1", "O2", "OZ"]
 
 impedence16 = ["FP1", 'FP2', "FPZ","F7",  "FZ",  "F8",  
-               "T7", "CZ", "T8", "P7", "PZ", "P8", "O1", "O2", "OZ", "US"]
+               "T7", "CZ", "T8", "P7", "PZ", "P8", "O1", "O2", "OZ", "A1"]
 
 impedences = {
     "8": impedence8,

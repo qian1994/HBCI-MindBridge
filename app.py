@@ -14,44 +14,33 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import *
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from jsBridge import JsBridge
-from figures import FigureWindow
-from figuresFFT import FiguresFFTWindow
-from SaveData import EEGSAVEDATA
-from config import MindBridge
 from signals import Signal
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from dataPorcessing import DataProcessing
 import scipy.io as sio
 from startSocketClient import SocketCustomClient
+from realtimeFigure import RealTimeFigure
 from threading import Thread, current_thread
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.stackData = []
         self.dir_path = '.'
         self.dir_path = self.dir_path.replace("\\", "/", 5)
-        self.lantency = 83
         self.time = time.time()
         self.boartStatus = None
         self.setStyleSheet("background-color:rgb(128, 128, 128)")
         self.boardId = 0
         self.board = None
-        self.model = None
         self.fileName = None
-        self.bci_file_name = None
         self.brainflow_file_name = None
         self.timmer = None
-        self.label = None
         self.webView = None
         self.webViewWidget = None
-        self.flashViewWidget = None
         self.webViewlayout = None
-        self.flashViewlayout = None
-        self.trial = []
-        self.openWindowsList = []
         self.widget = QWidget()
         self.figure = None
-        self.figureFFT = None
         self.timmerSession = None
         self.ip_address = None
         self.content = QHBoxLayout()
@@ -65,17 +54,12 @@ class MainWindow(QMainWindow):
         self.content.setContentsMargins(0, 0, 0, 0)
         self.setContentsMargins(0, 0, 0, 0)
         self.widget.setContentsMargins(0, 0, 0, 0)
-        self.realtimePlot = False
-        self.writeFile = None
         self.setCentralWidget(self.widget)
         self.createWebEng()
         self._signal = Signal()
         self._signal._mainClose[str].connect(self._sub_close)
-        self.currentApp = ''
         self.devToolsStatus = None
         self.dataprocessing = DataProcessing()
-        self.currentTimeString = ''
-        self.pationCode = ''
         self.filterParams = dict({
             'high': 45,
             "low": 5,
@@ -84,6 +68,7 @@ class MainWindow(QMainWindow):
         })
         self.badChannel = None
         self.SocketCustomClient = None
+        self.MindBridgefileName = ''
 
     def createWebEng(self):
         self.webView = QWebEngineView()
@@ -99,8 +84,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
+        # html_path = QtCore.QUrl.fromLocalFile(
+        #     QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl('http://localhost:8082')
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -109,7 +95,20 @@ class MainWindow(QMainWindow):
         self.python_bridge.responseSignal.emit('this is from serve')
 
 
- 
+    def saveBoardDataThread(self):
+        while 1:
+            time.sleep(5*60)
+            if self.board == None:
+                return
+            if self.MindBridgefileName == '':
+                return
+            if not os.path.exists(self.MindBridgefileName):
+                open(self.MindBridgefileName, 'w').close()
+
+            data = self.board.get_board_data()
+            with open(self.MindBridgefileName, 'a+') as file:
+                DataFilter.write_file(data, self.MindBridgefileName, 'a+')
+            file.close()
 
     def initDevTools(self):
         if self.devToolsStatus == True:
@@ -120,64 +119,20 @@ class MainWindow(QMainWindow):
         self.webView.page().setDevToolsPage(dev_view.page())
 
     def _sub_close(self, message):
-        if message == 'timeserise':
-            if self.timmerSession != None:
-                self.python_bridge.getFromServer.emit(
-                    json.dumps({"id": 0, "action": 'close-time-serise'}))
-
-    def closefftWindow(self, message):
-        if self.figureFFT != None:
-            self.figureFFT.close()
-            self.figureFFT = None
-
-    def openPSDWindow(self, message):
-        print('openPsdWIndow')
-
-    def closePSDWindow(self, message):
-        print('closePSDWindow')
-
-    def openHeadPlotWindow(self, message):
-        print('asdfasdf')
-
-    def closeHeadPlotindow(self, message):
-        print('asdfasdf')
+            self.python_bridge.getFromServer.emit(
+                json.dumps({"id": 0, "action": 'close-time-serise'}))
 
     def createFigures(self, message):
         try:
-            self.boardId = int(message['data']["productId"])
-            mindBridge = MindBridge()
-            channels = []
-            if str(self.boardId) == '5':
-                channels = mindBridge.channelImpedences["8"]
-            elif str(self.boardId) == '516':
-                channels = mindBridge.channelImpedences["16"]
-            elif str(self.boardId) == '532':
-                channels = mindBridge.channelImpedences["32"]
-            elif str(self.boardId) == '520':
-                channels = mindBridge.channelImpedences["20"]
-            else:
-                channels = mindBridge.channelImpedences["64"]
-            if message['data']['currentFigure'] == 'timeserise':
-                self.figure = FigureWindow()
-                self.figure.show()
-                self.figure.setChannels(channels)
-            elif message['data']['currentFigure'] == 'fft':
-                self.figureFFT = FiguresFFTWindow()
-                self.figureFFT.show()
-                self.figureFFT.setChannels(channels)
+            channels = message['data']["channels"]
+            self.figure = RealTimeFigure()
+            self.figure.setChannel(channels)
+            self.figure.show()
             self.startSession(message)
             self.startTimeOutPrepareSession()
-            self.openWindowsList = message['data']['checkList']
-            del mindBridge
         except Exception as e:
             print(e)
 
-    def openfftWindow(self, message):
-        try:
-            self.createFigures(message)
-        except:
-            return 'fail'
-        return 'ok'
 
     def closeTimeSeriseWindow(self):
         if self.figure != None:
@@ -185,14 +140,8 @@ class MainWindow(QMainWindow):
             self.figure = None
 
     def postTimeSeriseChannelShow(self, message):
-        try:
-            channels = message['data']
-            if 'fft' in self.openWindowsList:
-                self.figureFFT.chooseShowChannel(channels)
-            if 'timeserise' in self.openWindowsList:
-                self.figure.chooseShowChannel(channels)
-        except Exception as e:
-            return 'fail open time serise window'
+        channels = message['data']
+        self.figure.chooseShowChannel(channels)
         return 'ok'
 
     def showTimeSerise(self):
@@ -248,13 +197,7 @@ class MainWindow(QMainWindow):
         boardData = data.copy()
         boardData = self.dataprocessing.handleFilter(data, sampling_rate, self.filterParams['low'],
                                                      self.filterParams['high'], self.filterParams['order'], self.filterParams['filterType'])
-        # 显示timeserise
-        if self.figure != None:
-            self.figure.update(boardData)
-        # fft 数据显示
-        if self.figureFFT != None:
-            fftArray = self.dataprocessing.handleFFt(data.copy(), sampling_rate)
-            self.figureFFT.update(fftArray)
+        self.figure.update(boardData)
 
     def getRelTimeDectation(self, message):
         if self.boartStatus != 'startStream':
@@ -310,14 +253,9 @@ class MainWindow(QMainWindow):
     # 脱落检测计算
 
     def getRailedPercentage(self, boardData):
-        scaler = (4.5 / (pow(2, 23) - 1) / 24.0 * 1000000.)
-        maxVal = scaler * pow(2, 23)
-        boardData = np.abs(boardData)
         railed = []
         for channel in range(len(boardData)):
-            channelData = boardData[channel]
-            max = np.max(channelData)
-            percetage = (max / maxVal) * 100
+            percetage = DataFilter.get_railed_percentage(boardData[channel], 24) * 100
             railed.append(percetage)
         railed = ','.join([str(i) for i in railed])
         return railed
@@ -358,30 +296,16 @@ class MainWindow(QMainWindow):
             self.boardId = boardId
             self.ip_address = params.ip_address
             self.startStream(message)
+            time_now = datetime.datetime.now()
+            time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
+            self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
+            if not os.path.exists(self.MindBridgefileName):
+                open(self.MindBridgefileName, 'w').close()
+            threadSaveData = Thread(target=self.saveBoardDataThread)
+            threadSaveData.setDaemon(True)
+            threadSaveData.start()
         except:
             return 'fail'
-        return 'ok'
-
-    def startssvepTask(self, message):
-        # try:
-        if self.boartStatus == 'startStream' or self.board != None:
-            return 'ok'
-        data = message['data']
-        boardId = int(data["productId"])
-        self.fileName = data['fileName']
-        self.model = data['selectModel']
-
-        if self.boartStatus != 'startStream':
-            # params = BrainFlowInputParams()
-            # params.ip_port = 9521 + random.randint(1, 100)
-            # params.ip_address = data['ip']
-            # self.board = BoardShim(int(boardId), params)
-            # self.board.prepare_session()
-            # self.boardId = int(boardId)
-            # self.startStream(message)
-            self.startSession(message)
-        # except:
-        #     return 'fail'
         return 'ok'
 
     def startStream(self, message):
@@ -422,10 +346,6 @@ class MainWindow(QMainWindow):
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-flash'}))
 
-    def startNewExpriment(self):
-        time_now = datetime.datetime.now()
-        self.currentTimeString = time_now.strftime("%Y_%m_%d_%H_%M_%S")
-
     def openHtml(self, data):
         if data == 'timeSerise':
             return
@@ -437,7 +357,6 @@ class MainWindow(QMainWindow):
                 os.makedirs(save_path_dir)
             if not os.path.exists(save_path_def):
                 os.makedirs(save_path_def)
-            self.currentApp = data
             html_path = QtCore.QUrl.fromLocalFile(
                 QDir.currentPath() + "/web-app/"+data+"/index.html")
             self.webView.setUrl(html_path)
@@ -462,12 +381,11 @@ class MainWindow(QMainWindow):
             return 'fail'
         return 'ok'
 
-    def closeTimeSeriseWindow(self, message):
-        self.figure.close()
-
     def closeEvent(self, a0: QtGui.QCloseEvent):
         if self.timmer != None:
             self.killTimer(self.timmer.timerId())
+        self.closeTimeSeriseWindow()
+    
         return super().closeEvent(a0)
 
     def fullScreen(self, essage):
@@ -476,31 +394,35 @@ class MainWindow(QMainWindow):
     def exitFullScreen(self, message):
         self.showNormal()
 
-    # 添加edf 信息
-    def saveToEDF(self, fileName, info, originData,  sampleRate, channels):
-        otherInfo = info
-        eegSaveData = EEGSAVEDATA()
-        eegSaveData.saveFile(fileName=fileName, data=originData,
-                             channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
         
     def endTaskSaveData(self, message):
         info = message['data']
         info['productId'] = int(info['productId'])
-        if self.brainflow_file_name == None or self.brainflow_file_name == '':
-            self.brainflow_file_name = self.dir_path+"/data/" + \
-                self.currentApp + '/' + 'MindBridge_' + self.currentTimeString + '.csv'
-            self.bci_file_name = self.dir_path+"/data/" + \
-                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.txt'
-            self.edf_file_name = self.dir_path+"/edfFile/" + \
-                self.currentApp+"/"+'MindBridge_' + self.currentTimeString + '.edf'
+        info['sample_rage'] = 1000
+        currentTimeString = self.MindBridgefileName.replace('.csv', '').replace('./data/', '')
+        self.brainflow_file_name = self.dir_path+"/data/" + \
+            '/' + 'MindBridge_' + currentTimeString + '.csv'
+        self.mat_file_name = self.dir_path+"/edfFile/" + \
+            "/"+'MindBridge_' + currentTimeString + '.mat'
         dataNow = self.board.get_board_data()
         data = np.loadtxt(self.MindBridgefileName).T
+        os.remove(self.MindBridgefileName) 
         data = np.ascontiguousarray(np.array(data))
-        data = np.concatenate((data, dataNow), axis=1)
+        if len(data) != 0:
+            data = np.concatenate((data, dataNow), axis=1)
+        else:
+            data = dataNow
         datafilter = DataFilter()
-        datafilter.write_file(
-            data=data, file_name=self.brainflow_file_name, file_mode='w')
-        self.SocketCustomClient.send(json.dumps({"filePath": self.brainflow_file_name}))
+        datafilter.write_file(data=data, file_name=self.brainflow_file_name, file_mode='w')
+        info['data']= data.tolist()
+        sio.savemat(self.mat_file_name, info)
+        if self.SocketCustomClient != None:
+            self.SocketCustomClient.send(json.dumps({"filePath": self.brainflow_file_name}))
+        time_now = datetime.datetime.now()
+        time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
+        self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
+        if not os.path.exists(self.MindBridgefileName):
+            open(self.MindBridgefileName, 'w').close()
     def openFileDialog(self, message):
         fileName, fileType = QFileDialog.getOpenFileName(self, "选取文件")
         return fileName
@@ -516,6 +438,8 @@ class MainWindow(QMainWindow):
         return directory
 
     def startCustomParadigm(self, message):
+        if message['data']['customIp'] == "":
+            return
         try:
             self.SocketCustomClient = SocketCustomClient(self)
             self.SocketCustomClient.init(
@@ -527,8 +451,8 @@ class MainWindow(QMainWindow):
         return 'fail'
 
     def endCustomParadigm(self, message):
+        self.endTaskSaveData(message)
         if self.SocketCustomClient != None:
-            self.endTaskSaveData(message)
             self.SocketCustomClient.end()
             self.SocketCustomClient = None
         return 'ok'

@@ -47,6 +47,8 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
 
     def set_matplotlib(self):
         self.fig = plt.figure()
+        plt.margins(0, 0)
+        plt.margins(0, tight=True)
         self.fig.tight_layout(w_pad=0, h_pad=0)
         self.canvas = FigureCanvas(self.fig)
         self.vlayout = QVBoxLayout()
@@ -55,6 +57,7 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
         self.ax = self.fig.gca()
         self.ax.spines['right'].set_visible(False)
         self.ax.spines['top'].set_visible(False)
+        plt.subplots_adjust(left=0.05, right=1)
         
     def closeEvent(self, a0: QtGui.QCloseEvent):
         if self.signal and self.signal != None:
@@ -63,14 +66,17 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
     
     def update(self, data):
         self.ax.clear()
+        self.ax.set_ylim(0,100)
+        if len(data) != 0:
+            plt.xlim(0, 100)
         for i in range(len(data)):
             item = data[i] 
-            self.ax.plot(item[1][0:100].tolist(), item[0][0:100].tolist())
+            self.ax.plot(item[1][0:100].tolist(), np.log2(item[0][0:100].tolist()))
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    m = FiguresFFTWindow()
-    m.show()
-    sys.exit(app.exec_())
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     m = FiguresFFTWindow()
+#     m.show()
+#     sys.exit(app.exec_())

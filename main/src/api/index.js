@@ -126,49 +126,6 @@ export function closeTimeSeriseWindow(msg) {
 }
 
 
-export function openFFTWindow(msg) {
-    return apiClient.send({
-        action:'open-fft-window',
-        data: msg
-    })
-}
-
-export function closeFFTWindow(msg) {
-    return apiClient.send({
-        action:'close-fft-window',
-        data: msg
-    })
-}
-
-export function openPSDWindow(msg) {
-    return apiClient.send({
-        action:'open-psd-window',
-        data: msg
-    })
-}
-
-export function closePSDWindow(msg) {
-    return apiClient.send({
-        action:'close-psd-window',
-        data: msg
-    })
-}
-
-export function openHeadPlotWindow(msg) {
-    return apiClient.send({
-        action:'open-head-plot-window',
-        data: msg
-    })
-}
-
-export function closeHeadPlotindow(msg) {
-    return apiClient.send({
-        action:'close-head-plot-window',
-        data: msg
-    })
-}
-
-
 
 export function trigger(msg){
     return apiClient.send({
@@ -380,6 +337,7 @@ export function startCustomParadigm(msg) {
 
 export function stopCustomParadigm(msg) {
     return apiClient.send({
-        action: 'stop-custom-paradigm'
+        action: 'stop-custom-paradigm',
+        data: msg
     })
 }
