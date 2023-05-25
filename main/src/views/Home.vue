@@ -74,7 +74,6 @@ export default {
     paradigms() {
       let paradigm = []
       paradigm.push(localConfig['timeSerise'])
-      console.log('this.config', this.config)
       this.config.forEach((item, index) => {
         if (item == 'ssvep') {
           // paradigm.push(localConfig['ssvep'])
@@ -115,7 +114,7 @@ export default {
   },
   mounted() {
     const config = localStorage.getItem('mindbridgeinfo')
-    // initDevTools()
+    initDevTools()
     if (config) {
       const infor = JSON.parse(config)
       this.form.productId = infor.productId

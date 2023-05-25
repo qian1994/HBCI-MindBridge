@@ -50,19 +50,11 @@ export default {
                 });
                 return
             }
-            this.loading = this.$loading({
-                lock: true,
-                text: 'Loading',
-                spinner: 'el-icon-loading',
-                background: 'rgba(0, 0, 0, 0.7)',
-                target: document.documentElement
-            });
             this.$nextTick(async () => {
                 try {
                     const res = await initTestBoard(this.form)
                     if (res == 'ok') {
                         localStorage.setItem('mindbridgeinfo', JSON.stringify(this.form))
-                        this.loading.close()
                         if (name == 'timeSerise') {
                             startSession(this.form)
                             this.$router.push({ 'name': "TimeSerise" })
@@ -72,13 +64,9 @@ export default {
                             this.$router.push({ 'name': "Custom", params: {...this.form} })
                             return
                         }
-                        // if (name == 'impedence') {
-                        //     this.$router.push({ 'name': "Custom" })
-                        //     return
-                        // }
+                   
                         const data = await openHtml(name)
                     } else {
-                        this.loading.close()
                         this.$alert('', "请选择产品型号，并且请输入设备ip", {
                             confirmButtonText: '确定',
                         })
@@ -87,13 +75,11 @@ export default {
                     }
                 } catch (error) {
                     this.count += 1
-                    this.loading.close()
                     this.$alert('', "请选择产品型号，并且请输入设备ip", {
                         confirmButtonText: '确定',
                     })
                     return
                 }
-                this.loading.close()
             });
         },
         get() {

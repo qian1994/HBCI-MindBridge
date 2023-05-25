@@ -53,10 +53,6 @@ export default {
             }
         },
         submit() {
-            // addParadigmFromLocal({
-            //     link: this.form.link,
-            //     filePath: this.form.filePath
-            // })
         },
         async start() {
             const sres = await startSession({ip: this.ip, productId: this.productId})
