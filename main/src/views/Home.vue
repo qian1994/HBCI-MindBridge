@@ -85,12 +85,10 @@ export default {
           let title = item
           if (item == 'impendance') {
             title = '阻抗测试'
-          } else if (item == 'svp1_2') {
-            title = '脑视功能评估'
-          } else if (item == 'report') {
-            title = '评估报告'
-          }else if (item == 'transfile') {
+          } else if (item == 'transfile') {
             title = '转换文件格式'
+          }else if (item == 'processing') {
+            title = '数据处理'
           }
           paradigm.push({
             name: item,
@@ -114,7 +112,7 @@ export default {
   },
   mounted() {
     const config = localStorage.getItem('mindbridgeinfo')
-    initDevTools()
+    // initDevTools()
     if (config) {
       const infor = JSON.parse(config)
       this.form.productId = infor.productId

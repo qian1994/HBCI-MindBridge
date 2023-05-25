@@ -33,6 +33,8 @@ class FigureHeadPlotWidget(QWidget, Ui_figureHeadPlotWidget):
         channels_names = montage.ch_names
         channels_name_up = [item.upper() for item in channels_names]
         for index in range(len(channels)):
+            if channels[index] == "US":
+                del channels[index]
             id = channels_name_up.index(channels[index])
             channels[index] = channels_names[id]
         self.channels = channels

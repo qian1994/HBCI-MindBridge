@@ -61,6 +61,7 @@ class RealTimeFigure(QWidget, Ui_RealTimeFigure):
         self.figureHeadPlot.setChannel( self.channel)
     def chooseShowChannel(self, channels):
         print('channels')
+        
     def update(self, data):
         self.figures.update(data)
         self.figureHeadPlot.update(data)

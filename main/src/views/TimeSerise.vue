@@ -69,14 +69,8 @@ import {
   homePage, 
   getConfigFromServe, 
   postSelectChannel, 
-  initDevTools, 
-  startStream, 
-  stopStream, 
   filterBoardData, 
-  openFFTWindow, 
-  closeTimeSeriseWindow,
   getTimeSeriseChannelShow,
-closeFFTWindow
 } from '../api/index'
 export default {
   data() {
