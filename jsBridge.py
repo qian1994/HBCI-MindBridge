@@ -123,6 +123,7 @@ class JsBridge(QtCore.QObject):
             data = self.startCustomParadigm(message)
 
         if message['action'] == 'stop-custom-paradigm':
+            print('action', message)
             data = self.endCustomParadigm(message)
 
         message['data'] = data
@@ -315,6 +316,7 @@ class JsBridge(QtCore.QObject):
         self.mainwindow.startCustomParadigm(message)
 
     def endCustomParadigm(self, message):
+        print('message', message)
         self.mainwindow.endCustomParadigm(message)
 
     def flush(self):

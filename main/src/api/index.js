@@ -337,6 +337,7 @@ export function startCustomParadigm(msg) {
 
 export function stopCustomParadigm(msg) {
     return apiClient.send({
-        action: 'stop-custom-paradigm'
+        action: 'stop-custom-paradigm',
+        data: msg
     })
 }

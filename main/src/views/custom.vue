@@ -55,7 +55,7 @@ export default {
         submit() {
         },
         async start() {
-            const sres = await startSession({ip: this.ip, productId: this.productId})
+            const sres = await startSession({ip: this.form.ip, productId: this.form.productId})
             if (sres == 'ok') {
                const res = await startCustomParadigm(this.form)
                if (res == 'ok') {
@@ -79,8 +79,8 @@ export default {
         }
     },
     mounted() {
-       this.ip = this.$router.currentRoute.params.ip 
-       this.productId = this.$router.currentRoute.params.productId
+       this.form.ip = this.$router.currentRoute.params.ip 
+       this.form.productId = this.$router.currentRoute.params.productId
     }
 }
 </script>
