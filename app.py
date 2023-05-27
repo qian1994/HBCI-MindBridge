@@ -16,8 +16,9 @@ from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
-from brainFigure import BrainWindow
+from brainFigure import BrainWindow as BrainObject
 conn1, conn2 = Pipe()
+from realtimeFigure import RealTimeFigure
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -60,17 +61,7 @@ class MainWindow(QMainWindow):
         self.message = None
         self.currentData = []
         self.conn2 = None
-        self.recvSignalData()
-
-    def recvSignalData(self):
-        threadSaveData = Thread(target=self.recvSignalDataThread)
-        threadSaveData.setDaemon(True)
-        threadSaveData.start()
-    
-    def recvSignalDataThread(self):
-        self.timmerSession = QTimer()  # 创建定时器
-        self.timmerSession.timeout.connect(self.recv_signal)
-        self.timmerSession.start(10)
+        self.brainflowObject = BrainObject()
 
     def createWebEng(self):
         self.webView = QWebEngineView()
@@ -125,10 +116,10 @@ class MainWindow(QMainWindow):
    
     # 阻抗计算
     def getImpendenceData(self, message):
-        boardData = self.currentData
+        boardData = self.brainflowObject.getCurrentData()
         if boardData.shape[0] == 0 or boardData.shape[1] == 0:
             return json.dumps(dict({"impedences": [], "railed": []}))
-        channels = self.board.get_eeg_channels(int(self.boardId))
+        channels = self.brainflowObject.board.get_eeg_channels(int(self.brainflowObject.boardId))
         boardData = boardData[1: len(channels)+1]
         railed = self.getRailedPercentage(boardData)
         meanData = np.array([np.mean(boardData, axis=1)]).T
@@ -210,10 +201,6 @@ class MainWindow(QMainWindow):
         if message['action'] == 'trigger':
             self.trigger(int(message['data']))
 
-    # 获取实时数据
-    def getCurrentBoardData(self, message):
-        print('send data')
-        return self.currentData 
         
 
     def postTimeSeriseChannelShow(self, message):
@@ -221,12 +208,10 @@ class MainWindow(QMainWindow):
 
     def filterBoardData(self, message):
         print('send filter data')
-        self.conn2.send({"action": 'filter-show-data', "data": message})
+        # self.conn2.send({"action": 'filter-show-data', "data": message})
+        self.brainflowObject.filterBoardData(message)
     # 获取实时数据
 
-    def getCurrentData(self, data):
-        self.currentData = data
-        
 
     def startImpendenceTest(self, message):
         self.startSession(message)
@@ -241,61 +226,44 @@ class MainWindow(QMainWindow):
     def startSession(self, message):
         print('send start session')
         self.message = message
-        QTimer.singleShot(150, self.sendConfigStartSesssion)
-    
-    def sendConfigStartSesssion(self):
-        self.conn2.send({'action': 'start-session', "data":self.message})
+        self.brainflowObject.startSession(message)    
 
     def startStream(self, message):
         print('send start stream')
-        self.conn2.send({'action': 'start-stream', "data":''})
+        self.brainflowObject.startStream(message)
 
     def stopStream(self, message):
         print('send stop stream')
-        self.conn2.send({'action': 'stop-stream', "data":''})
-
+        self.brainflowObject.stopStream(message)
 
     def stopSession(self, message):
         print('send stop session')
-        self.conn2.send({'action': 'stop-session', "data":''})
+        self.brainflowObject.stopSession(message)
 
     def trigger(self, number):
         print('send trigger')
-        self.conn2.send({'action': 'stop-session', "data":number})
+        self.brainflowObject.trigger(number)        
 
 
     def openTimeSeriseWindow(self, message):
         print('send open time serise', message)
-        self.conn2.send({'action': 'open-window', "data":message})
+        self.brainflowObject.createFigures(message)
 
     
     def closeTimeSeriseWindow(self):
         print('send hide time serise window')
-        self.conn2.send({'action': 'close-window', "data":'1'})
+        self.brainflowObject.closeTimeSeriseWindow()
 
         
     def endTaskSaveData(self, message):
         print('get file name')
-        self.conn2.send({'action': 'end-task', "data":''})
+        self.brainflowObject.endTaskSaveData(message)
 
     def getTaskEndFile(self, message):
         print('message', message)
 
     def get_Signal(self, conn2 ):
-        self.conn2 = conn2
-
-    def recv_signal(self):
-        # if self.conn2 == None:
-        #     return
-        # res = self.conn2.recv()
-        # if res['action'] == 'current-data':
-        #     self.getCurrentBoardData(res['data'])
-        #     return
-            
-        # if res['action'] == 'current-file':
-        #     self.getTaskEndFile(res['data'])
-        #     return
-        return
+        self.brainflowObject.get_Signal(conn2)
 
 
 def MainWindowFunc(conn2):
@@ -305,19 +273,21 @@ def MainWindowFunc(conn2):
     m.show()
     sys.exit(app.exec_())
 
-
-def brainWindowFunc(conn1):
+def brainWindowFunc(conn2):
     app = QApplication(sys.argv)
-    m = BrainWindow()
-    m.get_Signal(conn1)
+    m = RealTimeFigure()
+    m.get_Signal(conn2)
+    m.show()
     sys.exit(app.exec_())
+    
 
 def main():
     conn1, conn2 = Pipe()
-    p = Process(target=MainWindowFunc, args=(conn1,))
-    p.start()
-    p2 = Process(target=brainWindowFunc, args=(conn2,))
+    p2 = Process(target=brainWindowFunc, args=(conn1,))
     p2.start()
+    MainWindowFunc(conn2)
+
+
 
 if __name__ == '__main__':
     main()

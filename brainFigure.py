@@ -14,20 +14,18 @@ from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from dataPorcessing import DataProcessing
 import scipy.io as sio
-from realtimeFigure import RealTimeFigure
 from threading import Thread, current_thread
+from multiprocessing import Process, Pipe, Queue, Manager
+from realtimeFigure import RealTimeFigure
 
-
-class BrainWindow(QMainWindow):
+class BrainWindow(QObject):
     def __init__(self):
         super().__init__()
-        print('this is place open brain window')
         self.stackData = []
         self.dir_path = '.'
         self.dir_path = self.dir_path.replace("\\", "/", 5)
         self.time = time.time()
         self.boartStatus = None
-        self.setStyleSheet("background-color:rgb(128, 128, 128)")
         self.boardId = 0
         self.board = None
         self.fileName = None
@@ -36,42 +34,20 @@ class BrainWindow(QMainWindow):
         self.figure = None
         self.timmerSession = None
         self.ip_address = None
-        self.setWindowTitle('brain wave')
-        self.resize(1200, 600)
-        self.setContentsMargins(0, 0, 0, 0)
-        self.dataprocessing = DataProcessing()
-        self.filterParams = dict({
-            'high': 45,
-            "low": 5,
-            "order": 2,
-            "filterType": 0,
-        })
+      
         self.MindBridgefileName = ''
         self.conn1 = None
-        signal_recv = QThread(target=self.recv_signal)
-        signal_recv.setDaemon(True)
-        signal_recv.start()
-
-        # message = {'data': {'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
-        #                     'channels': ['O1', 'C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1', 'FP2', 'F4', 'C4', 'FC4',
-        #                                  'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
-        # self.createFigures(message)
 
     def createFigures(self, message):
-        try:
-            channels = message['data']["channels"]
-            self.figure = RealTimeFigure()
-            self.figure.setChannel(channels)
-            self.startSession(message)
-            self.startTimeOutPrepareSession()
-            self.setCentralWidget(self.figure)
-        except Exception as e:
-            print(e)
+        channels = message['data']["channels"]
+        if self.conn1 != None:
+            self.conn1.send({'action': 'channels', "data": channels})
+        self.startSession(message)
+        self.showTimeSerise()
+      
 
     def closeTimeSeriseWindow(self):
-        if self.figure != None:
-            self.figure.close()
-            self.figure = None
+        self.conn1.send({'action': 'close-window'})
 
     def showTimeSerise(self):
         self.timmerSession = QTimer()  # 创建定时器
@@ -82,20 +58,8 @@ class BrainWindow(QMainWindow):
         self.timmerSession.stop()
         self.timmerSession.killTimer(self.timmerSession.timerId())
 
-    def startTimeOutPrepareSession(self):
-        QTimer.singleShot(1000, self.timmerPrePareSession)
-
-    def timmerPrePareSession(self):
-        if self.board != None and self.board.is_prepared():
-            self.startStream('')
-            QTimer.singleShot(2000, self.showTimeSerise)
-
     def filterBoardData(self, message):
-        data = message['data']
-        self.filterParams['low'] = data['low']
-        self.filterParams['high'] = data['high']
-        self.filterParams['filterType'] = data['filter']
-        self.filterParams['order'] = data['order']
+        self.conn1.send({'action': 'filter', 'data': message})
     # 获取实时数据
 
     def getCurrentData(self):
@@ -122,11 +86,7 @@ class BrainWindow(QMainWindow):
         data = self.getCurrentData()
         if len(data) == '':
             return
-        sampling_rate = BoardShim.get_sampling_rate(int(self.boardId))
-        boardData = data.copy()
-        boardData = self.dataprocessing.handleFilter(data, sampling_rate, self.filterParams['low'],
-                                                     self.filterParams['high'], self.filterParams['order'], self.filterParams['filterType'])
-        self.figure.update(boardData)
+        self.conn1.send({'action': 'update', "data": data })
 
     def saveBoardDataThread(self):
         while 1:
@@ -145,34 +105,30 @@ class BrainWindow(QMainWindow):
     # 建立连接
 
     def startSession(self, message):
-        try:
-            if self.boartStatus == 'startStream' or self.board != None:
-                return 'ok'
-            data = message['data']
-            boardId = int(data["productId"])
-            params = BrainFlowInputParams()
-            params.ip_port = 9521 + random.randint(1, 100)
-            params.ip_address = data['ip']
-            if self.ip_address == params.ip_address and self.boardId == boardId:
-                return 'ok'
-            if self.board != None:
-                self.board.release_all_sessions()
-            self.board = BoardShim(int(boardId), params)
-            self.board.prepare_session()
-            self.boardId = boardId
-            self.ip_address = params.ip_address
-            self.startStream(message)
-            time_now = datetime.datetime.now()
-            time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
-            self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
-            if not os.path.exists(self.MindBridgefileName):
-                open(self.MindBridgefileName, 'w').close()
-            threadSaveData = Thread(target=self.saveBoardDataThread)
-            threadSaveData.setDaemon(True)
-            threadSaveData.start()
-        except:
-            return 'fail'
-        return 'ok'
+        if self.boartStatus == 'startStream' or self.board != None:
+            return 'ok'
+        data = message['data']
+        boardId = int(data["productId"])
+        params = BrainFlowInputParams()
+        params.ip_port = 9521 + random.randint(1, 100)
+        params.ip_address = data['ip']
+        if self.ip_address == params.ip_address and self.boardId == boardId:
+            return 'ok'
+        if self.board != None:
+            self.board.release_all_sessions()
+        self.board = BoardShim(int(boardId), params)
+        self.board.prepare_session()
+        self.boardId = boardId
+        self.ip_address = params.ip_address
+        self.startStream(message)
+        time_now = datetime.datetime.now()
+        time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
+        self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
+        if not os.path.exists(self.MindBridgefileName):
+            open(self.MindBridgefileName, 'w').close()
+        threadSaveData = Thread(target=self.saveBoardDataThread)
+        threadSaveData.setDaemon(True)
+        threadSaveData.start()
 
     def startStream(self, message):
         if self.board == None:
@@ -207,15 +163,6 @@ class BrainWindow(QMainWindow):
 
     def trigger(self, number):
         self.board.insert_marker(int(number))
-
-    def openWindow(self, message):
-        self.createFigures(message)
-
-    def closeEvent(self, a0: QtGui.QCloseEvent):
-        if self.timmer != None:
-            self.killTimer(self.timmer.timerId())
-        self.closeTimeSeriseWindow()
-        return super().closeEvent(a0)
 
     def endTaskSaveData(self, message):
         info = message['data']
@@ -255,74 +202,12 @@ class BrainWindow(QMainWindow):
     def get_Signal(self, conn1):
         self.conn1 = conn1
 
-    def closeWindow(self, message):
-        print('close window')
-        self.hide()
-
-    def recv_signal(self):
-        while True:
-            time.sleep(0.005)
-            if self.conn1 == None:
-                continue
-
-            res = self.conn1.recv()
-
-            if res['action'] == 'close-app':
-                super().close()
-                continue
-
-            if res['action'] == 'open-window':
-                print('this is pace open -window', res)
-                self.openWindow(res['data'])
-                continue
-
-            if res['action'] == 'close-window':
-                self.closeWindow(res['data'])
-                continue
-
-            if res['action'] == 'start-session':
-                self.startSession(res['data'])
-                continue
-
-            if res['action'] == 'stop-session':
-                self.stopSession(res['data'])
-                continue
-
-            if res['action'] == 'start-stream':
-                self.startStream(res['data'])
-                continue
-
-            if res['action'] == 'stop-stream':
-                self.stopStream(res['data'])
-                continue
-
-            if res['action'] == 'trigger':
-                self.trigger(res['data'])
-                continue
-
-            if res['action'] == 'get-current-data':
-                self.postCurrentData(res['data'])
-                continue
-
-            if res['action'] == 'filter-show-data':
-                self.filterBoardData(res['data'])
-                continue
-
-            if res['action'] == 'end-task':
-                self.endTaskSaveData(res['data'])
-                continue
-
-
-def brainWindowFunc():
+def brainWindowFunc(conn1):
     app = QApplication(sys.argv)
     m = BrainWindow()
-    m.show()
+    m.conn1 = conn1
+    message = {'data': {'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
+                            'channels': ['O1', 'C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1', 'FP2', 'F4', 'C4', 'FC4',
+                                         'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
+    m.createFigures(message)
     sys.exit(app.exec_())
-
-
-def main():
-    brainWindowFunc()
-
-
-if __name__ == '__main__':
-    main()
