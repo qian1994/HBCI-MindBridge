@@ -16,7 +16,6 @@ from dataPorcessing import DataProcessing
 import scipy.io as sio
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
-from realtimeFigure import RealTimeFigure
 
 class BrainWindow(QObject):
     def __init__(self):
@@ -36,27 +35,27 @@ class BrainWindow(QObject):
         self.ip_address = None
       
         self.MindBridgefileName = ''
-        self.conn1 = None
+        # self.conn1 = None
 
     def createFigures(self, message):
         channels = message['data']["channels"]
-        if self.conn1 != None:
-            self.conn1.send({'action': 'channels', "data": channels})
+        # if self.conn1 != None:
+            # self.conn1.send({'action': 'channels', "data": channels})
         self.startSession(message)
-        self.showTimeSerise()
+        # self.showTimeSerise()
       
 
     def closeTimeSeriseWindow(self):
         self.conn1.send({'action': 'close-window'})
 
-    def showTimeSerise(self):
-        self.timmerSession = QTimer()  # 创建定时器
-        self.timmerSession.timeout.connect(self.updateRealTimePlot)
-        self.timmerSession.start(40)
+    # def showTimeSerise(self):
+    #     self.timmerSession = QTimer()  # 创建定时器
+    #     self.timmerSession.timeout.connect(self.updateRealTimePlot)
+    #     self.timmerSession.start(40)
 
-    def closeFigures(self):
-        self.timmerSession.stop()
-        self.timmerSession.killTimer(self.timmerSession.timerId())
+    # def closeFigures(self):
+    #     self.timmerSession.stop()
+    #     self.timmerSession.killTimer(self.timmerSession.timerId())
 
     def filterBoardData(self, message):
         self.conn1.send({'action': 'filter', 'data': message})
@@ -197,17 +196,17 @@ class BrainWindow(QObject):
         if self.conn1 == None:
             return
         data = self.getCurrentData()
-        self.conn1.send(data)
+        # self.conn1.send(data)
 
     def get_Signal(self, conn1):
         self.conn1 = conn1
 
-def brainWindowFunc(conn1):
-    app = QApplication(sys.argv)
-    m = BrainWindow()
-    m.conn1 = conn1
-    message = {'data': {'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
-                            'channels': ['O1', 'C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1', 'FP2', 'F4', 'C4', 'FC4',
-                                         'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
-    m.createFigures(message)
-    sys.exit(app.exec_())
+# def brainWindowFunc(conn1):
+#     app = QApplication(sys.argv)
+#     m = BrainWindow()
+#     m.conn1 = conn1
+#     message = {'data': {'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
+#                             'channels': ['O1', 'C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1', 'FP2', 'F4', 'C4', 'FC4',
+#                                          'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
+#     m.createFigures(message)
+#     sys.exit(app.exec_())

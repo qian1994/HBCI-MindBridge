@@ -16,7 +16,6 @@ from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
-from brainFigure import BrainWindow as BrainObject
 conn1, conn2 = Pipe()
 from realtimeFigure import RealTimeFigure
 
@@ -61,7 +60,7 @@ class MainWindow(QMainWindow):
         self.message = None
         self.currentData = []
         self.conn2 = None
-        self.brainflowObject = BrainObject()
+        self.brainflowObject = None
 
     def createWebEng(self):
         self.webView = QWebEngineView()
@@ -116,7 +115,7 @@ class MainWindow(QMainWindow):
    
     # 阻抗计算
     def getImpendenceData(self, message):
-        boardData = self.brainflowObject.getCurrentData()
+        # boardData = self.brainflowObject.getCurrentData()
         if boardData.shape[0] == 0 or boardData.shape[1] == 0:
             return json.dumps(dict({"impedences": [], "railed": []}))
         channels = self.brainflowObject.board.get_eeg_channels(int(self.brainflowObject.boardId))
@@ -226,7 +225,7 @@ class MainWindow(QMainWindow):
     def startSession(self, message):
         print('send start session')
         self.message = message
-        self.brainflowObject.startSession(message)    
+        # self.brainflowObject.startSession(message)    
 
     def startStream(self, message):
         print('send start stream')
@@ -247,7 +246,7 @@ class MainWindow(QMainWindow):
 
     def openTimeSeriseWindow(self, message):
         print('send open time serise', message)
-        self.brainflowObject.createFigures(message)
+        # self.brainflowObject.createFigures(message)
 
     
     def closeTimeSeriseWindow(self):
@@ -263,7 +262,8 @@ class MainWindow(QMainWindow):
         print('message', message)
 
     def get_Signal(self, conn2 ):
-        self.brainflowObject.get_Signal(conn2)
+        # self.brainflowObject.get_Signal(conn2)
+        print('aaa')
 
 
 def MainWindowFunc(conn2):

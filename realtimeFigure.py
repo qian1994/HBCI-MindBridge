@@ -9,6 +9,8 @@ from figuresFFT import FiguresFFTWindow
 from figures import FigureWindow 
 from dataPorcessing import DataProcessing
 from threading import Thread, current_thread
+from brainFigure import BrainWindow as BrainObject
+
 class RealTimeFigure(QMainWindow):
     def __init__(self):
         super(RealTimeFigure, self).__init__()
@@ -51,16 +53,25 @@ class RealTimeFigure(QMainWindow):
         self.dataprocessing = DataProcessing()
         MainWidget.setLayout(layout)
         self.setCentralWidget(MainWidget)
-        # self.recv_signal()
-        recive_data = Thread(target=self.recv_signal)
-        recive_data.setDaemon(True)
-        recive_data.start()
         self.filterParams = dict({
             'high': 45,
             "low": 5,
             "order": 2,
             "filterType": 0,
         })
+
+        self.brainBoject = BrainObject()
+        message = {'data': {'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
+                            'channels': ['O1', 'C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1', 'FP2', 'F4', 'C4', 'FC4',
+                                         'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
+        self.brainBoject.createFigures(message)
+        self.setChannel(message['data']['channels'])
+        # self.recv_signal()
+        recive_data = Thread(target=self.recv_signal)
+        recive_data.setDaemon(True)
+        recive_data.start()
+        # self.recv_signal()
+       
     
     def filterBoardData(self, message):
         data = message['data']
@@ -109,35 +120,40 @@ class RealTimeFigure(QMainWindow):
         self.conn1 = conn1
 
     def recv_signal(self):
-        try:
-            while True:
-                if self.conn1 == None:
-                    continue
-                res = self.conn1.recv()
-                if res['action'] == 'update':
-                    self.update(res['data'])
+        while True:
+            time.sleep(0.04)
+            data = self.brainBoject.getCurrentData()
+            self.update(data)
+            # print(data.shape)
+        # try:
+        #     while True:
+        #         if self.conn1 == None:
+        #             continue
+        #         res = self.conn1.recv()
+        #         if res['action'] == 'update':
+        #             self.update(res['data'])
                 
-                if res['action'] == 'channels':
-                    self.setChannel(res['data'])
+        #         if res['action'] == 'channels':
+        #             self.setChannel(res['data'])
 
-                if res['action'] == 'show':
-                    self.openWindow()
+        #         if res['action'] == 'show':
+        #             self.openWindow()
 
-                if res['action'] == 'close-window':
-                    self.closeWindow()
+        #         if res['action'] == 'close-window':
+        #             self.closeWindow()
                 
-                if res['action'] == 'filter':
-                    self.filterData(res['data'])
+        #         if res['action'] == 'filter':
+        #             self.filterData(res['data'])
 
-        except Exception as e:
-            print('this is wrong', e)
+        # except Exception as e:
+        #     print('this is wrong', e)
 def brainWindowFunc():
     app = QApplication(sys.argv)
     m = RealTimeFigure()
     m.show()
-    data =  np.random.rand(1000, 32) * 200
-    print(data.shape)
-    m.update(data)
+    # data =  np.random.rand(1000, 32) * 200
+    # print(data.shape)
+    # m.update(data)
     sys.exit(app.exec_())
 
 
