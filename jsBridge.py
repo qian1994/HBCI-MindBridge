@@ -263,15 +263,16 @@ class JsBridge(QtCore.QObject):
         res = process.plotEEGOriginData(filePath, channels, boardId)
         return 'ok'
     def getBatterVertage(self, message):
-        try:
-            result = requests.get(
-                'http://'+message['data']['ip'] + ':80/BatteryVoltage', timeout=1, headers={'Connection': 'close'})
-            res = json.loads(result.text)
-            Battery = res['BatteryProportion']
-            return int(Battery / 10)
-        except Exception as e:
-            print(e)
-            return 0
+        # try:
+        #     result = requests.get(
+        #         'http://'+message['data']['ip'] + ':80/BatteryVoltage', timeout=1, headers={'Connection': 'close'})
+        #     res = json.loads(result.text)
+        #     Battery = res['BatteryProportion']
+        #     return int(Battery / 10)
+        # except Exception as e:
+        #     print(e)
+        #     return 0
+        return 100
 
     def initTestBoard(self, message):
         try:
@@ -332,11 +333,6 @@ class JsBridge(QtCore.QObject):
 
 
     def getTimeSeriseChannelShow(self, message):
-        figure = self.mainwindow.figure
-        if figure != None:
-            channels = figure.getShowChannels()
-            print('channels', channels)
-            return channels
         return []
 
     def convertFileFormat(self, message):

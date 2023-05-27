@@ -27,11 +27,6 @@ class RealTimeFigure(QWidget, Ui_RealTimeFigure):
         self.content.setContentsMargins(0, 0, 0, 0)
         self.setContentsMargins(0, 0, 0, 0)
 
-        # central_widget = QWidget()
-        # central_widget.setLayout(layout)
-        # central_widget.setContentsMargins(0, 0, 0, 0)
-        # self.setCentralWidget(central_widget)
-
         self.widget = QWidget()
         self.widget.setContentsMargins(0, 0, 0, 0)
         self.widget.setLayout(self.content)

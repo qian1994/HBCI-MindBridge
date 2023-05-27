@@ -77,10 +77,8 @@ class FigureWindow(QWidget, Ui_figureWidget):
        
     def set_matplotlib(self):
         self.fig = plt.figure()
-        # plt.tight_layout(w_pad=-3, h_pad=-2)
         plt.margins(0, 0)
         plt.margins(0, tight=True)
-        # self.fig.tight_layout(w_pad=-3, h_pad=0)
         self.canvas = FigureCanvas(self.fig)
         self.vlayout = QVBoxLayout()
         self.vlayout.addWidget(self.canvas)
@@ -122,8 +120,3 @@ class FigureWindow(QWidget, Ui_figureWidget):
             self.ax.plot(item*0.0005 + ( 0.95 - 0.08 * i) + self.upScrollData, color='lightgrey')
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
-# if __name__ == '__main__':
-#     app = QApplication(sys.argv)
-#     m = FigureWindow()
-#     m.show()
-#     sys.exit(app.exec_())

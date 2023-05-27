@@ -31,14 +31,14 @@ class SocketCustomClient(object):
         if command == 'start':
             print('开始执行指令...')
             # TODO: 执行开始指令的操作
-            self.mainThread.getCustomInsertMarker({'start': 1})
+            self.mainThread.getCustomInsertMarker({'action': 'start', 'data': ''})
         elif command == 'stop':
             print('停止执行指令...')
             # TODO: 执行停止指令的操作
-            self.mainThread.getCustomInsertMarker({'stop': 1})
+            self.mainThread.getCustomInsertMarker({'action': 'stop', 'data': ''})
         else:
             print('接受打标命令', command)
-            self.mainThread.getCustomInsertMarker({'marker': command})
+            self.mainThread.getCustomInsertMarker({'action': 'trigger', 'data': command})
 
     def stop(self):
         self.socThread.join()

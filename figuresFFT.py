@@ -66,7 +66,7 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
     
     def update(self, data):
         self.ax.clear()
-        self.ax.set_ylim(0,100)
+        self.ax.set_ylim(0,30)
         if len(data) != 0:
             plt.xlim(0, 100)
         for i in range(len(data)):
