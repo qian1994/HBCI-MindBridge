@@ -87,9 +87,23 @@ export function getModels(msg){
     })
 }
 
+export function getImages(msg){
+    return apiClient.send({
+        action: 'get-images',
+        data: msg
+    })
+}
+
 export function startFlashTask(msg) {
     return apiClient.send({
         action: 'start-flash-task',
+        data: msg
+    })
+}
+
+export function endtrialTask(msg) {
+    return apiClient.send({
+        action: 'end-flash-trial',
         data: msg
     })
 }
@@ -155,6 +169,13 @@ export function drawExperimentImages(msg) {
 export function createExprimentSsvepResult(msg) {
     return apiClient.send({
         action: 'create-expriment-ssvep-result',
+        data: msg
+    })
+}
+
+export function getChannelImageByFiles(msg) {
+    return apiClient.send({
+        action: 'get-result-image-by-filename',
         data: msg
     })
 }
@@ -230,6 +251,12 @@ export function getEEGElectronPosition(msg) {
     return apiClient.send({
         action: "get-eeg-electron-position",
         data: msg
+    })
+}
+
+export function createNewExpriment(msg) {
+    return apiClient.send({
+        
     })
 }
 

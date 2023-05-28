@@ -40,6 +40,7 @@ class EEGSAVEDATA(object):
                 date of birth of the patient. The default is ''.
             """
             data = data.T
+            data = np.ascontiguousarray(np.array(data))
             signals = []
             for channel in range(len(data)):
                 DataFilter.detrend(data[channel], DetrendOperations.NO_DETREND.value)

@@ -17,6 +17,7 @@ import scipy.io as sio
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
 
+
 class BrainWindow(QObject):
     def __init__(self):
         super().__init__()
@@ -33,7 +34,7 @@ class BrainWindow(QObject):
         self.figure = None
         self.timmerSession = None
         self.ip_address = None
-      
+
         self.MindBridgefileName = ''
         # self.conn1 = None
 
@@ -147,15 +148,10 @@ class BrainWindow(QObject):
         self.board.insert_marker(int(number))
 
     def endTaskSaveData(self, message):
-        info = message['data']
-        info['productId'] = int(info['productId'])
-        info['sample_ratse'] = 1000
         currentTimeString = self.MindBridgefileName.replace(
             '.csv', '').replace('./data/', '')
         self.brainflow_file_name = self.dir_path+"/data/" + \
-            '/' + 'MindBridge_' + currentTimeString + '.csv'
-        self.mat_file_name = self.dir_path+"/edfFile/" + \
-            "/"+'MindBridge_' + currentTimeString + '.mat'
+            'MindBridge_' + currentTimeString + '.csv'
         dataNow = self.board.get_board_data()
         data = np.loadtxt(self.MindBridgefileName).T
         os.remove(self.MindBridgefileName)
@@ -167,14 +163,13 @@ class BrainWindow(QObject):
         datafilter = DataFilter()
         datafilter.write_file(
             data=data, file_name=self.brainflow_file_name, file_mode='w')
-        info['data'] = data.tolist()
-        sio.savemat(self.mat_file_name, info)
         time_now = datetime.datetime.now()
         time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
         self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
         if not os.path.exists(self.MindBridgefileName):
             open(self.MindBridgefileName, 'w').close()
-        return self.mat_file_name, self.brainflow_file_name
+        return self.brainflow_file_name
+
     def postCurrentData(self, message):
         if self.conn1 == None:
             return

@@ -64,7 +64,6 @@ class MainWindow(QMainWindow):
         self.SocketCustomClient = None
         self.MindBridgefileName = ''
         self.processing = None
-        self.message = None
         self.conn2 = None
         self.brainflowObject = None
         recive_data = Thread(target=self.recv_signal)
@@ -72,6 +71,9 @@ class MainWindow(QMainWindow):
         recive_data.start()
         self.currentData = []
         self.paradigms = None
+        self.message = None
+        self.taskEndData = None
+
     def createWebEng(self):
         self.webView = QWebEngineView()
         self.webView.settings().setAttribute(
@@ -242,35 +244,27 @@ class MainWindow(QMainWindow):
 
     # 创建保存数据线程
     def startSession(self, message):
-        print('send start session')
         self.message = message
         self.conn2.send({'action': 'start-session', 'data': message})
 
     def startStream(self, message):
-        print('send start stream')
         self.conn2.send({'action': 'start-stream', 'data': message})
 
     def stopStream(self, message):
-        print('send stop stream')
         self.conn2.send({'action': 'stop-stream', 'data': message})
 
     def stopSession(self, message):
-        print('send stop session')
         self.conn2.send({'action': 'stop-session', 'data': message})
 
     def trigger(self, number):
-        print('send trigger')
         self.conn2.send({'action': 'trigger', 'data': number})
 
     def openTimeSeriseWindow(self, message):
-        print('send open time serise', message)
         self.conn2.send({'action': 'open-window', 'data': message})
 
     
     def closeTimeSeriseWindow(self):
-        print('send hide time serise window')
         self.conn2.send({'action': 'close-window', 'data': ''})
-        
   
     def get_Signal(self, conn2 ):
         self.conn2 = conn2
@@ -307,21 +301,21 @@ class MainWindow(QMainWindow):
 
     def endTotalTask(self, data):
         self.paradigms.close()
-        self.message = data
-        print(data)
+        self.taskEndData = json.loads(json.dumps(data))
         self.conn2.send({'action': 'end-task-file', 'data': ''})
         return 'ok'
     
     def endTaskGetFileFromBrainflow(self, files):
-        self.endTotalTaskBySelf(files['csvFile'])
+        print(files)
+        self.endTotalTaskBySelf(files['csv'])
 
     #  创建数据保存文件夹 
-    def checkSaveFile(self,dataDir, mode):
+    def checkSaveFile(self,dataDir, mode, currentTimeString):
         if not os.path.exists(dataDir):
             os.makedirs(dataDir)
-        if not os.path.exists(dataDir + '/' + self.currentTimeString):
-            os.makedirs(dataDir + '/' + self.currentTimeString)
-        dataDir = dataDir + '/' + self.currentTimeString
+        if not os.path.exists(dataDir + '/' + currentTimeString):
+            os.makedirs(dataDir + '/' + currentTimeString)
+        dataDir = dataDir + '/' + currentTimeString
         if not os.path.exists(dataDir + '/' + mode):
             os.makedirs(dataDir + '/' + mode)
             dataDir = dataDir + '/' + mode
@@ -336,19 +330,23 @@ class MainWindow(QMainWindow):
         os.makedirs(dataDir + '/' + 'info')
         os.makedirs(dataDir + '/' + 'data')
         os.makedirs(dataDir + '/' + 'result')
+        return dataDir
     
     # 保存文件
     def endTotalTaskBySelf(self, file):
-        info = self.message['data']
+        info = self.taskEndData['data']
+        print(info)
+
         info['productId'] = int(info['productId'])
         self.paradigms.close()
-        originData = np.loadtxt(file).T
-        originData = np.ascontiguousarray(np.array(data))
+        originData = np.loadtxt(file)
+        print(originData.shape)
+        originData = np.ascontiguousarray(np.array(originData))
         patientcode = info['patientcode']
         userName = info['userName']
         mode = info['selectModel']
         dataDir = QDir.currentPath() + '/test_data/' + patientcode+'_'+userName
-        self.checkSaveFile(dataDir, mode)
+        dataDir = self.checkSaveFile(dataDir, mode, file.replace('.csv', '').replace('./data/MindBridge_', ''))
         with open(dataDir + '/info/' + 'pationInfo.txt', 'w')as file:
             file.write(json.dumps({
                 "birthdate": info['birthdate'],
@@ -418,7 +416,7 @@ class MainWindow(QMainWindow):
         info['badChannel'] = badChannel
         otherInfo = info
         eegSaveData = EEGSAVEDATA()
-        eegSaveData.saveFile(fileName=edf_file_name, data=originData,
+        eegSaveData.saveFile(fileName=edf_file_name, data=np.ascontiguousarray(np.array(eeg_data)),
                              channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
         sio.savemat(mat_file_name, info)
         self.python_bridge.getFromServer.emit(

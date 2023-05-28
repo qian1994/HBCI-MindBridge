@@ -151,7 +151,7 @@ class RealTimeFigure(QMainWindow):
         # self.figureHeadPlot.close()
         # self.recive_data.join()
        
-        os._exit()
+        os._exit(0)
         # return super().closeEvent(a0)
 
     def get_Signal(self, conn1):
@@ -173,6 +173,8 @@ class RealTimeFigure(QMainWindow):
             if res == '':
                 continue
             if res['action'] == 'open-window':
+                if len(self.channel) != 0:
+                    continue
                 self.openWindow()
                 self.brainBoject.createFigures(res['data'])
                 self.setChannel(res['data']['data']['channels'])
@@ -224,9 +226,9 @@ class RealTimeFigure(QMainWindow):
                                 "data": self.brainBoject.getCurrentData()})
 
             if res['action'] == 'end-task-file':
-                mtFile, csvFile = self.brainBoject.endTaskSaveData(res['data'])
+                csvFile= self.brainBoject.endTaskSaveData(res['data'])
                 self.conn1.send({'action': 'task-end-file',
-                                "data": {"mat": mtFile, "csv": csvFile}})
+                                "data": {"csv": csvFile}})
 
 def brainWindowFunc():
     app = QApplication(sys.argv)

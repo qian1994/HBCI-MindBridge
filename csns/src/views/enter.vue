@@ -21,11 +21,11 @@
                     }}</el-button>
             </div>
         </div>
-       
     </div>
 </template>
 <script>
 import Vue from 'vue'
+
 import {
     startFlashTask,
     msgListener,
@@ -50,7 +50,7 @@ export default {
             stopFlashed: true,
             channels: [],
             products: [],
-            currentChannels: []
+            currentChannels:[]
         }
     },
     mounted() {
@@ -79,6 +79,7 @@ export default {
         }, 300);
     
     },
+ 
     computed: {
         totalTrialButton() {
             return new Array(this.currentTrial).fill(0).map((item, index) => {
@@ -91,7 +92,6 @@ export default {
         async openWindow() {
             const res = await openParamsWindow()
         },
-     
         troggle(data) {
             let index = parseInt(data) - 1
             let array = this.goodTrial
@@ -143,7 +143,7 @@ export default {
                 this.$message('数据保存成功')
                 localStorage.setItem('config', JSON.stringify(this.params))
                 setTimeout(() => {
-                    this.$router.push({ name: 'home' })
+                    this.$router.go(-1)
                 }, 1000);
             }
         },
