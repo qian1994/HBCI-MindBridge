@@ -25,9 +25,6 @@ class FigureHeadPlotWidget(QWidget, Ui_figureHeadPlotWidget):
         self.info = None
         self.setupUi(self)
         self.set_matplotlib()
-        self.setWindowTitle("head plot")
-        self.resize(1200, 800)
-        self.move(200, 100)
     def setChannel(self, channels):
         montage = make_standard_montage('standard_1020')
         channels_names = montage.ch_names
@@ -57,6 +54,7 @@ class FigureHeadPlotWidget(QWidget, Ui_figureHeadPlotWidget):
         self.ax.spines['right'].set_visible(False)
         self.ax.spines['left'].set_visible(False)
         self.ax.spines['top'].set_visible(False)
+        self.ax.spines['bottom'].set_visible(False)
         plt.subplots_adjust(left=0.05, right=1)
         
     def update(self, boardData):

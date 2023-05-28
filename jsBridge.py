@@ -137,6 +137,9 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'plot-origin-data':
             data = self.plotOriginData(message)
 
+        if message['action'] == 'show-figures-widget':
+            data = self.showFiguresWidget(message)
+
         message['data'] = data
         return self.responseSignal.emit(json.dumps(message))
 
@@ -355,6 +358,9 @@ class JsBridge(QtCore.QObject):
     def endCustomParadigm(self, message):
         print('message', message)
         self.mainwindow.endCustomParadigm(message)
+
+    def showFiguresWidget(self, message):
+        self.mainwindow.showFiguresWidget(message)
 
     def flush(self):
         pass

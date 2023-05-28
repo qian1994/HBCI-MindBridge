@@ -33,7 +33,6 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.channels = []
         self.numbers = []
         plt.ioff()
-        self.figureFFT = []
         self.slider = None
         self.upScrollData = 0
         self.slider = QSlider(Qt.Vertical, self)
@@ -41,7 +40,6 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.slider.setGeometry(10, 350, 15, 200)
         self.slider.setTickInterval(1)
         self.slider.valueChanged.connect(self.scrollBar)
-        self.resize(1200, 750)
         # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
         # self.upScrollHeight = 0.3
     def setChannels(self, channels):

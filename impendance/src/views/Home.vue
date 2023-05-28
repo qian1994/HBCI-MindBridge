@@ -3,35 +3,37 @@
     <div class="impedences-content">
       <div class="impedences-pass">
         <el-button v-if="!entered" type="primary" @click="impendences">测试设备</el-button>
-        <el-button  @click="goToHomePage">返回</el-button>
-        <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio> 
-        <el-radio border size="small" label='color' v-model="showLabel">阻抗测试</el-radio> 
-        <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio> 
+        <el-button @click="goToHomePage">返回</el-button>
+        <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio>
+        <el-radio border size="small" label='color' v-model="showLabel">阻抗测试</el-radio>
+        <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio>
 
       </div>
       <div class="impedences-bad-channel" v-if="badChannels.length">
         <div class="impedences-bad-channel-warning">选择相关坏导： </div>
-        <el-button  v-for="channel in badChannels" type="danger" @click="removeBadChannel(channel)"> {{channel}}</el-button>
+        <el-button v-for="channel in badChannels" type="danger" @click="removeBadChannel(channel)">
+          {{ channel }}</el-button>
       </div>
-      <div  class="impedences-pass">
-        <ElectrodePositions :show-info="selectedChannelInfo" :radius="radius" @point-click="cellClick"> </ElectrodePositions> 
+      <div class="impedences-pass">
+        <ElectrodePositions :show-info="selectedChannelInfo" :radius="radius" @point-click="cellClick">
+        </ElectrodePositions>
       </div>
     </div>
   </div>
 </template>
 <script>
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
-import { 
-  startImpendenceTest, 
-  endImpendenceTest, 
+import {
+  startImpendenceTest,
+  endImpendenceTest,
   getImpendenceFromServe,
   updateBadChannel,
   getBadChannel,
-  getConfigFromServe, 
-  homePage, 
-  startSession ,
-   initDevTools
-  } from '../api/index'
+  getConfigFromServe,
+  homePage,
+  startSession,
+  initDevTools
+} from '../api/index'
 export default {
   data() {
     return {
@@ -52,10 +54,8 @@ export default {
 
     }
   },
-  components:{
+  components: {
     ElectrodePositions
-  },
-  created() {
   },
   destroyed() {
     if (this.timmer) {
@@ -75,7 +75,7 @@ export default {
       this.channels = JSON.parse(data)['channels']
       this.products = JSON.parse(data)['products']
       const badChannels = await getBadChannel()
-      if(badChannels && badChannels['bad-channel']) {
+      if (badChannels && badChannels['bad-channel']) {
         this.badChannels = badChannels['bad-channel']
       }
     }, 300);
@@ -103,8 +103,8 @@ export default {
       }
       let info = {}
       channels.forEach((item, index) => {
-        info[item]={
-          switch: this.badChannels.indexOf(item) >=0 ? false: true,
+        info[item] = {
+          switch: this.badChannels.indexOf(item) >= 0 ? false : true,
           label: item,
           show: this.showLabel,
           name: item,
@@ -115,8 +115,8 @@ export default {
       return info
     }
   },
-  async beforeDestroy(){
-    const res = await updateBadChannel({"bad-channel": this.badChannels})
+  async beforeDestroy() {
+    const res = await updateBadChannel({ "bad-channel": this.badChannels })
     if (res == 'ok') {
       this.$message('保存成果')
     }
@@ -132,34 +132,40 @@ export default {
       this.showImage = !this.showImage
     },
     cellClick(point) {
-      if (point.show !== 'switch'&& point.show !== 'color') {
+      if (point.show !== 'switch' && point.show !== 'color') {
         return
       }
-      if(this.badChannels.indexOf(point['label']) >= 0) {
+      if (this.badChannels.indexOf(point['label']) >= 0) {
         this.removeBadChannel(point['label'])
         return
-      } 
+      }
       this.badChannels.push(point['label'])
-      updateBadChannel({"bad-channel": this.badChannels})
+      updateBadChannel({ "bad-channel": this.badChannels })
     },
     start() {
       startImpendenceTest(this.form)
       this.entered = true
       setTimeout(() => {
+
         this.timmer = setInterval(async () => {
-          let data = await getImpendenceFromServe({})
-          data = JSON.parse(data)
-          this.railed = data['railed'].split(',').map(item => {
-            return parseFloat(item).toFixed(2)
-          })
-          this.impedences = data['impedences'].split(',').map(item => {
-            item = parseInt(item)
-            if (item < 0) {
-              return 0
-            }
-            return item
-          })
-          this.show = false
+          try {
+            let data = await getImpendenceFromServe({})
+            data = JSON.parse(data)
+            console.log(data)
+            this.railed = data['railed'].split(',').map(item => {
+              return parseFloat(item).toFixed(2)
+            })
+            this.impedences = data['impedences'].split(',').map(item => {
+              item = parseInt(item)
+              if (item < 0) {
+                return 0
+              }
+              return item
+            })
+            this.show = false
+          } catch (error) {
+          }
+
         }, 1000);
       }, 2000);
 
@@ -181,7 +187,6 @@ export default {
 </script>
 
 <style>
-
 .impedences {
   width: 900px;
   margin: 5px auto;
@@ -189,6 +194,7 @@ export default {
   position: relative;
   min-height: 500px;
 }
+
 .impedences-content {
   margin-left: 30px;
   width: 100%;
@@ -198,7 +204,7 @@ export default {
   padding: 3px 0;
 }
 
-.impedences-pass .el-radio{
+.impedences-pass .el-radio {
   margin-left: 30px;
 }
 
@@ -216,6 +222,7 @@ export default {
 .impedences-pass {
   margin-bottom: 30px;
 }
+
 .impedences-image {
   display: inline-block;
   width: 100px;
@@ -225,6 +232,7 @@ export default {
   top: 10px;
   cursor: pointer;
 }
+
 .impedences-image img {
   width: 100%;
   height: 100%;
@@ -251,6 +259,7 @@ export default {
 .impedences-bad-channel {
   padding: 10px 20px;
 }
+
 .impedences-bad-channel-warning {
   margin-bottom: 30px;
 }

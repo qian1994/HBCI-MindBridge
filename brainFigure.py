@@ -39,26 +39,11 @@ class BrainWindow(QObject):
 
     def createFigures(self, message):
         channels = message['data']["channels"]
-        # if self.conn1 != None:
-            # self.conn1.send({'action': 'channels', "data": channels})
         self.startSession(message)
-        # self.showTimeSerise()
-      
-
-    def closeTimeSeriseWindow(self):
-        self.conn1.send({'action': 'close-window'})
-
-    # def showTimeSerise(self):
-    #     self.timmerSession = QTimer()  # 创建定时器
-    #     self.timmerSession.timeout.connect(self.updateRealTimePlot)
-    #     self.timmerSession.start(40)
-
-    # def closeFigures(self):
-    #     self.timmerSession.stop()
-    #     self.timmerSession.killTimer(self.timmerSession.timerId())
 
     def filterBoardData(self, message):
-        self.conn1.send({'action': 'filter', 'data': message})
+        # self.conn1.send({'action': 'filter', 'data': message})
+        print('config')
     # 获取实时数据
 
     def getCurrentData(self):
@@ -82,10 +67,8 @@ class BrainWindow(QObject):
         return []
 
     def updateRealTimePlot(self):
-        data = self.getCurrentData()
-        if len(data) == '':
-            return
-        self.conn1.send({'action': 'update', "data": data })
+        print('up reld time')
+        # self.conn1.send({'action': 'update', "data": data })
 
     def saveBoardDataThread(self):
         while 1:

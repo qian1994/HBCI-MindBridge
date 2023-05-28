@@ -341,3 +341,10 @@ export function stopCustomParadigm(msg) {
         data: msg
     })
 }
+
+export function showFigures(msg) {
+    return apiClient.send({
+        action: 'show-figures-widget',
+        data: msg
+    })
+}

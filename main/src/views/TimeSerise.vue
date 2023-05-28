@@ -2,6 +2,13 @@
   <div class="timeSerise">
     <div class="channels-container">
       <el-form>
+        <div>
+          <el-form-item label="组件显示">
+            <el-button class="figure-toggle-btn" :type="wave ? 'primary': 'info'"  @click="toggleFigure('wave')">波形图</el-button>
+            <el-button class="figure-toggle-btn" :type="fft ? 'primary': 'info'"  @click="toggleFigure('fft')">频率图</el-button>
+            <el-button class="figure-toggle-btn" :type="headplot ? 'primary': 'info'" @click="toggleFigure('headplot')">脑区地形图</el-button>
+          </el-form-item>
+        </div>
         <div class="filter-type">
           <el-col :span="12" class="time-fregament-col-6">
             <el-form-item label="滤波类型">
@@ -67,6 +74,7 @@ import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
 import { 
   openTimeSeriseWindow, 
   homePage, 
+  showFigures,
   getConfigFromServe, 
   postSelectChannel, 
   filterBoardData, 
@@ -82,6 +90,9 @@ export default {
       channels: [],
       currentChannels: [],
       radius: 400,
+      fft: true,
+      wave: true,
+      headplot: true,
       form: {
         productId: "5",
         ip: "",
@@ -155,6 +166,15 @@ export default {
 
   },
   methods: {
+
+    async toggleFigure(name) {
+      this[name] = !this[name]
+      const params = {}
+      params[name] = this[name]
+      const res = await showFigures({
+        ...params
+      })
+    },
     homePage() {
       homePage()
     },

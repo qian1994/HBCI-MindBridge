@@ -23,9 +23,6 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
         super(FiguresFFTWindow, self).__init__()
         self.setupUi(self)
         self.set_matplotlib()
-        self.setWindowTitle("fft")
-        self.resize(1200, 800)
-        self.move(200, 100)
         self.signal = Signal()
         self.scale = []
         self.nowTime = []
