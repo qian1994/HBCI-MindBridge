@@ -224,30 +224,9 @@ class RealTimeFigure(QMainWindow):
                                 "data": self.brainBoject.getCurrentData()})
 
             if res['action'] == 'end-task-file':
-                self.brainBoject.endTaskSaveData(res['data'])
-
-            # print(data.shape)
-        # try:
-        #     while True:
-        #
-        #         if res['action'] == 'update':
-        #             self.update(res['data'])
-
-        #         if res['action'] == 'channels':
-        #             self.setChannel(res['data'])
-
-        #         if res['action'] == 'show':
-        #             self.openWindow()
-
-        #         if res['action'] == 'close-window':
-        #             self.closeWindow()
-
-        #         if res['action'] == 'filter':
-        #             self.filterData(res['data'])
-
-        # except Exception as e:
-        #     print('this is wrong', e)
-
+                mtFile, csvFile = self.brainBoject.endTaskSaveData(res['data'])
+                self.conn1.send({'action': 'task-end-file',
+                                "data": {"mat": mtFile, "csv": csvFile}})
 
 def brainWindowFunc():
     app = QApplication(sys.argv)
@@ -257,6 +236,7 @@ def brainWindowFunc():
     message =  {"data":{'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
                          'channels': ['O1','C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1',
                                       'FP2', 'F4', 'C4', 'FC4', 'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
+    
     m.brainBoject.createFigures(message)
     m.setChannel(message['data']['channels'])
     # data =  np.random.rand(1000, 32) * 200

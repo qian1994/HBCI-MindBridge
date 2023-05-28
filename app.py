@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import time
+import datetime
 import numpy as np
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -18,6 +19,9 @@ from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
 import multiprocessing.connection as mp_conn
+from visualAst import Paradigms
+from SaveData import EEGSAVEDATA
+import scipy.io as sio
 
 conn1, conn2 = Pipe()
 from realtimeFigure import RealTimeFigure
@@ -67,6 +71,7 @@ class MainWindow(QMainWindow):
         recive_data.setDaemon(True)
         recive_data.start()
         self.currentData = []
+        self.paradigms = None
     def createWebEng(self):
         self.webView = QWebEngineView()
         self.webView.settings().setAttribute(
@@ -118,7 +123,7 @@ class MainWindow(QMainWindow):
             self.python_bridge.getFromServer.emit(
                 json.dumps({"id": 0, "action": 'close-time-serise'}))
         
-   
+    
     # 阻抗计算
     def getImpendenceData(self, message):
         boardData = self.getCurrent()
@@ -153,7 +158,6 @@ class MainWindow(QMainWindow):
         time.sleep(0.01)
         return super().closeEvent(a0)
     def showFiguresWidget(self, message):
-        print(message)
         data = message['data']
         if 'wave' in data:
             self.conn2.send({'action': 'toggle-wave', "data": data['wave']})
@@ -227,7 +231,7 @@ class MainWindow(QMainWindow):
         self.startSession(message)
 
     def updateBadChannel(self, message):
-        self.badChannel = message
+        self.badChannel = message['data']
 
     def endImpendenceTest(self, data):
         return 'ok'
@@ -267,14 +271,7 @@ class MainWindow(QMainWindow):
         print('send hide time serise window')
         self.conn2.send({'action': 'close-window', 'data': ''})
         
-    def endTaskSaveData(self, message):
-        print('get file name')
-        self.conn2.send({'action': 'end-task-file', 'data': message})
-
-    def getTaskEndFile(self, message):
-        print('message', message)
-        self.conn2.send({'action': 'end-file', 'data': ''})
-
+  
     def get_Signal(self, conn2 ):
         self.conn2 = conn2
     
@@ -290,16 +287,157 @@ class MainWindow(QMainWindow):
             if res['action'] == 'current-data':
                 self.currentData = np.array(res['data'])
                 continue   
+            
+            if res['action'] == 'task-end-file':
+                self.endTaskGetFileFromBrainflow(res['data'])
 
   
+    # 视觉评估相关代码
+    def openParamsWindow(self, message):
+        if self.paradigms == None:
+            self.paradigms = Paradigms()
+            self.paradigms.init(self.python_bridge,1200,
+                                700, self.trigger)
+    
+    def startFlashTask(self, data):
+        if data['selectModel'] == "6motion":
+            self.paradigms.startWindow(data)
+        else:
+            self.paradigms.start(data)
+
+    def endTotalTask(self, data):
+        self.paradigms.close()
+        self.message = data
+        print(data)
+        self.conn2.send({'action': 'end-task-file', 'data': ''})
+        return 'ok'
+    
+    def endTaskGetFileFromBrainflow(self, files):
+        self.endTotalTaskBySelf(files['csvFile'])
+
+    #  创建数据保存文件夹 
+    def checkSaveFile(self,dataDir, mode):
+        if not os.path.exists(dataDir):
+            os.makedirs(dataDir)
+        if not os.path.exists(dataDir + '/' + self.currentTimeString):
+            os.makedirs(dataDir + '/' + self.currentTimeString)
+        dataDir = dataDir + '/' + self.currentTimeString
+        if not os.path.exists(dataDir + '/' + mode):
+            os.makedirs(dataDir + '/' + mode)
+            dataDir = dataDir + '/' + mode
+        else:
+            count = 0
+            dirs = os.listdir(dataDir)
+            for dir in dirs:
+                if mode in dir:
+                    count += 1
+            dataDir = dataDir + '/' + mode+'-' + str(count)
+            os.makedirs(dataDir)
+        os.makedirs(dataDir + '/' + 'info')
+        os.makedirs(dataDir + '/' + 'data')
+        os.makedirs(dataDir + '/' + 'result')
+    
+    # 保存文件
+    def endTotalTaskBySelf(self, file):
+        info = self.message['data']
+        info['productId'] = int(info['productId'])
+        self.paradigms.close()
+        originData = np.loadtxt(file).T
+        originData = np.ascontiguousarray(np.array(data))
+        patientcode = info['patientcode']
+        userName = info['userName']
+        mode = info['selectModel']
+        dataDir = QDir.currentPath() + '/test_data/' + patientcode+'_'+userName
+        self.checkSaveFile(dataDir, mode)
+        with open(dataDir + '/info/' + 'pationInfo.txt', 'w')as file:
+            file.write(json.dumps({
+                "birthdate": info['birthdate'],
+                "patient_additional": info['patient_additional'],
+                "age":  info['age'],
+                "gender": info['gender'],
+                "userName": info['userName'],
+                "startData": info["startDate"],
+                "patientcode": info["patientcode"],
+                "technician": info["technician"]
+            }))
+        file.close()
+        with open(dataDir + '/info/' + 'exprimentInfo.txt', 'w')as file:
+            badChannel = []
+            if self.badChannel != None:
+                badChannel = self.badChannel
+            file.write(json.dumps({
+                'motionNumber': info['motionNumber'],
+                'motionDistance': info['motionDistance'],
+                'motionWidth': info['motionWidth'],
+                'motionHeight': info['motionHeight'],
+                'motionSpeed': info['motionSpeed'],
+                'selectModel': info['selectModel'],
+                'colorObject': info['colorObject'],
+                'colorTarget': info['colorTarget'],
+                'triggerTrialStart': info['triggerTrialStart'],
+                'productId': info['productId'],
+                'marker': info['marker'],
+                'passedImpedence': info['passedImpedence'],
+                'targetIndex': info['targetIndex'],
+                'trialNumber': info['trialNumber'],
+                'totalTrial': info['totalTrial'],
+                'lantency': info['lantency'],
+                'instance': info['instance'],
+                'trialLantency': info['trialLantency'],
+                'equipment': info['equipment'],
+                'trial': info['trial'],
+                'badChannel': badChannel
+            }))
+        file.close()
+        data = info
+        channels = info['channels']
+        eeg_channel = BoardShim.get_eeg_channels(info['productId'])
+        mar_channel = BoardShim.get_marker_channel(info['productId'])
+        sampleRate = BoardShim.get_sampling_rate(data['productId'])
+        eeg_data = originData[:, eeg_channel]
+        array = []
+        count = 0
+        for i in originData[:, mar_channel]:
+            if int(i) == -1:
+                array.append(str(count))
+                count += 1
+        marker_data = np.array([originData[:, mar_channel]]).T
+        eeg_data = np.concatenate((eeg_data, marker_data), axis=1)
+        data['recording_additional'] = json.dumps(data['patient_additional'])
+        self.brainflow_file_name = dataDir + '/data/' + info['fileName'] + '.csv'
+        edf_file_name = dataDir + '/data/' + info['fileName'] + '.bdf'
+        mat_file_name = dataDir + '/data/' + info['fileName'] + '.mat'
+        if "marker" not in channels:
+            channels.extend(['marker'])
+        info['sampleRate'] = sampleRate
+        info['channels'] = channels
+        info['data'] = eeg_data.tolist()
+        badChannel = []
+        if self.badChannel != None:
+            badChannel = self.badChannel
+        info['badChannel'] = badChannel
+        otherInfo = info
+        eegSaveData = EEGSAVEDATA()
+        eegSaveData.saveFile(fileName=edf_file_name, data=originData,
+                             channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
+        sio.savemat(mat_file_name, info)
+        self.python_bridge.getFromServer.emit(
+            json.dumps({"id": 0, "data": 'sucess-save-data'}))
+        self.paradigms = None
+    
+    def startssvepTask(self, message):
+        self.conn2.send({'action': 'start-session', "data": message})
+        return 'ok'
+
+    def endSingleTask(self, message):
+        self.python_bridge.getFromServer.emit(
+            json.dumps({"id": 0, "data": 'stop-flash'}))
 
 def MainWindowFunc(conn2):
     app = QApplication(sys.argv)
     m = MainWindow()
     m.get_Signal(conn2)
     m.show()
-    print('aa', app.exit())
-
     sys.exit(app.exec_())
 
 def brainWindowFunc(conn2):
@@ -308,7 +446,6 @@ def brainWindowFunc(conn2):
     m.get_Signal(conn2)
     m.showMinimized()
     m.show()
-    print('bb', app.exit())
     sys.exit(app.exec_())
 
 def main():

@@ -174,7 +174,7 @@ class BrainWindow(QObject):
         self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
         if not os.path.exists(self.MindBridgefileName):
             open(self.MindBridgefileName, 'w').close()
-
+        return self.mat_file_name, self.brainflow_file_name
     def postCurrentData(self, message):
         if self.conn1 == None:
             return
