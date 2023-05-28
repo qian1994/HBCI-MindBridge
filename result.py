@@ -226,8 +226,8 @@ class Result(object):
             baseFrequency = message['data']['baseFrequency']
             numMeanPlus = message['data']['number']
             labels = signals[-1]
-            signals = signals[1: 33]
             data = signals[:len(signals)-1]
+            print(data.shape)
             for index in range(len(data)):
                 DataFilter.detrend(data[index], DetrendOperations.NO_DETREND.value)
                 DataFilter.perform_bandpass(data[index], int(fs), message['data']['filterlow'], message['data']['filterHigh'], 2,
@@ -240,6 +240,7 @@ class Result(object):
             trial_data = []
             trial_index = 0
             select_train = message['data']['selectTrial']
+            
             for index in range(len(labels)):
                 label = labels[index]
                 if int(label) == 0:
@@ -274,12 +275,14 @@ class Result(object):
             psd_size = DataFilter.get_nearest_power_of_two(len(feature[0]))
             foi_idx = []
             channel_Score = dict({})
+            print(feature.shape)
             for index in range(len(feature)):
                 if channels[index] == 'HOE':
                     continue
                 if channels[index] == 'marker':
                     continue
                 if channels[index] not in selectComputedChannel:
+                    print(channels[index])
                     continue
                 channel_data = dict({})
                 foi_idx = []

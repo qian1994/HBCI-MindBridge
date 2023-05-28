@@ -22,7 +22,7 @@
   </div>
 </template>
 <script>
-import { getReportFileListSSVEP, createFileReportSSVEP } from '../api/index'
+import { getReportFileListSSVEP, initDevTools, createFileReportSSVEP, homePage } from '../api/index'
 export default {
   data() {
     return {

@@ -181,6 +181,7 @@ class RealTimeFigure(QMainWindow):
                 continue
 
             if res['action'] == 'trigger':
+                print('action', res['data'])
                 self.brainBoject.trigger(res['data'])
                 continue
 

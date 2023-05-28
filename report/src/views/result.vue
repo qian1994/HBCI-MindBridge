@@ -33,7 +33,7 @@
 <script>
 import * as echarts from 'echarts'
 import HeadPlot from '../Components/HeadPlot/electrodePositions.vue'
-import { getResultInfoByFileName, drawImageByLabelSSVEP, openFileDialog } from '../api/index'
+import { getResultInfoByFileName, openFileDialog, drawImageByLabelSSVEP } from '../api/index'
 export default {
     data() {
         this.myChart = ''

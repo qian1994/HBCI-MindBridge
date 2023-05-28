@@ -62,6 +62,16 @@ export default {
                         const data = await openHtml(name)
                         return
                     }
+
+                    if (name == 'transfile') {
+                        const data = await openHtml(name)
+                        return
+                    }
+
+                    if (name == 'report') {
+                        const data = await openHtml(name)
+                        return
+                    }
                     const res = await initTestBoard(this.form)
                     if (res == 'ok') {
                         localStorage.setItem('mindbridgeinfo', JSON.stringify(this.form))

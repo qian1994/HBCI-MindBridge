@@ -89,6 +89,10 @@ export default {
             title = '转换文件格式'
           }else if (item == 'processing') {
             title = '数据处理'
+          }else if (item == 'report') {
+            title = '评估报告'
+          }else if (item == 'svp1_2') {
+            title = '视觉评估'
           }
           paradigm.push({
             name: item,

@@ -145,7 +145,7 @@ class BrainWindow(QObject):
         return 'ok'
 
     def trigger(self, number):
-        self.board.insert_marker(int(number))
+        self.board.insert_marker(float(number))
 
     def endTaskSaveData(self, message):
         currentTimeString = self.MindBridgefileName.replace(
@@ -153,6 +153,8 @@ class BrainWindow(QObject):
         self.brainflow_file_name = self.dir_path+"/data/" + \
             'MindBridge_' + currentTimeString + '.csv'
         dataNow = self.board.get_board_data()
+        labels = dataNow[-1]
+        print(labels[labels != 0], 'this is labels ')
         data = np.loadtxt(self.MindBridgefileName).T
         os.remove(self.MindBridgefileName)
         data = np.ascontiguousarray(np.array(data))

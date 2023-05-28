@@ -26,6 +26,7 @@ import scipy.io as sio
 conn1, conn2 = Pipe()
 from realtimeFigure import RealTimeFigure
 sub_window = None
+app = None
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -45,6 +46,9 @@ class MainWindow(QMainWindow):
         self.content.setSpacing(0)
         self.widget.setLayout(self.content)
         self.setWindowTitle('MindBridge')
+        screenRect = app.primaryScreen().geometry().getRect()
+        self.width = screenRect[2] - screenRect[0]
+        self.height = screenRect[3] - screenRect[1]
         self.resize(1200, 600)
         self.content.setContentsMargins(0, 0, 0, 0)
         self.setContentsMargins(0, 0, 0, 0)
@@ -290,8 +294,8 @@ class MainWindow(QMainWindow):
     def openParamsWindow(self, message):
         if self.paradigms == None:
             self.paradigms = Paradigms()
-            self.paradigms.init(self.python_bridge,1200,
-                                700, self.trigger)
+            self.paradigms.init(self.python_bridge,self.width,
+                                self.height, self.trigger)
     
     def startFlashTask(self, data):
         if data['selectModel'] == "6motion":
@@ -431,13 +435,6 @@ class MainWindow(QMainWindow):
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-flash'}))
 
-def MainWindowFunc(conn2):
-    app = QApplication(sys.argv)
-    m = MainWindow()
-    m.get_Signal(conn2)
-    m.show()
-    sys.exit(app.exec_())
-
 def brainWindowFunc(conn2):
     app = QApplication(sys.argv)
     m = RealTimeFigure()
@@ -446,15 +443,16 @@ def brainWindowFunc(conn2):
     m.show()
     sys.exit(app.exec_())
 
-def main():
-    global sub_window
-    conn1, conn2 = Pipe()
-    p2 = Process(target=brainWindowFunc, args=(conn1,))
-    p2.start()
-    sub_window = p2
-    MainWindowFunc(conn2)
 
 
 
 if __name__ == '__main__':
-    main()
+    conn1, conn2 = Pipe()
+    p2 = Process(target=brainWindowFunc, args=(conn1,))
+    p2.start()
+    sub_window = p2
+    app = QApplication(sys.argv)
+    m = MainWindow()
+    m.get_Signal(conn2)
+    m.show()
+    sys.exit(app.exec_())

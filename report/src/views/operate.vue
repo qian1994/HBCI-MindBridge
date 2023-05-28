@@ -149,7 +149,7 @@
 </template>
 <script>
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
-import {  createExprimentSsvepResult,   getInfoByFileName} from '../api/index'
+import { getResultFiles, createExprimentSsvepResult, getChannelImageByFiles, initDevTools, getEEGElectronPosition, openFileDialog , getInfoByFileName} from '../api/index'
 export default {
     data() {
         return {
