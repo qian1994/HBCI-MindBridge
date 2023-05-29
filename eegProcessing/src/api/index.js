@@ -17,13 +17,6 @@ export function sendSyncMsg(msg) {
     });
 }
 
-export function homePage(msg) {
-    return apiClient.send({
-        action:'go-to-home-page',
-        data: msg
-    })
-}
-
 function _addMsgListener(callback) {
     apiClient.on("getFromServer", callback);
 }

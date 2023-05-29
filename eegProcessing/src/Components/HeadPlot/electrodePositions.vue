@@ -1,6 +1,6 @@
 <template>
   <div class="electrode-positions">
-    <div class="electrode-positions-head" :style="'min-height: ' + radius + 'px;' + 'width:' + radius + 'px'">
+    <div class="electrode-positions-head" :style="'min-height: ' + radius + 'px;' + 'width:' + 0 + 'px'">
       <div class="electrode-positions-head-cirle" :style="'width:' + radius + 'px;' + 'height:' + radius + 'px'">
         <div class="point-out" v-for="point in points" :style="point['position']" @click="pointClick(point)">
           <!-- 
@@ -178,6 +178,7 @@ export default {
 
 .electrode-positions {
   position: relative;
+  width: 300px;
 }
 
 .electrode-positions-head {
