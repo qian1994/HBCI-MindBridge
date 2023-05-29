@@ -210,7 +210,7 @@
         </div>
       </el-form>
     </div>
-    <div class="storage_address">
+    <div class="storage_address" v-if="files.length">
       <label for="存储地址" style=" width:130px; display: inline-block;">存储地址</label>
       <el-button @click="saveDataDir" style="margin-left: -50px;">选择文件夹</el-button>
       <div> {{this.form.saveDataPath}}</div>
@@ -269,7 +269,7 @@ export default {
      
       radius: 300,
       triggerNumbers: [],
-      files: ['a.csv'],
+      files: [],
       channels: [],
       channelsName: []
     }
@@ -382,22 +382,17 @@ export default {
     },
     async onSubmit() {
       
-      // const res = await processingOriginData({
-      //   config: this.form,
-      //   files: this.files,
-      //   channels:this.channelsName,
-      //   boardId: this.form.productId
-      // })
-
-      console.log({
+      const res = await processingOriginData({
         config: this.form,
         files: this.files,
         channels:this.channelsName,
         boardId: this.form.productId
       })
-      // if (res == 'ok') {
-      //   this.$message('成功生成预处理数据')
-      // }
+
+    
+      if (res == 'ok') {
+        this.$message('成功生成预处理数据')
+      }
     },
     async getLabelsByFileName(files) {
       console.log('this is labels', files)   

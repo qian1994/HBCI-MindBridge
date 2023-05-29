@@ -7,7 +7,7 @@ from scipy import signal
 from scipy.linalg import eigh
 from scipy.signal import periodogram
 import scipy.io as sio
-
+import datetime
 
 class Processsing(object):
     def __init__(self):
@@ -404,10 +404,11 @@ class Processsing(object):
         
         # if config['saveDataPath'] == '':
         #     return
-        
+        time_now = datetime.datetime.now()
+        time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
         if config['createScript'] == '1':
             self.createScript(files, channel, config,
-                              boardId, './demo-script.py')
+                              boardId, './createScript/demo-script_'+time_string+'.py')
             
         if config['isOutPutData'] == '1':
             save_mat_data = dict({})
@@ -420,8 +421,9 @@ class Processsing(object):
             save_mat_data['DE'] = de_feature.tolist()
             save_mat_data['statistic'] = statistic_feature.tolist()
             print('this is create mat file')
-        
-            sio.savemat('./demo-script.mat', save_mat_data)
+            
+
+            sio.savemat('./createScript/demo-script_'+time_string+'.mat', save_mat_data)
         print('this is create mat end')
     
     def createScript(self, files, channel, config, boardId, fileName):
@@ -480,7 +482,7 @@ def extract_DE_new(epoch_std, Fs, bands):
     NFFT = 2**np.ceil(np.log2(time_sec)).astype(int)
     f = Fs/2 * np.linspace(0, 1, NFFT//2)
 
-    de = np.zeros((epoch_std.shape[0], len(bands)))  # 存储 DE 特征的数组
+    de = np.zeros((epoch_std.shape[0], len(bands)))  
     for channel in range(epoch_std.shape[0]):
         for section in range(epoch_std.shape[1] // time_sec):
             window = np.hanning(time_sec)
