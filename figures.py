@@ -98,17 +98,6 @@ class FigureWindow(QWidget, Ui_figureWidget):
     def update(self, data):
         self.ax.clear()
         self.ax.set_yticks(self.numbers, self.showChannels, fontsize=9)
-        # self.ax.set_ylim(0,32)
-     
-        # for i in range(len(data)):
-        #     if i not in self.seletChannelIndex:
-        #         continue
-        #     item = data[i] 
-        #     if len(item) == 0:
-        #         continue
-        #     self.ax.plot( (187500 - item) / 187500 + i* 1   + self.upScrollData, color='lightgrey')
-        # self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
-        # self.fig.canvas.flush_events()
         self.ax.set_ylim((len(self.channels) - 8) * self.splitMargin ,  len(self.channels) * self.splitMargin )
         if len(data) != 0:
             plt.xlim(500, len(data[0]))

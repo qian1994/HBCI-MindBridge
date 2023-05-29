@@ -104,7 +104,6 @@ class RealTimeFigure(QMainWindow):
     def filterData(self, data):
         dataprocessing = DataProcessing()
         boardData = data.copy()
-        print(boardData.shape)
         boardData = dataprocessing.handleFilter(boardData, 1000, self.filterParams['low'],
                                                 self.filterParams['high'], self.filterParams['order'], self.filterParams['filterType'])
         return boardData
