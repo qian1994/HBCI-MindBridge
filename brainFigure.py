@@ -12,7 +12,6 @@ from PyQt5.QtCore import QDir, QTimer, Qt, QObject
 from PyQt5.QtWidgets import *
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
-from dataPorcessing import DataProcessing
 import scipy.io as sio
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
@@ -163,6 +162,7 @@ class BrainWindow(QObject):
         else:
             data = dataNow
         datafilter = DataFilter()
+        data = np.argsort(data[:, -12])
         datafilter.write_file(
             data=data, file_name=self.brainflow_file_name, file_mode='w')
         time_now = datetime.datetime.now()

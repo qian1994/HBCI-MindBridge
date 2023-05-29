@@ -22,6 +22,7 @@ import multiprocessing.connection as mp_conn
 from visualAst import Paradigms
 from SaveData import EEGSAVEDATA
 import scipy.io as sio
+import signal
 
 conn1, conn2 = Pipe()
 from realtimeFigure import RealTimeFigure
@@ -148,7 +149,7 @@ class MainWindow(QMainWindow):
     def getRailedPercentage(self, boardData):
         railed = []
         for channel in range(len(boardData)):
-            percetage = DataFilter.get_railed_percentage(boardData[channel], 24) * 100
+            percetage = DataFilter.get_railed_percentage(boardData[channel], 24) 
             railed.append(percetage)
         railed = ','.join([str(i) for i in railed])
         return railed
@@ -162,7 +163,9 @@ class MainWindow(QMainWindow):
     def closeEvent(self, a0: QtGui.QCloseEvent):
         self.conn2.send({"action": 'close-app', "data": ''})
         time.sleep(0.01)
-        return super().closeEvent(a0)
+        os.kill(sub_window.pid, signal.SIGTERM)
+        sys.exit(0)
+
     def showFiguresWidget(self, message):
         data = message['data']
         if 'wave' in data:

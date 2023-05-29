@@ -69,7 +69,7 @@ class RealTimeFigure(QMainWindow):
         self.recive_data = Thread(target=self.recv_signal)
         self.recive_data.setDaemon(True)
         self.recive_data.start()
-        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
 
     def filterBoardData(self, message):
         data = message['data']
@@ -104,7 +104,8 @@ class RealTimeFigure(QMainWindow):
     def filterData(self, data):
         dataprocessing = DataProcessing()
         boardData = data.copy()
-        boardData = dataprocessing.handleFilter(data, 1000, self.filterParams['low'],
+        boardData = np.ascontiguousarray(np.array(boardData))
+        boardData = dataprocessing.handleFilter(boardData, 1000, self.filterParams['low'],
                                                 self.filterParams['high'], self.filterParams['order'], self.filterParams['filterType'])
         return boardData
 
@@ -113,6 +114,7 @@ class RealTimeFigure(QMainWindow):
         if len(data) == 0 or len(data[0]) == 0 or len(self.channel) == 0:
             return
         try:
+            data = self.filterData(data)
             self.figures.update(data)
             self.figureHeadPlot.update(data)
             fftArray = self.dataprocessing.handleFFt(data, 1000)
@@ -146,13 +148,7 @@ class RealTimeFigure(QMainWindow):
                 self.leftWidget.hide()
 
     def closeEvent(self, a0: QtGui.QCloseEvent):
-        # self.figures.close()
-        # self.figureFft.close()
-        # self.figureHeadPlot.close()
-        # self.recive_data.join()
-       
         os._exit(0)
-        # return super().closeEvent(a0)
 
     def get_Signal(self, conn1):
         self.conn1 = conn1
