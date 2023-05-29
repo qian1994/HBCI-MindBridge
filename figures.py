@@ -38,25 +38,22 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.slider = QSlider(Qt.Vertical, self)
         self.slider.setTickPosition(QSlider.TicksBelow)
         self.slider.setGeometry(10, 350, 15, 200)
-        self.slider.setTickInterval(1)
+        self.slider.setTickInterval(0)
         self.slider.valueChanged.connect(self.scrollBar)
+        self.splitMargin = 30
         # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
         # self.upScrollHeight = 0.3
     def setChannels(self, channels):
         labels = []
         self.labels = labels
         self.channels = channels
-        if len(channels) <= 8:
-            self.upScrollData = -0.2
         for i in range(len(channels)):
-            self.numbers.append(0.95 - 0.08 * i + 0.0005 + self.upScrollData)
+            self.numbers.append(len(channels) * self.splitMargin - ((i + 0.5)  * self.splitMargin) + self.upScrollData)
         self.slider.setRange(1, len(channels))
         self.slider.setValue(len(channels))
         selectChannelsIndex = []
-        index = 0
         for channel in channels:
             selectChannelsIndex.append(self.channels.index(channel))
-            index +=1
         self.seletChannelIndex = selectChannelsIndex
         self.showChannels = channels
     
@@ -93,28 +90,33 @@ class FigureWindow(QWidget, Ui_figureWidget):
         return super().closeEvent(a0)
     
     def scrollBar(self, data):
-        if len(self.channels) <= 8:
-            return
-        number = 0.06
-        if len(self.channels) > 32:
-            number = 0.07
-        self.upScrollData = number * len(self.channels) / len(self.channels) * (len(self.channels)-data)
+        self.upScrollData = self.splitMargin *  (len(self.channels) - data )
         self.numbers = []
         for i in range(len(self.channels)):
-            self.numbers.append(0.95 - 0.08 * i + 0.0005 + self.upScrollData)
+            self.numbers.append(len(self.channels) * self.splitMargin - ((i + 0.5) * self.splitMargin) + self.upScrollData)
 
     def update(self, data):
         self.ax.clear()
         self.ax.set_yticks(self.numbers, self.showChannels, fontsize=9)
-        self.ax.set_ylim(0,1)
+        # self.ax.set_ylim(0,32)
+     
+        # for i in range(len(data)):
+        #     if i not in self.seletChannelIndex:
+        #         continue
+        #     item = data[i] 
+        #     if len(item) == 0:
+        #         continue
+        #     self.ax.plot( (187500 - item) / 187500 + i* 1   + self.upScrollData, color='lightgrey')
+        # self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
+        # self.fig.canvas.flush_events()
+        self.ax.set_ylim((len(self.channels) - 8) * self.splitMargin ,  len(self.channels) * self.splitMargin )
         if len(data) != 0:
-            plt.xlim(0, len(data[0]))
+            plt.xlim(500, len(data[0]))
         for i in range(len(data)):
-            if i not in self.seletChannelIndex:
-                continue
-            item = data[i] 
-            if len(item) == 0:
-                continue
-            self.ax.plot(item*0.0005 + ( 0.95 - 0.08 * i) + self.upScrollData, color='lightgrey')
+            item = data[i]
+            item -= np.mean(item) 
+            item = len(data) * self.splitMargin - self.splitMargin * (i + 0.5)  + self.upScrollData + item 
+            item[item == 0] = len(data) * self.splitMargin - self.splitMargin * (i + 0.5)  + self.upScrollData
+            self.ax.plot(np.arange(500, len(item)), item[500: 5000], color='lightgrey')
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()

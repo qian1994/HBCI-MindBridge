@@ -63,12 +63,12 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
     
     def update(self, data):
         self.ax.clear()
-        self.ax.set_ylim(0,30)
+        self.ax.set_ylim(0,1)
         if len(data) != 0:
             plt.xlim(0, 100)
         for i in range(len(data)):
             item = data[i] 
-            self.ax.plot(item[1][0:100].tolist(), np.log2(item[0][0:100].tolist()))
+            self.ax.plot(item[1][0:100].tolist(),(item[0][0:100].tolist()))
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
 

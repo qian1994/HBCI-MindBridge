@@ -18,6 +18,7 @@ from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
 import multiprocessing.connection as mp_conn
+import signal
 
 conn1, conn2 = Pipe()
 from realtimeFigure import RealTimeFigure
@@ -137,7 +138,7 @@ class MainWindow(QMainWindow):
     def getRailedPercentage(self, boardData):
         railed = []
         for channel in range(len(boardData)):
-            percetage = DataFilter.get_railed_percentage(boardData[channel], 24) * 100
+            percetage = DataFilter.get_railed_percentage(boardData[channel], 24) 
             railed.append(percetage)
         railed = ','.join([str(i) for i in railed])
         return railed
@@ -151,9 +152,10 @@ class MainWindow(QMainWindow):
     def closeEvent(self, a0: QtGui.QCloseEvent):
         self.conn2.send({"action": 'close-app', "data": ''})
         time.sleep(0.01)
-        return super().closeEvent(a0)
+        os.kill(sub_window.pid, signal.SIGTERM)
+        sys.exit(0)
+
     def showFiguresWidget(self, message):
-        print(message)
         data = message['data']
         if 'wave' in data:
             self.conn2.send({'action': 'toggle-wave', "data": data['wave']})
@@ -308,7 +310,6 @@ def brainWindowFunc(conn2):
     m.get_Signal(conn2)
     m.showMinimized()
     m.show()
-    print('bb', app.exit())
     sys.exit(app.exec_())
 
 def main():
