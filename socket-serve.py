@@ -24,11 +24,14 @@ while True:
             print('this is send action trigger')
             time.sleep(1)
             client_socket.sendall(json.dumps({"action": "trigger", "data": 1}).encode('utf-8'))
-            # data = client_socket.recv(1024)
+            data = client_socket.recv(1024)
             # 处理接收到的数据
             # ...
             # 发送响应给客户端
-            # response = '收到消息：' + data.decode()
+            response = '收到消息：' + data.decode()
+            
+            # 收到消息的反馈 {'active': 'recv'}
+            print('response', response)
             # client_socket.sendall(response.encode())
             
     except Exception as e:

@@ -54,6 +54,7 @@ class SocketCustomClient(object):
         else:
             print('接受命令', command)
 
+        self.serve.sendall(json.dumps({'active': 'recv'}).encode('utf-8'))
 
     def stop(self):
         print('this is stop')
