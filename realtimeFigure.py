@@ -244,25 +244,25 @@ class RealTimeFigure(QMainWindow):
         #     print('this is wrong', e)
 
 
-def brainWindowFunc():
-    app = QApplication(sys.argv)
-    m = RealTimeFigure()
-    m.show()
-    # m.setChannel(['1', '2', '3'])
-    message =  {"data":{'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
-                         'channels': ['O1','C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1',
-                                      'FP2', 'F4', 'C4', 'FC4', 'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
-    m.brainBoject.createFigures(message)
-    m.setChannel(message['data']['channels'])
-    # data =  np.random.rand(1000, 32) * 200
-    # print(data.shape)
-    # m.update(data)
-    sys.exit(app.exec_())
+# def brainWindowFunc():
+#     app = QApplication(sys.argv)
+#     m = RealTimeFigure()
+#     m.show()
+#     # m.setChannel(['1', '2', '3'])
+#     message =  {"data":{'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
+#                          'channels': ['O1','C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1',
+#                                       'FP2', 'F4', 'C4', 'FC4', 'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
+#     m.brainBoject.createFigures(message)
+#     m.setChannel(message['data']['channels'])
+#     # data =  np.random.rand(1000, 32) * 200
+#     # print(data.shape)
+#     # m.update(data)
+#     sys.exit(app.exec_())
 
 
-def main():
-    brainWindowFunc()
+# def main():
+#     brainWindowFunc()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':y
+#     main()

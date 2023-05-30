@@ -10,6 +10,8 @@ from eeg_positions import get_elec_coords
 from util import *
 from processing import Processsing
 import numpy as np
+
+
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
     getFromServer = pyqtSignal(str)
@@ -102,48 +104,51 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'init-dev-tools':
             data = self.initDevTools(message)
 
-
         if message['action'] == 'get-current-board-data':
-            data = self.getCurrentBoardData(message)
+            data=self.getCurrentBoardData(message)
 
         if message['action'] == 'open-file-dialog':
-            data = self.openFileDialog(message)
+            data=self.openFileDialog(message)
 
         if message['action'] == 'open-dir-dialog':
-            data = self.openDirectory(message)
+            data=self.openDirectory(message)
 
         if message['action'] == 'filter-board-dta':
-            data = self.filterBoardData(message)
+            data=self.filterBoardData(message)
 
         if message['action'] == 'convert-file-format':
-            data = self.convertFileFormat(message)
+            data=self.convertFileFormat(message)
 
         if message['action'] == 'get-eeg-electron-position':
-            data = self.getEEGElectronPosition(message)
+            data=self.getEEGElectronPosition(message)
 
         if message['action'] == 'start-custom-paradigm':
-            data = self.startCustomParadigm(message)
+            data=self.startCustomParadigm(message)
 
         if message['action'] == 'stop-custom-paradigm':
             print('action', message)
-            data = self.endCustomParadigm(message)
+            data=self.endCustomParadigm(message)
 
         if message['action'] == 'get-file-labels-by-file-name':
-            data = self.getFileLabelsByFileName(message)
+            data=self.getFileLabelsByFileName(message)
+
+        # eeg processing data
+        if message['action'] == 'get-productId-by-file-name':
+            data=self.getProductIdByFileName(message)
 
         if message['action'] == 'processing-origin-data':
-            data = self.processingOriginData(message)
-        
+            data=self.processingOriginData(message)
+
         if message['action'] == 'plot-origin-data':
-            data = self.plotOriginData(message)
+            data=self.plotOriginData(message)
 
         if message['action'] == 'show-figures-widget':
-            data = self.showFiguresWidget(message)
+            data=self.showFiguresWidget(message)
 
-        message['data'] = data
+        message['data']=data
         return self.responseSignal.emit(json.dumps(message))
 
-    @QtCore.pyqtSlot(str, result=str)
+    @ QtCore.pyqtSlot(str, result = str)
     def context(self, message):
         self.handleMessage(message)
 
@@ -157,7 +162,7 @@ class JsBridge(QtCore.QObject):
         print(message)
 
     def startSession(self, message):
-        data = self.mainwindow.startSession(message)
+        data=self.mainwindow.startSession(message)
         return data
 
     def startStream(self, message):
@@ -184,24 +189,24 @@ class JsBridge(QtCore.QObject):
         return 'ok'
 
     def startImpendenceTest(self, message):
-        data = self.mainwindow.startImpendenceTest(message)
+        data=self.mainwindow.startImpendenceTest(message)
         return data
 
     def endImpendenceTest(self, message):
-        data = self.mainwindow.endImpendenceTest(message)
+        data=self.mainwindow.endImpendenceTest(message)
         return data
 
     def impendenceData(self, message):
-        data = self.mainwindow.getImpendenceData(message)
+        data=self.mainwindow.getImpendenceData(message)
         return data
 
     def postConfigToPage(self, message):
-        mindBridge = MindBridge()
+        mindBridge=MindBridge()
         return json.dumps(dict({"channels": mindBridge.channelImpedences, "products": mindBridge.products}))
 
 
     def getApplication(self, message):
-        data = os.listdir('./web-app')
+        data=os.listdir('./web-app')
         return data
 
     def openHtml(self, message):
@@ -217,11 +222,11 @@ class JsBridge(QtCore.QObject):
 
 
     def postTimeSeriseChannelShow(self, message):
-        data = self.mainwindow.postTimeSeriseChannelShow(message)
+        data=self.mainwindow.postTimeSeriseChannelShow(message)
         return data
 
     def closeTimeSeriseWindow(self, message):
-        data = self.mainwindow.closeTimeSeriseWindow(message)
+        data=self.mainwindow.closeTimeSeriseWindow(message)
         return data
 
     def fullScreen(self, message):
@@ -235,35 +240,54 @@ class JsBridge(QtCore.QObject):
 
     def getCurrentBoardData(self, message):
         return self.mainwindow.getCurrentBoardData(message)
-    
+
     def getFileLabelsByFileName(self, message):
-        filePath = message['data']
-        files_label = []
+        filePath=message['data']
+        files_label=[]
         for file in filePath:
-            data = np.loadtxt(file)
-            data = data.T
-            label = data[-1]
-            label = label[label != 0]
+            data=np.loadtxt(file)
+            data=data.T
+            label=data[-1]
+            label=label[label != 0]
             files_label.extend(label.tolist())
         return files_label
 
+    def getProductIdByFileName(self, message):
+        filePath=message['data']
+        productId= 5
+        for file in filePath:
+            data=np.loadtxt(file)
+            data=data.T
+            print(data.shape)
+            if len(data) == 24:
+                productId=5
+            elif len(data) == 32:
+                productId=516
+            elif len(data) == 40:
+                productId= 520
+            elif len(data) == 48:
+                productId=532
+            elif len(data) == 80:
+                productId=564
+        return productId
+
     def processingOriginData(self, message):
-        data = message['data']
-        filePath = data['files']
-        channels = data['channels']
-        boardId = data['boardId']
-        config = data['config']
-        process = Processsing()
-        res = process.processing(filePath, channels, config, boardId)
+        data=message['data']
+        filePath=data['files']
+        channels=data['channels']
+        boardId=data['boardId']
+        config=data['config']
+        process=Processsing()
+        res=process.processing(filePath, channels, config, boardId)
         return 'ok'
 
     def plotOriginData(self, message):
-        data = message['data']
-        filePath = data['file']
-        channels = data['channels']
-        boardId = data['boardId']
-        process = Processsing()
-        res = process.plotEEGOriginData(filePath, channels, boardId)
+        data=message['data']
+        filePath=data['file']
+        channels=data['channels']
+        boardId=data['boardId']
+        process=Processsing()
+        res=process.plotEEGOriginData(filePath, channels, boardId)
         return 'ok'
     def getBatterVertage(self, message):
         # try:
@@ -279,9 +303,9 @@ class JsBridge(QtCore.QObject):
 
     def initTestBoard(self, message):
         try:
-            result = requests.get(
-                'http://'+message['data']['ip'] + ':80/all', timeout=3, headers={'Connection': 'close'})
-            res = json.loads(result.text)
+            result=requests.get(
+                'http://'+message['data']['ip'] + ':80/all', timeout = 3, headers = {'Connection': 'close'})
+            res=json.loads(result.text)
             result.close()
             if result.status_code != 200:
                 return "fail"
@@ -304,20 +328,20 @@ class JsBridge(QtCore.QObject):
         return 'ok'
 
     def openFileDialog(self, message):
-        fileName = self.mainwindow.openFileDialog(message)
+        fileName=self.mainwindow.openFileDialog(message)
         return fileName
 
     def openFilesDialog(self, message):
-        fileNames = self.mainwindow.openFilesDialog(message)
+        fileNames=self.mainwindow.openFilesDialog(message)
         return fileNames
 
     def openDirectory(self, message):
-        dir = self.mainwindow.openDirectory(message)
+        dir=self.mainwindow.openDirectory(message)
         return dir
 
     # 实时数据进行滤波处理
     def filterBoardData(self, message):
-        data = self.mainwindow.filterBoardData(message)
+        data=self.mainwindow.filterBoardData(message)
         return data
 
     def getBadChannel(self, message):
@@ -329,8 +353,8 @@ class JsBridge(QtCore.QObject):
         return self.mainwindow.updateBadChannel(message['data'])
 
     def getEEGElectronPosition(self, message):
-        coords = get_elec_coords(system='1010', as_mne_montage=False)
-        data = [coords['label'].tolist(), coords['x'].tolist(),
+        coords=get_elec_coords(system = '1010', as_mne_montage = False)
+        data=[coords['label'].tolist(), coords['x'].tolist(),
                 coords['y'].tolist()]
         return data
 

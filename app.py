@@ -5,6 +5,7 @@ import time
 import numpy as np
 from PyQt5 import QtCore
 from PyQt5 import QtGui
+from PyQt5.QtCore import QCoreApplication, QStandardPaths
 from brainflow.board_shim import BoardShim
 from PyQt5 import QtWebEngineWidgets
 from PyQt5.QtCore import QDir, QTimer, Qt, QObject
@@ -18,6 +19,7 @@ from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
 import multiprocessing.connection as mp_conn
+import multiprocessing
 import signal
 
 conn1, conn2 = Pipe()
@@ -82,9 +84,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl('http://localhost:8082/')
+        # html_path = QtCore.QUrl.fromLocalFile(
+        #     QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl('http://localhost:8082/')
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -295,21 +297,19 @@ class MainWindow(QMainWindow):
 
   
 
-def MainWindowFunc(conn2):
-    app = QApplication(sys.argv)
-    m = MainWindow()
-    m.get_Signal(conn2)
-    m.show()
-    print('aa', app.exit())
-
-    sys.exit(app.exec_())
+# def MainWindowFunc(conn2):
+   
 
 def brainWindowFunc(conn2):
     app = QApplication(sys.argv)
     m = RealTimeFigure()
+    QCoreApplication.setOrganizationName("./cache")
+    QCoreApplication.setApplicationName("./cache")
+
+    cache_dir = QStandardPaths.writableLocation(QStandardPaths.CacheLocation)
+
     m.get_Signal(conn2)
     m.showMinimized()
-    m.show()
     sys.exit(app.exec_())
 
 def main():
@@ -318,9 +318,14 @@ def main():
     p2 = Process(target=brainWindowFunc, args=(conn1,))
     p2.start()
     sub_window = p2
-    MainWindowFunc(conn2)
-
-
+    # p1 = Process(target=MainWindowFunc, args=(conn2,))
+    # p1.start()
+    app = QApplication(sys.argv)
+    m = MainWindow()
+    m.get_Signal(conn2)
+    m.show()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     main()
