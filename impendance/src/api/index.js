@@ -167,12 +167,6 @@ export function getChannelImageByFiles(msg) {
     })
 }
 
-export function startSsvepTask(msg) {
-    return apiClient.send({
-        action: 'start-ssvep-task',
-        data: msg
-    })
-}
 
 export function fullScreen(msg) {
     return apiClient.send({
