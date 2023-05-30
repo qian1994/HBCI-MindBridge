@@ -10,7 +10,6 @@ from eeg_positions import get_elec_coords
 from util import *
 from processing import Processsing
 import numpy as np
-from result import Result
 
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)

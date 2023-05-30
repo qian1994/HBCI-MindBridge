@@ -287,8 +287,8 @@ export default {
         return
       const res = await getLabelByFileName(newValue)
       const id = await getProductIdByFileName(newValue)
-      console.log(id, res)
       this.form.productId = id
+      this.channelsName = this.getChannelsByProductId(id)
       this.triggerNumbers = [...new Set(res)];   
     }
   },
@@ -365,26 +365,28 @@ export default {
       const data = await getConfigFromServe("msg")
       this.channels = JSON.parse(data)['channels']
       this.products = JSON.parse(data)['products']
-      let channels = []
-      if (this.form.productId == '5') {
-        channels = this.channels['8']
-      }
-      if (this.form.productId == '516') {
-        channels = this.channels["16"]
-      }
-      if (this.form.productId == '520') {
-        channels = this.channels["20"]
-      }
-      if (this.form.productId == '532') {
-        channels = this.channels['32']
-      }
-      if (this.form.productId == '564') {
-        channels = this.channels['64']
-      }
-      this.channelsName = channels
     }, 300);
   },
   methods:{
+    getChannelsByProductId(productId) {
+      let channels = []
+      if (productId == '5') {
+        channels = this.channels['8']
+      }
+      if (productId == '516') {
+        channels = this.channels["16"]
+      }
+      if (productId == '520') {
+        channels = this.channels["20"]
+      }
+      if (productId == '532') {
+        channels = this.channels['32']
+      }
+      if (productId == '564') {
+        channels = this.channels['64']
+      }
+      return channels
+    },
     homePage() {
       homePage()
     },
