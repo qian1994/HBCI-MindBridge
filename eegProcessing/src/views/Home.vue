@@ -2,6 +2,7 @@
   <div class="container">
     <div class="file">
       <h2 class="select_file">选中文件</h2>
+      <el-button @click="homePage"  style="background: #FAA629;color: white;">首页</el-button>
       <el-button @click="chooseFile"  style="background: #FAA629;color: white;">选择文件</el-button>
       <el-button @click="chooseDir"  style="background: #FAA629;color: white;">选择文件夹</el-button>
       <el-button @click="addFiles"  style="background: #2868C9;color: white;">添加文件</el-button>
@@ -222,13 +223,15 @@
 </template>
 <script>
 import { 
+  homePage,
   openFileDialog, 
   openDirDialog, 
   initDevTools,
   processingOriginData, 
   getConfigFromServe, 
   getLabelByFileName, 
-  plotOriginEEGDataByFile 
+  plotOriginEEGDataByFile, 
+getProductIdByFileName
 } from '../api/index'
 import ElectrodePositions from '../Components/HeadPlot/electrodePositions.vue'
 import Feature from '../Components/Feature/index.vue'
@@ -280,7 +283,12 @@ export default {
   },
   watch:{
     async files(oldValue, newValue) {
+      if (newValue.length == 0)
+        return
       const res = await getLabelByFileName(newValue)
+      const id = await getProductIdByFileName(newValue)
+      console.log(id, res)
+      this.form.productId = id
       this.triggerNumbers = [...new Set(res)];   
     }
   },
@@ -377,11 +385,13 @@ export default {
     }, 300);
   },
   methods:{
+    homePage() {
+      homePage()
+    },
     removeFiles(file) {
       this.files = this.files.filter(item => item != file)
     },
     async onSubmit() {
-      
       const res = await processingOriginData({
         config: this.form,
         files: this.files,

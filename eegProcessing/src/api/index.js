@@ -100,6 +100,14 @@ export function getLabelByFileName(msg) {
     })
 }
 
+
+export function getProductIdByFileName(msg) {
+    return apiClient.send({
+        action: 'get-productId-by-file-name',
+        data: msg
+    })
+}
+
 export function processingOriginData(msg) {
     return apiClient.send({
         action: 'processing-origin-data',
