@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         screenRect = app.primaryScreen().geometry().getRect()
         self.width = screenRect[2] - screenRect[0]
         self.height = screenRect[3] - screenRect[1]
-        self.resize(1200, 600)
+        self.resize(1200, 800)
         self.content.setContentsMargins(0, 0, 0, 0)
         self.setContentsMargins(0, 0, 0, 0)
         self.widget.setContentsMargins(0, 0, 0, 0)
