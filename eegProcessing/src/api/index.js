@@ -121,3 +121,10 @@ export function plotOriginEEGDataByFile(msg) {
         data: msg
     })
 }
+
+export function homePage(msg) {
+    return apiClient.send({
+        action:'go-to-home-page',
+        data: msg
+    })
+}

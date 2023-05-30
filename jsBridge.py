@@ -10,7 +10,7 @@ from eeg_positions import get_elec_coords
 from util import *
 from processing import Processsing
 import numpy as np
-
+from result import Result
 
 class JsBridge(QtCore.QObject):
     responseSignal = pyqtSignal(str)
@@ -429,7 +429,6 @@ class JsBridge(QtCore.QObject):
     def showFiguresWidget(self, message):
         self.mainwindow.showFiguresWidget(message)
 
-
     # 视觉评估报告相关
     def getReportFileListSSVEP(self, message):
         res = Result()
@@ -496,5 +495,6 @@ class JsBridge(QtCore.QObject):
     def getModels(self, message):
         models = os.listdir('./assets')
         return models
+    
     def flush(self):
         pass

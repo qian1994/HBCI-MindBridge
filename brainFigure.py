@@ -162,7 +162,6 @@ class BrainWindow(QObject):
         else:
             data = dataNow
         datafilter = DataFilter()
-        data = np.argsort(data[:, -12])
         datafilter.write_file(
             data=data, file_name=self.brainflow_file_name, file_mode='w')
         time_now = datetime.datetime.now()

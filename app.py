@@ -95,9 +95,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        # html_path = QtCore.QUrl.fromLocalFile(
-        #     QDir.currentPath() + "/mainPage/index.html")
-        html_path = QtCore.QUrl('http://localhost:8082/')
+        html_path = QtCore.QUrl.fromLocalFile(
+            QDir.currentPath() + "/mainPage/index.html")
+        # html_path = QtCore.QUrl('http://localhost:8082/')
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -344,20 +344,17 @@ class MainWindow(QMainWindow):
     # 保存文件
     def endTotalTaskBySelf(self, file):
         info = self.taskEndData['data']
-        print(info)
-
         info['productId'] = int(info['productId'])
         self.paradigms.close()
-        originData = np.loadtxt(file)
-        print(originData.shape)
-        originData = np.ascontiguousarray(np.array(originData))
+        eegOriginData = np.loadtxt(file)
+        originData = eegOriginData.copy()
         patientcode = info['patientcode']
         userName = info['userName']
         mode = info['selectModel']
         dataDir = QDir.currentPath() + '/test_data/' + patientcode+'_'+userName
         dataDir = self.checkSaveFile(dataDir, mode, file.replace('.csv', '').replace('./data/MindBridge_', ''))
-        with open(dataDir + '/info/' + 'pationInfo.txt', 'w')as file:
-            file.write(json.dumps({
+        with open(dataDir + '/info/' + 'pationInfo.txt', 'w')as fileObj:
+            fileObj.write(json.dumps({
                 "birthdate": info['birthdate'],
                 "patient_additional": info['patient_additional'],
                 "age":  info['age'],
@@ -367,12 +364,12 @@ class MainWindow(QMainWindow):
                 "patientcode": info["patientcode"],
                 "technician": info["technician"]
             }))
-        file.close()
-        with open(dataDir + '/info/' + 'exprimentInfo.txt', 'w')as file:
+        fileObj.close()
+        with open(dataDir + '/info/' + 'exprimentInfo.txt', 'w')as fileObj:
             badChannel = []
             if self.badChannel != None:
                 badChannel = self.badChannel
-            file.write(json.dumps({
+            fileObj.write(json.dumps({
                 'motionNumber': info['motionNumber'],
                 'motionDistance': info['motionDistance'],
                 'motionWidth': info['motionWidth'],
@@ -395,12 +392,11 @@ class MainWindow(QMainWindow):
                 'trial': info['trial'],
                 'badChannel': badChannel
             }))
-        file.close()
-        data = info
+        fileObj.close()
         channels = info['channels']
         eeg_channel = BoardShim.get_eeg_channels(info['productId'])
         mar_channel = BoardShim.get_marker_channel(info['productId'])
-        sampleRate = BoardShim.get_sampling_rate(data['productId'])
+        sampleRate = BoardShim.get_sampling_rate(info['productId'])
         eeg_data = originData[:, eeg_channel]
         array = []
         count = 0
@@ -410,10 +406,12 @@ class MainWindow(QMainWindow):
                 count += 1
         marker_data = np.array([originData[:, mar_channel]]).T
         eeg_data = np.concatenate((eeg_data, marker_data), axis=1)
-        data['recording_additional'] = json.dumps(data['patient_additional'])
+        info['recording_additional'] = json.dumps(info['patient_additional'])
         self.brainflow_file_name = dataDir + '/data/' + info['fileName'] + '.csv'
         edf_file_name = dataDir + '/data/' + info['fileName'] + '.bdf'
         mat_file_name = dataDir + '/data/' + info['fileName'] + '.mat'
+        csv_file_name = dataDir + '/data/' + info['fileName'] + '.csv'
+
         if "marker" not in channels:
             channels.extend(['marker'])
         info['sampleRate'] = sampleRate
@@ -428,10 +426,16 @@ class MainWindow(QMainWindow):
         eegSaveData.saveFile(fileName=edf_file_name, data=np.ascontiguousarray(np.array(eeg_data)),
                              channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
         sio.savemat(mat_file_name, info)
+        DataFilter.write_file(np.ascontiguousarray(np.array(eegOriginData).T),csv_file_name, file_mode='w')
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'sucess-save-data'}))
         self.paradigms = None
-    
+        csvFile = file.replace('MindBridge_', '')
+        if os.path.exists(csvFile):
+            os.remove(csvFile)
+        if os.path.exists(file):
+            os.remove(file)
+
     def startssvepTask(self, message):
         self.conn2.send({'action': 'start-session', "data": message})
         return 'ok'
@@ -450,24 +454,15 @@ def brainWindowFunc(conn2):
     m.showMinimized()
     sys.exit(app.exec_())
 
-
-
-
-
-def main():
-    global sub_window
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
     conn1, conn2 = Pipe()
     p2 = Process(target=brainWindowFunc, args=(conn1,))
     p2.start()
     sub_window = p2
-    # p1 = Process(target=MainWindowFunc, args=(conn2,))
-    # p1.start()
     app = QApplication(sys.argv)
     m = MainWindow()
     m.get_Signal(conn2)
     m.show()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    main()
