@@ -20,9 +20,6 @@ from startSocketClient import SocketCustomClient
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
 import multiprocessing.connection as mp_conn
-from visualAst import Paradigms
-from SaveData import EEGSAVEDATA
-import scipy.io as sio
 import multiprocessing
 import signal
 
@@ -69,10 +66,8 @@ class MainWindow(QMainWindow):
         })
         self.badChannel = None
         self.SocketCustomClient = None
-        self.MindBridgefileName = ''
         self.processing = None
         self.conn2 = None
-        self.brainflowObject = None
         recive_data = Thread(target=self.recv_signal)
         recive_data.setDaemon(True)
         recive_data.start()
@@ -95,9 +90,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        # html_path = QtCore.QUrl.fromLocalFile(
-        #     QDir.currentPath() + "/mainPage/index.html")
-        html_path = QtCore.QUrl('http://localhost:8082/')
+        html_path = QtCore.QUrl.fromLocalFile(
+            QDir.currentPath() + "/mainPage/index.html")
+        # html_path = QtCore.QUrl('http://localhost:8082/')
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -277,10 +272,9 @@ class MainWindow(QMainWindow):
         self.conn2 = conn2
     
     def endCustomParadigmByBrainflow(self, file):
-        print('file', file)
-        # self.python_bridge.responseSignal.emit('this is from serve')
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-custom-paradigm', 'file': file}))
+        
     def recv_signal(self):
         while True:
             if self.conn2 == None:
@@ -292,164 +286,13 @@ class MainWindow(QMainWindow):
                 continue
             if res['action'] == 'current-data':
                 self.currentData = np.array(res['data'])
-                continue   
-            
-            if res['action'] == 'task-end-file':
-                self.endTaskGetFileFromBrainflow(res['data'])
+                continue
 
             if res['action'] == 'task-end-file-custom':
                 self.endCustomParadigmByBrainflow(res['data'])
 
   
-    # 视觉评估相关代码
-    def openParamsWindow(self, message):
-        if self.paradigms == None:
-            self.paradigms = Paradigms()
-            self.paradigms.init(self.python_bridge,self.width,
-                                self.height, self.trigger)
     
-    def startFlashTask(self, data):
-        if data['selectModel'] == "6motion":
-            self.paradigms.startWindow(data)
-        else:
-            self.paradigms.start(data)
-
-    def endTotalTask(self, data):
-        self.paradigms.close()
-        self.taskEndData = json.loads(json.dumps(data))
-        self.conn2.send({'action': 'end-task-file', 'data': ''})
-        return 'ok'
-    
-    def endTaskGetFileFromBrainflow(self, files):
-        self.endTotalTaskBySelf(files['csv'])
-
-    #  创建数据保存文件夹 
-    def checkSaveFile(self,dataDir, mode, currentTimeString):
-        if not os.path.exists(dataDir):
-            os.makedirs(dataDir)
-        if not os.path.exists(dataDir + '/' + currentTimeString):
-            os.makedirs(dataDir + '/' + currentTimeString)
-        dataDir = dataDir + '/' + currentTimeString
-        if not os.path.exists(dataDir + '/' + mode):
-            os.makedirs(dataDir + '/' + mode)
-            dataDir = dataDir + '/' + mode
-        else:
-            count = 0
-            dirs = os.listdir(dataDir)
-            for dir in dirs:
-                if mode in dir:
-                    count += 1
-            dataDir = dataDir + '/' + mode+'-' + str(count)
-            os.makedirs(dataDir)
-        os.makedirs(dataDir + '/' + 'info')
-        os.makedirs(dataDir + '/' + 'data')
-        os.makedirs(dataDir + '/' + 'result')
-        return dataDir
-    
-    # 保存文件
-    def endTotalTaskBySelf(self, file):
-        info = self.taskEndData['data']
-        info['productId'] = int(info['productId'])
-        self.paradigms.close()
-        eegOriginData = np.loadtxt(file)
-        originData = eegOriginData.copy()
-        patientcode = info['patientcode']
-        userName = info['userName']
-        mode = info['selectModel']
-        dataDir = QDir.currentPath() + '/test_data/' + patientcode+'_'+userName
-        dataDir = self.checkSaveFile(dataDir, mode, file.replace('.csv', '').replace('./data/MindBridge_', ''))
-        with open(dataDir + '/info/' + 'pationInfo.txt', 'w')as fileObj:
-            fileObj.write(json.dumps({
-                "birthdate": info['birthdate'],
-                "patient_additional": info['patient_additional'],
-                "age":  info['age'],
-                "gender": info['gender'],
-                "userName": info['userName'],
-                "startData": info["startDate"],
-                "patientcode": info["patientcode"],
-                "technician": info["technician"]
-            }))
-        fileObj.close()
-        with open(dataDir + '/info/' + 'exprimentInfo.txt', 'w')as fileObj:
-            badChannel = []
-            if self.badChannel != None:
-                badChannel = self.badChannel
-            fileObj.write(json.dumps({
-                'motionNumber': info['motionNumber'],
-                'motionDistance': info['motionDistance'],
-                'motionWidth': info['motionWidth'],
-                'motionHeight': info['motionHeight'],
-                'motionSpeed': info['motionSpeed'],
-                'selectModel': info['selectModel'],
-                'colorObject': info['colorObject'],
-                'colorTarget': info['colorTarget'],
-                'triggerTrialStart': info['triggerTrialStart'],
-                'productId': info['productId'],
-                'marker': info['marker'],
-                'passedImpedence': info['passedImpedence'],
-                'targetIndex': info['targetIndex'],
-                'trialNumber': info['trialNumber'],
-                'totalTrial': info['totalTrial'],
-                'lantency': info['lantency'],
-                'instance': info['instance'],
-                'trialLantency': info['trialLantency'],
-                'equipment': info['equipment'],
-                'trial': info['trial'],
-                'badChannel': badChannel
-            }))
-        fileObj.close()
-        channels = info['channels']
-        eeg_channel = BoardShim.get_eeg_channels(info['productId'])
-        mar_channel = BoardShim.get_marker_channel(info['productId'])
-        sampleRate = BoardShim.get_sampling_rate(info['productId'])
-        eeg_data = originData[:, eeg_channel]
-        array = []
-        count = 0
-        for i in originData[:, mar_channel]:
-            if int(i) == -1:
-                array.append(str(count))
-                count += 1
-        marker_data = np.array([originData[:, mar_channel]]).T
-        eeg_data = np.concatenate((eeg_data, marker_data), axis=1)
-        info['recording_additional'] = json.dumps(info['patient_additional'])
-        self.brainflow_file_name = dataDir + '/data/' + info['fileName'] + '.csv'
-        edf_file_name = dataDir + '/data/' + info['fileName'] + '.bdf'
-        mat_file_name = dataDir + '/data/' + info['fileName'] + '.mat'
-        csv_file_name = dataDir + '/data/' + info['fileName'] + '.csv'
-
-        if "marker" not in channels:
-            channels.extend(['marker'])
-        info['sampleRate'] = sampleRate
-        info['channels'] = channels
-        info['data'] = eeg_data.tolist()
-        badChannel = []
-        if self.badChannel != None:
-            badChannel = self.badChannel
-        info['badChannel'] = badChannel
-        otherInfo = info
-        eegSaveData = EEGSAVEDATA()
-        eegSaveData.saveFile(fileName=edf_file_name, data=np.ascontiguousarray(np.array(eeg_data)),
-                             channels=channels, sampleRate=sampleRate, otherInfo=otherInfo)
-        sio.savemat(mat_file_name, info)
-        DataFilter.write_file(np.ascontiguousarray(np.array(eegOriginData).T),csv_file_name, file_mode='w')
-        self.python_bridge.getFromServer.emit(
-            json.dumps({"id": 0, "data": 'sucess-save-data'}))
-        self.paradigms = None
-        csvFile = file.replace('MindBridge_', '')
-        if os.path.exists(csvFile):
-            os.remove(csvFile)
-        if os.path.exists(file):
-            os.remove(file)
-
-    def startssvepTask(self, message):
-        self.conn2.send({'action': 'start-session', "data": message})
-        return 'ok'
-
-    def endSingleTask(self, message):
-        self.python_bridge.getFromServer.emit(
-            json.dumps({"id": 0, "data": 'stop-flash'}))
-# def MainWindowFunc(conn2):
-   
 
 def brainWindowFunc(conn2):
     app = QApplication(sys.argv)

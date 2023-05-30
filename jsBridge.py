@@ -145,49 +145,6 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'show-figures-widget':
             data=self.showFiguresWidget(message)
 
-        # 视觉评估报告相关
-        if message['action'] == 'get-report-file-list-ssvep':
-            data = self.getReportFileListSSVEP(message)
-        
-        if message['action'] == 'create-file-reaport-ssvep':
-            data = self.createFileReportSSVEP(message)
-        
-        if message['action'] == 'create-expriment-ssvep-result':
-            data = self.createExprimentSsvepResult(message)
-
-        if message['action'] == 'get-info-by-file-name':
-            data = self.getInfoByFileName(message)
-
-        if message['action'] == 'get-result-info-by-file-ssvep':
-            data = self.getResultInfoByFileName(message)
-
-        if message['action'] == 'draw-image-by-label-ssvep':
-            data = self.drawImageByLabelSSVEP(message)
-        
-        if message['action'] == 'get-result-files':
-            data = self.getResultFiles(message)
-        
-        if message['action'] == 'get-experiment-image':
-            data = self.drawImage(message)
-
-        if message['action'] == 'end-signal-trial-task':
-            data = self.endSignalTrialTask(message)
-
-        if message['action'] == 'open-params-window':
-            data = self.openParamsWindow(message)
-
-        if message['action'] == 'start-ssvep-task':
-            data = self.startSsvepTask(message)
-
-        if message['action'] == 'end-total-task':
-            data = self.endTotalTask(message)
-        
-        if message['action'] == 'start-flash-task':
-            data = self.startFlashTask(message)
-        
-        if message['action'] == 'get-models':
-            data = self.getModels(message)
-        message['data'] = data
         message['data']=data
         return self.responseSignal.emit(json.dumps(message))
 
@@ -429,72 +386,6 @@ class JsBridge(QtCore.QObject):
     def showFiguresWidget(self, message):
         self.mainwindow.showFiguresWidget(message)
 
-    # 视觉评估报告相关
-    def getReportFileListSSVEP(self, message):
-        res = Result()
-        data = res.getReportFileListSSVEP(message)
-        return data
-    
-    def createFileReportSSVEP(self, message):
-        res = Result()
-        data = res.createReport(message)
-        return data
-    
-    def createExprimentSsvepResult(self, message):
-        res = Result()
-        data = res.createExprimentSsvepResult(message)
-        return data
-    
-    def getInfoByFileName(self, message):
-        res = Result()
-        data = res.getInfoByFileName(message)
-        return data
-    
-    def getResultInfoByFileName(self, message):
-        fileName = message['data']['fileName']
-        with open(fileName) as f:
-            data = json.load(f)
-        f.close()
-        return data
-    
-    def drawImageByLabelSSVEP(self, message):
-        res = Result()
-        data = res.createImages(message)
-        return data
-    
-    def getResultFiles(self, message):
-        res = Result()
-        data = res.readAllFiles()
-        return ','.join(data)
-    
-    def drawImage(self, message):
-        res = Result()
-        data = res.drawImages(message)
-        if len(data) > 0:
-            return 'ok'
-        return 'fail'
-    
-    def endSignalTrialTask(self, message):
-        data = self.mainwindow.endSingleTask(message)
-        return data
-    
-    def openParamsWindow(self, message):
-        self.mainwindow.openParamsWindow(message)
-    
-    def startSsvepTask(self, message):
-        data = self.mainwindow.startssvepTask(message)
-        return data
-    
-    def endTotalTask(self, message):
-        data = self.mainwindow.endTotalTask(message)
-        return data
-    
-    def startFlashTask(self, message):
-        self.mainwindow.startFlashTask(message['data'])
-
-    def getModels(self, message):
-        models = os.listdir('./assets')
-        return models
     
     def flush(self):
         pass
