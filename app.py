@@ -95,9 +95,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl('http://localhost:8082/')
+        # html_path = QtCore.QUrl.fromLocalFile(
+        #     QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl('http://localhost:8082/')
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -200,7 +200,7 @@ class MainWindow(QMainWindow):
 
     def startCustomParadigm(self, message):
         if message['data']['customIp'] == "":
-            return
+            return 'fail'
         try:
             self.SocketCustomClient = SocketCustomClient(self)
             self.SocketCustomClient.init(
@@ -209,17 +209,16 @@ class MainWindow(QMainWindow):
             return 'ok'
         except:
             return 'fail'
-        return 'fail'
 
     def endCustomParadigm(self, message):
-        self.endTaskSaveData(message)
+        self.conn2.send({'action': 'task-end-file-custom', 'data': ''})
+        print('message', self.SocketCustomClient)
         if self.SocketCustomClient != None:
-            self.SocketCustomClient.end()
+            self.SocketCustomClient.stop()
             self.SocketCustomClient = None
         return 'ok'
 
     def getCustomInsertMarker(self, message):
-        print(message)
         if message['action'] == 'start':
             self.startStream()
         
@@ -228,7 +227,6 @@ class MainWindow(QMainWindow):
 
         if message['action'] == 'trigger':
             self.trigger(int(message['data']))
-
 
     def postTimeSeriseChannelShow(self, message):
         return 'ok'
@@ -278,6 +276,11 @@ class MainWindow(QMainWindow):
     def get_Signal(self, conn2 ):
         self.conn2 = conn2
     
+    def endCustomParadigmByBrainflow(self, file):
+        print('file', file)
+        # self.python_bridge.responseSignal.emit('this is from serve')
+        self.python_bridge.getFromServer.emit(
+            json.dumps({"id": 0, "data": 'stop-custom-paradigm', 'file': file}))
     def recv_signal(self):
         while True:
             if self.conn2 == None:
@@ -293,6 +296,9 @@ class MainWindow(QMainWindow):
             
             if res['action'] == 'task-end-file':
                 self.endTaskGetFileFromBrainflow(res['data'])
+
+            if res['action'] == 'task-end-file-custom':
+                self.endCustomParadigmByBrainflow(res['data'])
 
   
     # 视觉评估相关代码
@@ -315,7 +321,6 @@ class MainWindow(QMainWindow):
         return 'ok'
     
     def endTaskGetFileFromBrainflow(self, files):
-        print(files)
         self.endTotalTaskBySelf(files['csv'])
 
     #  创建数据保存文件夹 

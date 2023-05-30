@@ -125,31 +125,6 @@ export default {
     setTimeout(async () => {
       const data = await getConfigFromServe("msg")
       this.products = JSON.parse(data)['products']
-      const res = await getBatteryProportion(this.form)
-      const elements = document.querySelectorAll('.battery')
-      for (let i = 0; i < elements.length; i++) {
-        const element = elements[i]
-        element.style.display = 'none'
-      }
-      if (res > 90) {
-        document.querySelector('.battery-4').style.display = 'block'
-        return
-      }
-      if (res > 70) {
-        document.querySelector('.battery-3').style.display = 'block'
-        return
-      }
-
-      if (res > 40) {
-        document.querySelector('.battery-2').style.display = 'block'
-        return
-      }
-
-      if (res > 15) {
-        document.querySelector('.battery-1').style.display = 'block'
-        return
-      }
-      document.querySelector('.battery-0').style.display = 'block'
     }, 100);
   },
 };

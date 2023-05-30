@@ -225,6 +225,12 @@ class RealTimeFigure(QMainWindow):
                 csvFile= self.brainBoject.endTaskSaveData(res['data'])
                 self.conn1.send({'action': 'task-end-file',
                                 "data": {"csv": csvFile}})
+                
+            if res['action'] == 'task-end-file-custom':
+                print('task-end-file-custom')
+                csvFile= self.brainBoject.endTaskSaveData(res['data'])
+                self.conn1.send({'action': 'task-end-file-custom',
+                                "data": {"csv": csvFile}})
 
 # def brainWindowFunc():
 #     app = QApplication(sys.argv)

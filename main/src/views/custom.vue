@@ -10,12 +10,15 @@
             <el-form-item label="port">
                 <el-input type="text" v-model="form.customPort" placeholder="请输入端口"> </el-input>
             </el-form-item>
-            <el-form-item label="数据保存路径">
+            <!-- <el-form-item label="数据保存路径">
                 <el-button @click="dirChoose"> 选择保存数据路径</el-button> 
                 <div v-if="!form.filePath">文件默认保存在软件data文件夹下</div>
                 <div v-if="form.filePath">{{form.filePath}}</div>
-
+            </el-form-item> -->
+            <el-form-item label="数据保存路径">
+                {{ form.file }}
             </el-form-item>
+            
             <el-form-item label="">
                 <el-button @click="back" size="medium">
                     返回首页
@@ -31,7 +34,7 @@
     </div>
 </template>
 <script>
-import { addParadigmFromLocal, startCustomParadigm, startSession, openDirDialog, stopCustomParadigm} from '../api/index'
+import { addParadigmFromLocal,initDevTools, msgListener, startCustomParadigm, startSession, openDirDialog, stopCustomParadigm} from '../api/index'
 export default {
     data() {
         return {
@@ -41,11 +44,20 @@ export default {
                 customIp: '',
                 customPort: '',
                 ip: '',
-                productId: ''
+                productId: '',
+                file: ''
             }
         }
     },
+    created() {
+        msgListener.add(this.getFromPythonServe);
+    },
     methods: {
+        getFromPythonServe(data) {
+            console.log('data', data)
+            data = JSON.parse(data)
+            this.form.file = data['file']['csv']
+        },
         async dirChoose() {
             const dirPath = await openDirDialog()
             if (dirPath) {
