@@ -291,9 +291,6 @@ class MainWindow(QMainWindow):
             if res['action'] == 'task-end-file-custom':
                 self.endCustomParadigmByBrainflow(res['data'])
 
-  
-    
-
 def brainWindowFunc(conn2):
     app = QApplication(sys.argv)
     m = RealTimeFigure()
