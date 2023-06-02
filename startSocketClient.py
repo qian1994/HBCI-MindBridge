@@ -14,7 +14,7 @@ class SocketCustomClient(object):
         try:
             self.serve = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
             self.serve.connect((ip, int(port)))
-            self.serve.sendall(b'connect')
+            self.serve.sendall(json.dumps({'active': 'start'}).encode('utf-8'))
             self.socThread = Thread(target=self.startSock)
             self.socThread.start()
         except Exception as e:
@@ -32,7 +32,7 @@ class SocketCustomClient(object):
                     command = json.loads(command)
                     self.recive(command)
             except Exception as e:
-                self.stop()
+                # self.stop()
                 print('发生异常:', e)  
                 break
     def recive(self, command):
@@ -57,6 +57,7 @@ class SocketCustomClient(object):
         self.serve.sendall(json.dumps({'active': 'recv'}).encode('utf-8'))
 
     def stop(self):
+        self.serve.sendall(json.dumps({'active': 'stop'}).encode('utf-8'))
         print('this is stop')
         self.flag = True
         self.socThread.join()
