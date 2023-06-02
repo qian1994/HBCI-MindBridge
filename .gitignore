@@ -23,7 +23,7 @@ web/*
 assets
 pyapp
 test_data
-
+attention-app
 __pycache__
 
 apk
