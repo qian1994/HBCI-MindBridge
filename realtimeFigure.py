@@ -127,7 +127,9 @@ class RealTimeFigure(QMainWindow):
             self.figures.show()
         else:
             self.figures.hide()
-
+    def setBrainWaveScale(self, data):
+        self.figures.setBrainWaveScale(data)
+        
     def toggleFft(self, flag):
         if flag:
             self.figureFft.show()
@@ -225,6 +227,9 @@ class RealTimeFigure(QMainWindow):
                 csvFile= self.brainBoject.endTaskSaveData(res['data'])
                 self.conn1.send({'action': 'task-end-file',
                                 "data": {"csv": csvFile}})
+                
+            if res['action'] == 'set-brain-wave-scale':
+                self.setBrainWaveScale(res['data'])
                 
             if res['action'] == 'task-end-file-custom':
                 print('task-end-file-custom')

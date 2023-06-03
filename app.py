@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
             self.python_bridge.getFromServer.emit(
                 json.dumps({"id": 0, "action": 'close-time-serise'}))
         
-    
+        
     # 阻抗计算
     def getImpendenceData(self, message):
         boardData = self.getCurrent()
@@ -267,6 +267,9 @@ class MainWindow(QMainWindow):
     
     def closeTimeSeriseWindow(self):
         self.conn2.send({'action': 'close-window', 'data': ''})
+
+    def setBrainWaveScale(self, message):
+        self.conn2.send({'action': 'set-brain-wave-scale', 'data': message['data']['scale']})
   
     def get_Signal(self, conn2 ):
         self.conn2 = conn2

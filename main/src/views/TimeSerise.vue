@@ -54,11 +54,16 @@
                 </el-select>
             </el-form-item>
           </el-col>
+
+          <el-form-item label="脑电规格:">
+            <el-button class="data-scale-apply" @click="changeSCale('upper')" type="primary">放大</el-button>
+            <el-button class="data-scale-apply" @click="changeSCale('lower')" type="primary">缩小</el-button>
+          </el-form-item>
         </div>
+        
           <div class="data-config-apply-container">
             <el-button class="data-config-apply" @click="apply" type="primary">应用</el-button>
             <el-button class="home-page-button" type="warning" @click="homePage">返回首页</el-button>
-
           </div>
       </el-form>
       <div class="channel-button">
@@ -75,6 +80,7 @@ import {
   openTimeSeriseWindow, 
   homePage, 
   showFigures,
+  setBrainWaveScale,
   getConfigFromServe, 
   postSelectChannel, 
   filterBoardData, 
@@ -93,6 +99,8 @@ export default {
       fft: true,
       wave: true,
       headplot: true,
+      scale : 200,
+
       form: {
         productId: "5",
         ip: "",
@@ -166,7 +174,14 @@ export default {
 
   },
   methods: {
-
+    async changeSCale(type) {
+      if (type == 'upper') {
+        this.scale += 5
+      }else {
+        this.scale -= 5
+      }
+      const res = await setBrainWaveScale({ scale: this.scale})
+    },
     async toggleFigure(name) {
       this[name] = !this[name]
       const params = {}

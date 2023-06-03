@@ -23,10 +23,12 @@ web/*
 assets
 pyapp
 test_data
-
+attention-app
 __pycache__
-
+csns
+report
 apk
 createScript
 
-attention-app
+attention
+attentionDir
