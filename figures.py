@@ -40,7 +40,8 @@ class FigureWindow(QWidget, Ui_figureWidget):
         self.slider.setGeometry(10, 350, 15, 200)
         self.slider.setTickInterval(0)
         self.slider.valueChanged.connect(self.scrollBar)
-        self.splitMargin = 30
+        self.splitMargin = 200
+
         # self.setWindowFlags(self.windowFlags() & ~Qt.WindowCloseButtonHint)
         # self.upScrollHeight = 0.3
     def setChannels(self, channels):
@@ -59,6 +60,13 @@ class FigureWindow(QWidget, Ui_figureWidget):
     
     def getShowChannels(self):
         return self.showChannels
+    
+    def setBrainWaveScale(self, data):
+        self.splitMargin = data
+        self.numbers = []
+        for i in range(len(self.channels)):
+            self.numbers.append(len(self.channels) * self.splitMargin - ((i + 0.5) * self.splitMargin) + self.upScrollData)
+
     
     def chooseShowChannel(self, channels):
         return

@@ -66,6 +66,13 @@ export function stopStream(msg) {
     })
 }
 
+export function setBrainWaveScale(msg) {
+    return apiClient.send({
+        action: 'set-brain-wave-scale',
+        data: msg
+    })
+}
+
 
 export function openDataAnalysis(msg) {
     return apiClient.send({
@@ -161,6 +168,7 @@ export function endTrialTask(msg) {
         data: msg
     })
 }
+
 
 
 export function startImpendenceTest(msg) {

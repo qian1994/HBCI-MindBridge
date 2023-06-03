@@ -95,9 +95,9 @@ class MainWindow(QMainWindow):
         self.webViewlayout.setSpacing(0)
         self.webViewlayout.addWidget(self.webView)
         # # 调试工具
-        html_path = QtCore.QUrl.fromLocalFile(
-            QDir.currentPath() + "/mainPage/index.html")
-        # html_path = QtCore.QUrl('http://localhost:8082/')
+        # html_path = QtCore.QUrl.fromLocalFile(
+        #     QDir.currentPath() + "/mainPage/index.html")
+        html_path = QtCore.QUrl('http://localhost:8082/')
         self.webView.setUrl(html_path)
         self.webViewWidget.setLayout(self.webViewlayout)
         self.content.addWidget(self.webViewWidget)
@@ -132,7 +132,7 @@ class MainWindow(QMainWindow):
             self.python_bridge.getFromServer.emit(
                 json.dumps({"id": 0, "action": 'close-time-serise'}))
         
-    
+        
     # 阻抗计算
     def getImpendenceData(self, message):
         boardData = self.getCurrent()
@@ -272,6 +272,9 @@ class MainWindow(QMainWindow):
     
     def closeTimeSeriseWindow(self):
         self.conn2.send({'action': 'close-window', 'data': ''})
+
+    def setBrainWaveScale(self, message):
+        self.conn2.send({'action': 'set-brain-wave-scale', 'data': message['data']['scale']})
   
     def get_Signal(self, conn2 ):
         self.conn2 = conn2

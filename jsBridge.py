@@ -56,6 +56,9 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'update-bad-channel':
             data = self.updateBadChannel(message)
 
+        if message['action'] == 'set-brain-wave-scale':
+            data = self.setBrainWaveScale(message)
+
         if message['action'] == 'start-impendence-test':
             data = self.startImpendenceTest(message)
 
@@ -188,7 +191,6 @@ class JsBridge(QtCore.QObject):
         if message['action'] == 'get-models':
             data = self.getModels(message)
         message['data'] = data
-        message['data']=data
         return self.responseSignal.emit(json.dumps(message))
 
     @ QtCore.pyqtSlot(str, result = str)
@@ -386,6 +388,9 @@ class JsBridge(QtCore.QObject):
     def filterBoardData(self, message):
         data=self.mainwindow.filterBoardData(message)
         return data
+    
+    def setBrainWaveScale(self, message):
+        data = self.mainwindow.setBrainWaveScale(message)
 
     def getBadChannel(self, message):
         if self.mainwindow.badChannel == None:
@@ -417,7 +422,7 @@ class JsBridge(QtCore.QObject):
             elif message['data']['type'] == 'mne':
                 fileFormat.toMNE(file, savePath)
         return 'ok'
-    # 生成p300 检测模型
+
 
     def startCustomParadigm(self, message):
         self.mainwindow.startCustomParadigm(message)
