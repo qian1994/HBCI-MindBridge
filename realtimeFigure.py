@@ -127,6 +127,7 @@ class RealTimeFigure(QMainWindow):
             self.figures.show()
         else:
             self.figures.hide()
+            
     def setBrainWaveScale(self, data):
         self.figures.setBrainWaveScale(data)
         
