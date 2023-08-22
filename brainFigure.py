@@ -16,7 +16,6 @@ import scipy.io as sio
 from threading import Thread, current_thread
 from multiprocessing import Process, Pipe, Queue, Manager
 
-
 class BrainWindow(QObject):
     def __init__(self):
         super().__init__()
