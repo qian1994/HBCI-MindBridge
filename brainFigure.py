@@ -70,21 +70,21 @@ class BrainWindow(QObject):
         print('up reld time')
         # self.conn1.send({'action': 'update', "data": data })
 
-    def saveBoardDataThread(self):
-        while 1:
-            time.sleep(5*60)
-            if self.board == None:
-                return
-            if self.MindBridgefileName == '':
-                return
-            if not os.path.exists(self.MindBridgefileName):
-                open(self.MindBridgefileName, 'w').close()
+    # def saveBoardDataThread(self):
+    #     while 1:
+    #         time.sleep(5*60)
+    #         if self.board == None:
+    #             return
+    #         if self.MindBridgefileName == '':
+    #             return
+    #         if not os.path.exists(self.MindBridgefileName):
+    #             open(self.MindBridgefileName, 'w').close()
 
-            data = self.board.get_board_data()
-            with open(self.MindBridgefileName, 'a+') as file:
-                DataFilter.write_file(data, self.MindBridgefileName, 'a+')
-            file.close()
-    # 建立连接
+    #         data = self.board.get_board_data()
+    #         with open(self.MindBridgefileName, 'a+') as file:
+    #             DataFilter.write_file(data, self.MindBridgefileName, 'a+')
+    #         file.close()
+    # # 建立连接
 
     def startSession(self, message):
         if self.boartStatus == 'startStream' or self.board != None:
@@ -108,9 +108,9 @@ class BrainWindow(QObject):
         self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
         if not os.path.exists(self.MindBridgefileName):
             open(self.MindBridgefileName, 'w').close()
-        threadSaveData = Thread(target=self.saveBoardDataThread)
-        threadSaveData.setDaemon(True)
-        threadSaveData.start()
+        # threadSaveData = Thread(target=self.saveBoardDataThread)
+        # threadSaveData.setDaemon(True)
+        # threadSaveData.start()
 
     def startStream(self, message):
         if self.board == None:
@@ -118,7 +118,7 @@ class BrainWindow(QObject):
         if self.boartStatus == 'startStream':
             return 'ok'
         if self.board != None:
-            self.board.start_stream()
+            self.board.start_stream(num_samples=45000,streamer_params = 'file://'+self.MindBridgefileName+':w')
             self.boartStatus = "startStream"
             return 'ok'
         return 'fail'
@@ -151,17 +151,17 @@ class BrainWindow(QObject):
             '.csv', '').replace('./data/', '')
         self.brainflow_file_name = self.dir_path+"/data/" + \
             'MindBridge_' + currentTimeString + '.csv'
-        dataNow = self.board.get_board_data()
-        data = np.loadtxt(self.MindBridgefileName).T
-        os.remove(self.MindBridgefileName)
-        data = np.ascontiguousarray(np.array(data))
-        if len(data) != 0:
-            data = np.concatenate((data, dataNow), axis=1)
-        else:
-            data = dataNow
-        datafilter = DataFilter()
-        datafilter.write_file(
-            data=data, file_name=self.brainflow_file_name, file_mode='w')
+        # dataNow = self.board.get_board_data()
+        # data = np.loadtxt(self.MindBridgefileName).T
+        # os.remove(self.MindBridgefileName)
+        # data = np.ascontiguousarray(np.array(data))
+        # if len(data) != 0:
+        #     data = np.concatenate((data, dataNow), axis=1)
+        # else:
+        #     data = dataNow
+        # datafilter = DataFilter()
+        # datafilter.write_file(
+        #     data=data, file_name=self.brainflow_file_name, file_mode='w')
         time_now = datetime.datetime.now()
         time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
         self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
