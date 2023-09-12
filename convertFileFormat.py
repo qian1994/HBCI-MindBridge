@@ -59,9 +59,13 @@ class ConvertFileFormat(object):
         data = data[channle].T
         data = np.concatenate((data, np.array([markerData]).T), axis=1)
         saveData = EEGSAVEDATA()
-        fileName = fileName.replace('.csv', '.bdf')
+        fileName = fileName.replace('.csv', '.bdf') 
         channels = np.array(self.channels).copy().tolist()
         channels.append('trigger')
+        print('======================')
+        print(data.shape, np.array(channels).shape, channels)
+        print('======================')
+
         if savePath:
             fileName = fileName.split('/')
             path = savePath+ '/'+fileName[len(fileName) -1]
@@ -116,7 +120,7 @@ class ConvertFileFormat(object):
         data = np.loadtxt(file_name)
         data[:, -12] = 0
         data = data.T
-        for item in data[-2]:
+        for item in data[-3]:
             time_now = datetime.datetime.fromtimestamp(item)
             time_string = time_now.strftime("%Y-%m-%d %H:%M:%S")
             time_string += str(format(item%1, ".3f"))

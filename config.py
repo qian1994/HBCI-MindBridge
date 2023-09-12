@@ -13,7 +13,7 @@ impedence23 = ["OZ", 'PZ','O1', "P3", "P7",'A1',
               "FP2", "F4", 'FZ',"F8", "T8", "US", 
               "P8", "O2", "P4", "C4", 'CZ', "A2"]
 
-impedence32 = ["FP1", "FP2" "F7", "F3", "FZ", "F4", "F8", "FT7", 
+impedence32 = ["FP1", "FP2","F7", "F3", "FZ", "F4", "F8", "FT7", 
                "FC3", "FCZ", "FC4", "FT8", "T7", "C3", "CZ", "C4",
                "T8", "TP7", "CP3", "block" "CP4", "TP8", "P7", "P3",
                "PZ", "P4", "P8", "O1", "OZ", "O2", "HOV", "EOG1", "EOG2"
