@@ -25,18 +25,31 @@ class FigureHeadPlotWidget(QWidget, Ui_figureHeadPlotWidget):
         self.info = None
         self.setupUi(self)
         self.set_matplotlib()
+        self.new_channels_index = []
     def setChannel(self, channels):
         montage = make_standard_montage('standard_1020')
         channels_names = montage.ch_names
         channels_name_up = [item.upper() for item in channels_names]
+        new_channels = []
+        self.new_channels_index = []
         for index in range(len(channels)):
             if channels[index] == "US":
-                del channels[index]
+                continue
+            if channels[index] == 'block':
+                continue
+            if channels[index] == 'HOV':
+                continue
+            if channels[index] == 'EOG1':
+                continue
+            if channels[index] == 'EOG2':
+                continue
             id = channels_name_up.index(channels[index])
-            channels[index] = channels_names[id]
-        self.channels = channels
-        self.ch_types = ['eeg'] * len(channels)
-        self.info = mne.create_info(channels, self.sfreq, self.ch_types)
+            new_channels.append(channels_names[id])
+            self.new_channels_index.append(index)
+        print(new_channels, self.new_channels_index)    
+        self.channels = new_channels
+        self.ch_types = ['eeg'] * len(new_channels)
+        self.info = mne.create_info(new_channels, self.sfreq, self.ch_types)
         # Load a standard electrode montage
         self.info.set_montage(montage)
 
@@ -61,5 +74,5 @@ class FigureHeadPlotWidget(QWidget, Ui_figureHeadPlotWidget):
         if len(boardData) != 0:
             self.ax.clear()
             data = np.mean(boardData, axis=1)
-            plot_topomap(data, self.info, axes=self.ax, show=False,  extrapolate='head')
+            plot_topomap(data[self.new_channels_index], self.info, axes=self.ax, show=False,  extrapolate='head')
             self.canvas.draw()

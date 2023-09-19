@@ -86,6 +86,7 @@ class BrainWindow(QObject):
     # # 建立连接
 
     def startSession(self, message):
+        print('hhhhhhhhhhhhhhhhhhhhh')
         if self.boartStatus == 'startStream' or self.board != None:
             return 'ok'
         data = message['data']
@@ -93,6 +94,7 @@ class BrainWindow(QObject):
         params = BrainFlowInputParams()
         params.ip_port = 9521 + random.randint(1, 100)
         params.ip_address = data['ip']
+        print(self.ip_address, params.ip_address, self.boardId, boardId)
         if self.ip_address == params.ip_address and self.boardId == boardId:
             return 'ok'
         if self.board != None:
@@ -101,22 +103,24 @@ class BrainWindow(QObject):
         self.board.prepare_session()
         self.boardId = boardId
         self.ip_address = params.ip_address
+        time.sleep(2)
         self.startStream(message)
+
+    def startStream(self, message):
         time_now = datetime.datetime.now()
         time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
         self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
         if not os.path.exists(self.MindBridgefileName):
             open(self.MindBridgefileName, 'w').close()
-        # threadSaveData = Thread(target=self.saveBoardDataThread)
-        # threadSaveData.setDaemon(True)
-        # threadSaveData.start()
-
-    def startStream(self, message):
         if self.board == None:
             return 'fail'
         if self.boartStatus == 'startStream':
             return 'ok'
         if self.board != None:
+            print('=============================')
+            print(self.MindBridgefileName)
+            print('=============================')
+            
             self.board.start_stream(num_samples=45000,streamer_params = 'file://'+self.MindBridgefileName+':w')
             self.boartStatus = "startStream"
             return 'ok'
