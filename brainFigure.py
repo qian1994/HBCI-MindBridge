@@ -27,8 +27,6 @@ class BrainWindow(QObject):
         self.boardId = 0
         self.board = None
         self.fileName = None
-        self.brainflow_file_name = None
-        self.timmer = None
         self.figure = None
         self.timmerSession = None
         self.ip_address = None
@@ -86,7 +84,6 @@ class BrainWindow(QObject):
     # # 建立连接
 
     def startSession(self, message):
-        print('hhhhhhhhhhhhhhhhhhhhh')
         if self.boartStatus == 'startStream' or self.board != None:
             return 'ok'
         data = message['data']
@@ -117,10 +114,7 @@ class BrainWindow(QObject):
         if self.boartStatus == 'startStream':
             return 'ok'
         if self.board != None:
-            print('=============================')
-            print(self.MindBridgefileName)
-            print('=============================')
-            
+    
             self.board.start_stream(num_samples=45000,streamer_params = 'file://'+self.MindBridgefileName+':w')
             self.boartStatus = "startStream"
             return 'ok'
@@ -152,8 +146,7 @@ class BrainWindow(QObject):
     def endTaskSaveData(self, message):
         currentTimeString = self.MindBridgefileName.replace(
             '.csv', '').replace('./data/', '')
-        self.brainflow_file_name = self.dir_path+"/data/" + \
-            'MindBridge_' + currentTimeString + '.csv'
+      
         # dataNow = self.board.get_board_data()
         # data = np.loadtxt(self.MindBridgefileName).T
         # os.remove(self.MindBridgefileName)
@@ -170,7 +163,7 @@ class BrainWindow(QObject):
         self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
         if not os.path.exists(self.MindBridgefileName):
             open(self.MindBridgefileName, 'w').close()
-        return self.brainflow_file_name
+        return ''
 
     def postCurrentData(self, message):
         if self.conn1 == None:
