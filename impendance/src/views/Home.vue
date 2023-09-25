@@ -32,7 +32,7 @@ import {
   getConfigFromServe,
   homePage,
   startSession,
-  initDevTools
+  initDevTools,
 } from '../api/index'
 export default {
   data() {
@@ -57,11 +57,18 @@ export default {
   components: {
     ElectrodePositions
   },
+  // beforeDestroy() {
+  //   if (this.timmer) {
+  //     clearInterval(this.timmer)
+  //     endImpendenceTest()
+  //   }
+  // },
   destroyed() {
     if (this.timmer) {
       clearInterval(this.timmer)
       endImpendenceTest()
     }
+    endImpendenceTest()
   },
   async mounted() {
     const config = localStorage.getItem('mindbridgeinfo')
@@ -79,6 +86,7 @@ export default {
         this.badChannels = badChannels['bad-channel']
       }
     }, 300);
+
   },
   computed: {
     selectedChannelInfo() {
@@ -125,7 +133,10 @@ export default {
     chooseShowType(type) {
       this.showLabel = type
     },
-    goToHomePage() {
+    async goToHomePage() {
+      if(this.timmer) {
+        const res = await endImpendenceTest(this.form)
+      }
       homePage()
     },
     showImageEvent() {
@@ -152,7 +163,7 @@ export default {
             let data = await getImpendenceFromServe({})
             data = JSON.parse(data)
             console.log(data)
-            this.railed = data['railed'].split(',').map(item => {
+            this.railed = data['impedences'].split(',').map(item => {
               return parseFloat(item).toFixed(2)
             })
             this.impedences = data['impedences'].split(',').map(item => {

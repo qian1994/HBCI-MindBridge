@@ -5,6 +5,7 @@ import json
 import time
 import random
 import datetime
+import csv
 import numpy as np
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -91,7 +92,6 @@ class BrainWindow(QObject):
         params = BrainFlowInputParams()
         params.ip_port = 9521 + random.randint(1, 100)
         params.ip_address = data['ip']
-        print(self.ip_address, params.ip_address, self.boardId, boardId)
         if self.ip_address == params.ip_address and self.boardId == boardId:
             return 'ok'
         if self.board != None:
@@ -114,7 +114,6 @@ class BrainWindow(QObject):
         if self.boartStatus == 'startStream':
             return 'ok'
         if self.board != None:
-    
             self.board.start_stream(num_samples=45000,streamer_params = 'file://'+self.MindBridgefileName+':w')
             self.boartStatus = "startStream"
             return 'ok'
@@ -143,10 +142,29 @@ class BrainWindow(QObject):
     def trigger(self, number):
         self.board.insert_marker(float(number))
 
+    def deleteLastLine(file):
+        import csv
+        # 读取CSV文件并存储数据
+        with open(file, 'r') as file:
+            lines = list(csv.reader(file))
+
+        # 检查文件是否为空
+        if len(lines) == 0:
+            print("CSV文件为空，无法删除最后一行。")
+        else:
+            # 删除最后一行数据
+            lines.pop()
+
+            # 将数据写回CSV文件
+            with open(file, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(lines)
+            print("已成功删除最后一行数据。")
+            
     def endTaskSaveData(self, message):
-        currentTimeString = self.MindBridgefileName.replace(
-            '.csv', '').replace('./data/', '')
-      
+        self.deleteLastLine(self.MindBridgefileName)
+        data = self.board.get_board_data()
+        DataFilter.write_file(data, self.MindBridgefileName, 'a')
         # dataNow = self.board.get_board_data()
         # data = np.loadtxt(self.MindBridgefileName).T
         # os.remove(self.MindBridgefileName)
@@ -174,12 +192,3 @@ class BrainWindow(QObject):
     def get_Signal(self, conn1):
         self.conn1 = conn1
 
-# def brainWindowFunc(conn1):
-#     app = QApplication(sys.argv)
-#     m = BrainWindow()
-#     m.conn1 = conn1
-#     message = {'data': {'productId': '532', 'ip': '127.0.0.1', 'model': '0', 'low': 5, 'high': 45, 'filter': 0, 'order': 2,
-#                             'channels': ['O1', 'C3', 'CP3', 'P3', 'P7', 'TP7', 'T7', 'A1', 'FT7', 'F7', 'FC3', 'F3', 'CZ', 'FCZ', 'FZ', 'FP1', 'FP2', 'F4', 'C4', 'FC4',
-#                                          'F8', 'FT8', 'P8', 'A2', 'TP8', 'T8', 'CP4', 'P4', 'O2', 'CPZ', 'PZ', 'OZ']}}
-#     m.createFigures(message)
-#     sys.exit(app.exec_())

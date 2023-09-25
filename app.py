@@ -22,7 +22,7 @@ from multiprocessing import Process, Pipe, Queue, Manager
 import multiprocessing.connection as mp_conn
 import multiprocessing
 import signal
-
+import requests
 conn1, conn2 = Pipe()
 from realtimeFigure import RealTimeFigure
 sub_window = None
@@ -127,7 +127,6 @@ class MainWindow(QMainWindow):
             self.python_bridge.getFromServer.emit(
                 json.dumps({"id": 0, "action": 'close-time-serise'}))
         
-        
     # 阻抗计算
     def getImpendenceData(self, message):
         boardData = self.getCurrent()
@@ -138,11 +137,12 @@ class MainWindow(QMainWindow):
         boardData -= meanData
         stdData = np.std(boardData, axis=1)
         impedences = [
-            ((np.sqrt(2) * item * 1.0e-6 / 6.0e-9 - 2200) / 1000) for item in stdData
+            ((np.sqrt(2) * item * 1.0e-6 / 6.0e-9 ) / 1000) for item in stdData
         ]
         impedences = ','.join([str(i) for i in impedences])
         return json.dumps(dict({"impedences": impedences, "railed": railed}))
     # 脱落检测计算
+
     def getRailedPercentage(self, boardData):
         railed = []
         for channel in range(len(boardData)):
@@ -173,6 +173,7 @@ class MainWindow(QMainWindow):
         
         if 'headplot' in data:
             self.conn2.send({'action': 'toggle-headplot', "data": data['headplot']})
+
     def fullScreen(self, essage):
         self.showFullScreen()
 
@@ -232,12 +233,23 @@ class MainWindow(QMainWindow):
     # 获取实时数据
 
     def startImpendenceTest(self, message):
-        self.startSession(message)
+        url = 'http://'+ message['data']['ip'] +'/impedance'
+        post_data = dict({})
+        post_data['channel'] = '9'
+        res = requests.post(url,data=json.dumps(post_data))
+        if res.status_code == 200:
+            self.startSession(message)
 
     def updateBadChannel(self, message):
-        self.badChannel = message['data']
+        self.badChannel = message['bad-channel']
 
-    def endImpendenceTest(self, data):
+    def endImpendenceTest(self, message):
+        url = 'http://'+ message['data']['ip'] +'/command'
+        post_data = dict({})
+        post_data['command'] = 'reset'
+        res = requests.post(url,data=json.dumps(post_data))
+        if res.status_code == 200:
+            return 'ok'
         return 'ok'
 
     def getCurrent(self):
