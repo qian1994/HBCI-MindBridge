@@ -63,7 +63,7 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
     
     def update(self, data):
         self.ax.clear()
-        self.ax.set_ylim(0,3)
+        self.ax.set_ylim(0,20)
         if len(data) != 0:
             plt.xlim(0, 45)
         for i in range(len(data)):
@@ -72,8 +72,3 @@ class FiguresFFTWindow(QWidget, Ui_figuresFFTWidget):
         self.fig.canvas.draw()  # 画布重绘，self.figs.canvas
         self.fig.canvas.flush_events()
 
-# if __name__ == '__main__':
-#     app = QApplication(sys.argv)
-#     m = FiguresFFTWindow()
-#     m.show()
-#     sys.exit(app.exec_())

@@ -1,3 +1,4 @@
+from realtimeFigure import RealTimeFigure
 import os
 import sys
 import json
@@ -24,9 +25,9 @@ import multiprocessing
 import signal
 import requests
 conn1, conn2 = Pipe()
-from realtimeFigure import RealTimeFigure
 sub_window = None
 app = None
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -124,9 +125,9 @@ class MainWindow(QMainWindow):
         self.webView.page().setDevToolsPage(dev_view.page())
 
     def _sub_close(self, message):
-            self.python_bridge.getFromServer.emit(
-                json.dumps({"id": 0, "action": 'close-time-serise'}))
-        
+        self.python_bridge.getFromServer.emit(
+            json.dumps({"id": 0, "action": 'close-time-serise'}))
+
     # 阻抗计算
     def getImpendenceData(self, message):
         boardData = self.getCurrent()
@@ -137,7 +138,7 @@ class MainWindow(QMainWindow):
         boardData -= meanData
         stdData = np.std(boardData, axis=1)
         impedences = [
-            ((np.sqrt(2) * item * 1.0e-6 / 6.0e-9 ) / 1000) for item in stdData
+            ((np.sqrt(2) * item * 1.0e-6 / 6.0e-9) / 1000) for item in stdData
         ]
         impedences = ','.join([str(i) for i in impedences])
         return json.dumps(dict({"impedences": impedences, "railed": railed}))
@@ -146,12 +147,13 @@ class MainWindow(QMainWindow):
     def getRailedPercentage(self, boardData):
         railed = []
         for channel in range(len(boardData)):
-            percetage = DataFilter.get_railed_percentage(boardData[channel], 24) 
+            percetage = DataFilter.get_railed_percentage(
+                boardData[channel], 24)
             railed.append(percetage)
         railed = ','.join([str(i) for i in railed])
         return railed
         # 设置相关
-   
+
     def homePage(self):
         html_path = QtCore.QUrl.fromLocalFile(
             QDir.currentPath() + "/web-app/mainPage/index.html")
@@ -167,12 +169,13 @@ class MainWindow(QMainWindow):
         data = message['data']
         if 'wave' in data:
             self.conn2.send({'action': 'toggle-wave', "data": data['wave']})
-        
+
         if 'fft' in data:
             self.conn2.send({'action': 'toggle-fft', "data": data['fft']})
-        
+
         if 'headplot' in data:
-            self.conn2.send({'action': 'toggle-headplot', "data": data['headplot']})
+            self.conn2.send({'action': 'toggle-headplot',
+                            "data": data['headplot']})
 
     def fullScreen(self, essage):
         self.showFullScreen()
@@ -217,7 +220,7 @@ class MainWindow(QMainWindow):
     def getCustomInsertMarker(self, message):
         if message['action'] == 'start':
             self.startStream()
-        
+
         if message['action'] == 'stop':
             self.stopStream()
 
@@ -233,10 +236,10 @@ class MainWindow(QMainWindow):
     # 获取实时数据
 
     def startImpendenceTest(self, message):
-        url = 'http://'+ message['data']['ip'] +'/impedance'
+        url = 'http://' + message['data']['ip'] + '/impedance'
         post_data = dict({})
         post_data['channel'] = '9'
-        res = requests.post(url,data=json.dumps(post_data))
+        res = requests.post(url, data=json.dumps(post_data))
         if res.status_code == 200:
             self.startSession(message)
 
@@ -244,10 +247,10 @@ class MainWindow(QMainWindow):
         self.badChannel = message['bad-channel']
 
     def endImpendenceTest(self, message):
-        url = 'http://'+ message['data']['ip'] +'/command'
+        url = 'http://' + message['data']['ip'] + '/command'
         post_data = dict({})
         post_data['command'] = 'reset'
-        res = requests.post(url,data=json.dumps(post_data))
+        res = requests.post(url, data=json.dumps(post_data))
         if res.status_code == 200:
             return 'ok'
         return 'ok'
@@ -276,27 +279,27 @@ class MainWindow(QMainWindow):
     def openTimeSeriseWindow(self, message):
         self.conn2.send({'action': 'open-window', 'data': message})
 
-    
     def closeTimeSeriseWindow(self):
         self.conn2.send({'action': 'close-window', 'data': ''})
 
     def setBrainWaveScale(self, message):
-        self.conn2.send({'action': 'set-brain-wave-scale', 'data': message['data']['scale']})
-  
-    def get_Signal(self, conn2 ):
+        self.conn2.send({'action': 'set-brain-wave-scale',
+                        'data': message['data']['scale']})
+
+    def get_Signal(self, conn2):
         self.conn2 = conn2
-    
+
     def endCustomParadigmByBrainflow(self, file):
         self.python_bridge.getFromServer.emit(
             json.dumps({"id": 0, "data": 'stop-custom-paradigm', 'file': file}))
-        
+
     def recv_signal(self):
         while True:
             if self.conn2 == None:
                 continue
             res = ""
             if mp_conn.wait([self.conn2], timeout=0):
-                res = self.conn2.recv()  
+                res = self.conn2.recv()
             if res == '':
                 continue
             if res['action'] == 'current-data':
@@ -309,7 +312,6 @@ class MainWindow(QMainWindow):
 def brainWindowFunc(conn2):
     app = QApplication(sys.argv)
     m = RealTimeFigure()
-
     m.get_Signal(conn2)
     m.showMinimized()
     sys.exit(app.exec_())
@@ -325,4 +327,3 @@ if __name__ == '__main__':
     m.get_Signal(conn2)
     m.show()
     sys.exit(app.exec_())
-
