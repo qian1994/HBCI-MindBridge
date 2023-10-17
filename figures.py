@@ -21,7 +21,7 @@ class RealTimePlotWidget(QWidget):
 
     def initUI(self):
         for i in range(self.num_plots):
-            hbox = QtGui.QHBoxLayout()
+            hbox = QHBoxLayout()
 
             label = QLabel(self.channels[i], self)
             self.lables.append(label)
