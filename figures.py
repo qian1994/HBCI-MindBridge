@@ -15,10 +15,23 @@ class RealTimePlotWidget(QWidget):
         self.plots = []
         self.channels = impedence32
         self.lables = []
+        self.plot_widget = None
         self.layout = QVBoxLayout(self)
         self.initUI()
-        print('===============================================')
 
+    def set_range(self, number):
+        if number <= 0:
+            self.plot_widget.enableAutoRange()
+        elif number == 50:
+            self.plot_widget.setRange(yRange=[-50, 50])
+        elif number == 100:
+            self.plot_widget.setRange(yRange=[-100, 100])
+        elif number == 200:
+            self.plot_widget.setRange(yRange=[-200, 200])    
+        elif number == 1000:
+            self.plot_widget.setRange(yRange=[-1000, 1000])   
+        elif number == 10000:
+            self.plot_widget.setRange(yRange=[-10000, 10000]) 
     def initUI(self):
         for i in range(self.num_plots):
             hbox = QHBoxLayout()
@@ -26,17 +39,16 @@ class RealTimePlotWidget(QWidget):
             label = QLabel(self.channels[i], self)
             self.lables.append(label)
             hbox.addWidget(label)
-            plot_widget = pg.PlotWidget()
-            plot_widget.setBackground(None)
-            plot_widget.getPlotItem().getViewBox().setMouseEnabled(x=False, y=False)
-            plot_widget.setRange(yRange=[-100, 100])
-
+            self.plot_widget = pg.PlotWidget()
+            self.plot_widget.setBackground(None)
+            self.plot_widget.getPlotItem().getViewBox().setMouseEnabled(x=False, y=False)
+            self.plot_widget.enableAutoRange()
             color = QtGui.QColor(128,128,128)
-            curve = plot_widget.plot(pen=pg.mkPen(color=color, width=2))
+            curve = self.plot_widget.plot(pen=pg.mkPen(color=color, width=2))
             self.curves.append(curve)
-            self.plots.append(plot_widget)
-
-            hbox.addWidget(plot_widget)
+            self.plots.append(self.plot_widget)
+            self.set_range(0)
+            hbox.addWidget(self.plot_widget)
             self.layout.addLayout(hbox)
     def setChannels(self, channels):
         self.channels = channels
