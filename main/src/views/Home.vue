@@ -95,6 +95,8 @@ export default {
             title = '评估报告'
           }else if (item == 'svp1_2') {
             title = '视觉评估'
+          } if (item == 'app') {
+            return
           }
           paradigm.push({
             name: item,

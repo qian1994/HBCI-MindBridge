@@ -47,7 +47,7 @@ class RealTimePlotWidget(QWidget):
             curve = self.plot_widget.plot(pen=pg.mkPen(color=color, width=2))
             self.curves.append(curve)
             self.plots.append(self.plot_widget)
-            self.set_range(0)
+            # self.set_range(0)
             hbox.addWidget(self.plot_widget)
             self.layout.addLayout(hbox)
     def setChannels(self, channels):
