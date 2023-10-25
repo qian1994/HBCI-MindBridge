@@ -142,10 +142,10 @@ class BrainWindow(QObject):
     def trigger(self, number):
         self.board.insert_marker(float(number))
 
-    def deleteLastLine(file):
+    def deleteLastLine(self, filename):
         import csv
         # 读取CSV文件并存储数据
-        with open(file, 'r') as file:
+        with open(filename, 'r') as file:
             lines = list(csv.reader(file))
 
         # 检查文件是否为空
@@ -156,7 +156,7 @@ class BrainWindow(QObject):
             lines.pop()
 
             # 将数据写回CSV文件
-            with open(file, 'w', newline='') as file:
+            with open(filename, 'w', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerows(lines)
             print("已成功删除最后一行数据。")
