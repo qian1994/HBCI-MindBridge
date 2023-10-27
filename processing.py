@@ -195,7 +195,7 @@ class Processsing(object):
 
             if 'filter' in config['checkList']:
                 for index in range(len(eeg_data)):
-                    DataFilter.perform_bandpass(eeg_data[index], self.sampling_rate, config['low'], config['high'], 2,
+                    DataFilter.perform_bandpass(eeg_data[index], self.sampling_rate, float(config['low']), float(config['high']), 2,
                                                 FilterTypes.BUTTERWORTH, ripple=0)
 
             if 'badChannel' in config['checkList']:
@@ -288,7 +288,7 @@ class Processsing(object):
                 for item in range(len(features)):
                     data = features[item]
                     for index in range(len(data)):
-                        DataFilter.perform_bandpass(data[index], self.sampling_rate, config['samplelow'], config['samplehigh'], 2,
+                        DataFilter.perform_bandpass(data[index], self.sampling_rate, float(config['samplelow']), float(config['samplehigh']), 2,
                                                     FilterTypes.BUTTERWORTH, ripple=0)
 
             if 'down_sample' in config['checkList']:
@@ -326,7 +326,7 @@ class Processsing(object):
                         single_features = copied_feature[item, index]
                         for wave_index in range(len(config['feature']['characteristicWave'])):
                             wave = config['feature']['characteristicWave'][wave_index]
-                            DataFilter.perform_bandpass(single_features, sampling_rate, int(wave[0]),int( wave[1]), 2,
+                            DataFilter.perform_bandpass(single_features, sampling_rate, float(wave[0]),float( wave[1]), 2,
                                                                     FilterTypes.BUTTERWORTH, ripple=0)
                             new_feature[item, index, wave_index] = single_features
             else:
@@ -336,11 +336,10 @@ class Processsing(object):
                     single_features = copied_feature[item, index]
                     for wave_index in range(len(config['feature']['characteristicWave'])):
                         wave = config['feature']['characteristicWave'][wave_index]
-                        DataFilter.perform_bandpass(single_features, sampling_rate, int(wave[0]), int(wave[1]), 2,
+                        DataFilter.perform_bandpass(single_features, sampling_rate, float(wave[0]), float(wave[1]), 2,
                                                                 FilterTypes.BUTTERWORTH, ripple=0)
                         new_feature[item, index, wave_index] = single_features
-            characteristic_wave_Data = new_feature
-        print('characteristic_wave_Data', characteristic_wave_Data.shape)
+            characteristic_wave_Data = np.array(new_feature)
         spatial_pattern = []
         if 'spatialPattern' in config['feature']['checkList']:
             copied_feature = np.copy(all_features)
@@ -351,7 +350,6 @@ class Processsing(object):
             else:
                 spatial_pattern = self.eeg_spatial_pattern(copied_feature)
         spatial_pattern = np.array(spatial_pattern)
-        print('spatial_pattern',  spatial_pattern.shape)
         psd_feature = []
         if 'psd' in config['feature']['checkList']:
             bands = [1, 48]
@@ -399,7 +397,7 @@ class Processsing(object):
                 statistic_feature = self.extract_statistic_feature(
                     copied_feature)
 
-        print('statistic_feature', statistic_feature.shape)
+        print('statistic_feature', np.array(statistic_feature).shape)
         
         
         # if config['saveDataPath'] == '':
@@ -412,17 +410,15 @@ class Processsing(object):
             
         if config['isOutPutData'] == '1':
             save_mat_data = dict({})
-            save_mat_data['origin_data'] = eeg_data.tolist()
-            save_mat_data['processing_data'] = all_features.tolist()
+            save_mat_data['origin_data'] = np.array(eeg_data).tolist()
+            save_mat_data['processing_data'] = np.array(all_features).tolist()
             save_mat_data['processing_label'] = all_label
-            save_mat_data['characteristic_wave_Data'] = characteristic_wave_Data.tolist()
-            save_mat_data['spatialPattern'] = spatial_pattern.tolist()
-            save_mat_data['psd'] = psd_feature.tolist()
-            save_mat_data['DE'] = de_feature.tolist()
-            save_mat_data['statistic'] = statistic_feature.tolist()
+            save_mat_data['characteristic_wave_Data'] = np.array(characteristic_wave_Data).tolist()
+            save_mat_data['spatialPattern'] = np.array(spatial_pattern).tolist()
+            save_mat_data['psd'] = np.array(psd_feature).tolist()
+            save_mat_data['DE'] = np.array(de_feature).tolist()
+            save_mat_data['statistic'] = np.array(statistic_feature).tolist()
             print('this is create mat file')
-            
-
             sio.savemat('./createScript/demo-script_'+time_string+'.mat', save_mat_data)
         print('this is create mat end')
     
@@ -626,7 +622,7 @@ def get_features(files, channel, config, boardId):
             script4 = """
         # 对一维信号进行滤波处理
         for index in range(len(eeg_data)):
-            DataFilter.perform_bandpass(eeg_data[index], sampling_rate, config['low'], config['high'], 2,
+            DataFilter.perform_bandpass(eeg_data[index], sampling_rate, float(config['low']), float(config['high']), 2,
                                             FilterTypes.BUTTERWORTH, ripple= 0)"""
 
         script5 = """"""
@@ -740,7 +736,7 @@ def get_features(files, channel, config, boardId):
         for item in range(len(features)):
             data = features[item]
             for index in range(len(data)):
-                DataFilter.perform_bandpass(data[index], sampling_rate, config['samplelow'], config['samplehigh'], 2,
+                DataFilter.perform_bandpass(data[index], sampling_rate, float(config['samplelow']), float(config['samplehigh']), 2,
                                                                 FilterTypes.BUTTERWORTH, ripple= 0)
         """
 
@@ -783,7 +779,7 @@ def get_features(files, channel, config, boardId):
             single_features = copied_feature[item, index]
             for wave_index in range(len(config['feature']['characteristicWave'])):
                 wave = config['feature']['characteristicWave'][wave_index]
-                DataFilter.perform_bandpass(single_features, sampling_rate, int(wave[0]), int(wave[1]), 2,
+                DataFilter.perform_bandpass(single_features, sampling_rate, float(wave[0]), float(wave[1]), 2,
                                         FilterTypes.BUTTERWORTH, ripple=0)
                 characteristic_wave_Data[item, index, wave_index] = single_features
         """
@@ -794,10 +790,10 @@ def get_features(files, channel, config, boardId):
         single_features = copied_feature[item, index]
         for wave_index in range(len(config['feature']['characteristicWave'])):
             wave = config['feature']['characteristicWave'][wave_index]
-            DataFilter.perform_bandpass(single_features, sampling_rate, int(wave[0]), int(wave[1]), 2,
+            DataFilter.perform_bandpass(single_features, sampling_rate, float(wave[0]), float(wave[1]), 2,
                                     FilterTypes.BUTTERWORTH, ripple=0)
             new_feature[item, index, wave_index] = single_features
-    characteristic_wave_Data = new_feature
+    characteristic_wave_Data = np.array(new_feature)
     print('characteristic_wave_Data', characteristic_wave_Data.shape)
         """
         script12 = """"""
@@ -866,14 +862,14 @@ def get_features(files, channel, config, boardId):
         if config['isOutPutData'] == '1':
             script_save = """
     save_mat_data = dict({})
-    save_mat_data['origin_data'] = eeg_data.tolist()
-    save_mat_data['processing_data'] = features.tolist()
-    save_mat_data['processing_label'] = features_label
-    save_mat_data['characteristic_wave_Data'] = characteristic_wave_Data.tolist()
-    save_mat_data['spatialPattern'] = spatial_pattern.tolist()
-    save_mat_data['psd'] = psd_feature.tolist()
-    save_mat_data['DE'] = de_feature.tolist()
-    save_mat_data['statistic'] = statistic_feature.tolist()
+    save_mat_data['origin_data'] = np.array(eeg_data).tolist()
+    save_mat_data['processing_data'] = np.array(all_features).tolist()
+    save_mat_data['processing_label'] = all_label
+    save_mat_data['characteristic_wave_Data'] = np.array(characteristic_wave_Data).tolist()
+    save_mat_data['spatialPattern'] = np.array(spatial_pattern).tolist()
+    save_mat_data['psd'] = np.array(psd_feature).tolist()
+    save_mat_data['DE'] = np.array(de_feature).tolist()
+    save_mat_data['statistic'] = np.array(statistic_feature).tolist()
     sio.savemat('./demo-script.mat', save_mat_data)
 
         """
