@@ -88,6 +88,7 @@ class BrainWindow(QObject):
         if self.boartStatus == 'startStream' or self.board != None:
             return 'ok'
         data = message['data']
+        print(data)
         boardId = int(data["productId"])
         params = BrainFlowInputParams()
         params.ip_port = 9521 + random.randint(1, 100)
@@ -165,23 +166,11 @@ class BrainWindow(QObject):
         self.deleteLastLine(self.MindBridgefileName)
         data = self.board.get_board_data()
         DataFilter.write_file(data, self.MindBridgefileName, 'a')
-        # dataNow = self.board.get_board_data()
-        # data = np.loadtxt(self.MindBridgefileName).T
-        # os.remove(self.MindBridgefileName)
-        # data = np.ascontiguousarray(np.array(data))
-        # if len(data) != 0:
-        #     data = np.concatenate((data, dataNow), axis=1)
-        # else:
-        #     data = dataNow
-        # datafilter = DataFilter()
-        # datafilter.write_file(
-        #     data=data, file_name=self.brainflow_file_name, file_mode='w')
-        time_now = datetime.datetime.now()
-        time_string = time_now.strftime("%Y_%m_%d_%H_%M_%S")
-        self.MindBridgefileName = self.dir_path+"/data/" + time_string + '.csv'
-        if not os.path.exists(self.MindBridgefileName):
-            open(self.MindBridgefileName, 'w').close()
-        return ''
+        olld_mindBridgefileName = self.MindBridgefileName
+        self.stopStream('')
+        time.sleep(1)
+        self.startStream('')
+        return olld_mindBridgefileName
 
     def postCurrentData(self, message):
         if self.conn1 == None:

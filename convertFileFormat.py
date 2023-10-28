@@ -105,7 +105,8 @@ class ConvertFileFormat(object):
         file.write("%OpenBCI Raw EEG Data\n")   
         file.write("%Number of channels = "+str(len(channels))+"\n")   
         file.write("%Sample Rate = "+str(sample_rate)+" Hz\n")   
-        file.write("%Board = OpenBCI_GUI$BoardCytonWifi\n")   
+        file.write("%Board = OpenBCI_GUI$OpenBCI_GUI$BoardCytonWifi"+str(self.boardId).replace('5', '')+"\n")   
+ 
         str_h = "Sample Index," 
         str_channels = ""
         for i in range(len(channels)):

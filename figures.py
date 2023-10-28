@@ -33,9 +33,9 @@ class RealTimePlotWidget(QWidget):
         elif number == 10000:
             self.plot_widget.setRange(yRange=[-10000, 10000]) 
     def initUI(self):
-        for i in range(self.num_plots):
-            hbox = QHBoxLayout()
+        hbox = QVBoxLayout()
 
+        for i in range(self.num_plots):
             label = QLabel(self.channels[i], self)
             self.lables.append(label)
             hbox.addWidget(label)
@@ -47,9 +47,9 @@ class RealTimePlotWidget(QWidget):
             curve = self.plot_widget.plot(pen=pg.mkPen(color=color, width=2))
             self.curves.append(curve)
             self.plots.append(self.plot_widget)
-            # self.set_range(0)
+            self.set_range(0)
             hbox.addWidget(self.plot_widget)
-            self.layout.addLayout(hbox)
+        self.layout.addLayout(hbox)
     def setChannels(self, channels):
         self.channels = channels
         for i in range(len(channels)):

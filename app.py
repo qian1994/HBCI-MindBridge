@@ -211,7 +211,6 @@ class MainWindow(QMainWindow):
 
     def endCustomParadigm(self, message):
         self.conn2.send({'action': 'task-end-file-custom', 'data': ''})
-        print('message', self.SocketCustomClient)
         if self.SocketCustomClient != None:
             self.SocketCustomClient.stop()
             self.SocketCustomClient = None

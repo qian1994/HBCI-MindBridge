@@ -64,8 +64,6 @@ export default {
                 this.form.filePath = dirPath
             }
         },
-        submit() {
-        },
         async start() {
             const sres = await startSession({ip: this.form.ip, productId: this.form.productId})
             if (sres == 'ok') {

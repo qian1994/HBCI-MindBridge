@@ -231,7 +231,6 @@ class RealTimeFigure(QMainWindow):
                 self.setBrainWaveScale(res['data'])
                 
             if res['action'] == 'task-end-file-custom':
-                print('task-end-file-custom')
                 csvFile= self.brainBoject.endTaskSaveData(res['data'])
                 self.conn1.send({'action': 'task-end-file-custom',
                                 "data": {"csv": csvFile}})
