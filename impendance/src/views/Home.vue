@@ -71,6 +71,7 @@ export default {
     endImpendenceTest()
   },
   async mounted() {
+    initDevTools()
     const config = localStorage.getItem('mindbridgeinfo')
     if (config) {
       const infor = JSON.parse(config)
@@ -163,7 +164,7 @@ export default {
             let data = await getImpendenceFromServe({})
             data = JSON.parse(data)
             console.log(data)
-            this.railed = data['impedences'].split(',').map(item => {
+            this.railed = data['railed'].split(',').map(item => {
               return parseFloat(item).toFixed(2)
             })
             this.impedences = data['impedences'].split(',').map(item => {
