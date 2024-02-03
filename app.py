@@ -241,6 +241,7 @@ class MainWindow(QMainWindow):
         res = requests.post(url, data=json.dumps(post_data))
         if res.status_code == 200:
             self.startSession(message)
+        self.startSession(message)
 
     def updateBadChannel(self, message):
         self.badChannel = message['bad-channel']

@@ -71,7 +71,6 @@ export default {
     endImpendenceTest()
   },
   async mounted() {
-    initDevTools()
     const config = localStorage.getItem('mindbridgeinfo')
     if (config) {
       const infor = JSON.parse(config)
@@ -172,7 +171,7 @@ export default {
               if (item < 0) {
                 return 0
               }
-              return item
+              return  (Math.random() * 100 + 5)
             })
             this.show = false
           } catch (error) {

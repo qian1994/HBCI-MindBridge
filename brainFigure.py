@@ -88,7 +88,6 @@ class BrainWindow(QObject):
         if self.boartStatus == 'startStream' or self.board != None:
             return 'ok'
         data = message['data']
-        print(data)
         boardId = int(data["productId"])
         params = BrainFlowInputParams()
         params.ip_port = 9521 + random.randint(1, 100)
