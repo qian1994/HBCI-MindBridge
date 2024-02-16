@@ -1,8 +1,8 @@
 <template>
     <div class="fft-config">
         <div>
-            <el-button type="primary" @click="openFFT">打开功率谱图</el-button>
-            <el-button type="success" @click="home">返回首页</el-button>
+            <el-button type="primary" @click="openFFT">open fft</el-button>
+            <el-button type="success" @click="home">Back</el-button>
         </div>
     </div>
 </template>

@@ -5,29 +5,29 @@
                 <el-input type="text" v-model="form.link" disabled placeholder="功能未开启"> </el-input>
             </el-form-item> -->
             <el-form-item label="ip">
-                <el-input type="text" v-model="form.customIp" placeholder="请输入ip"> </el-input>
+                <el-input type="text" v-model="form.customIp" placeholder="Please enter ip"> </el-input>
             </el-form-item>
             <el-form-item label="port">
-                <el-input type="text" v-model="form.customPort" placeholder="请输入端口"> </el-input>
+                <el-input type="text" v-model="form.customPort" placeholder="Please enter port"> </el-input>
             </el-form-item>
             <!-- <el-form-item label="数据保存路径">
                 <el-button @click="dirChoose"> 选择保存数据路径</el-button> 
                 <div v-if="!form.filePath">文件默认保存在软件data文件夹下</div>
                 <div v-if="form.filePath">{{form.filePath}}</div>
             </el-form-item> -->
-            <el-form-item label="数据保存路径">
+            <el-form-item label="file path">
                 {{ form.file }}
             </el-form-item>
             
             <el-form-item label="">
                 <el-button @click="back" size="medium">
-                    返回首页
+                    Home Page
                 </el-button>
                 <el-button @click="start">
-                    开始实验
+                    Start
                 </el-button>
                 <el-button @click="end">
-                    结束实验
+                    End
                 </el-button>
             </el-form-item>
         </el-form>

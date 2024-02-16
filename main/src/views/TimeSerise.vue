@@ -4,48 +4,48 @@
       <el-form>
         <div>
           <el-form-item label="组件显示">
-            <el-button class="figure-toggle-btn" :type="wave ? 'primary': 'info'"  @click="toggleFigure('wave')">波形图</el-button>
-            <el-button class="figure-toggle-btn" :type="fft ? 'primary': 'info'"  @click="toggleFigure('fft')">频率图</el-button>
-            <el-button class="figure-toggle-btn" :type="headplot ? 'primary': 'info'" @click="toggleFigure('headplot')">脑区地形图</el-button>
+            <el-button class="figure-toggle-btn" :type="wave ? 'primary': 'info'"  @click="toggleFigure('wave')">TimeSerise</el-button>
+            <el-button class="figure-toggle-btn" :type="fft ? 'primary': 'info'"  @click="toggleFigure('fft')">FFT</el-button>
+            <el-button class="figure-toggle-btn" :type="headplot ? 'primary': 'info'" @click="toggleFigure('headplot')">HeadPlot</el-button>
           </el-form-item>
         </div>
         <div class="filter-type">
           <el-col :span="12" class="time-fregament-col-6">
-            <el-form-item label="滤波类型">
+            <el-form-item label="">
               <div class="time-fregament time-fregament-first">
                 <el-select v-model="form.model">
-                  <el-option value="0" label="带通滤波" name="带通滤波"></el-option>
+                  <el-option value="0" label="BandPass" name="BandPass"></el-option>
                   <!-- <el-option value="1" label="带阻滤波" name="带租滤波"></el-option> -->
                 </el-select>
               </div>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="滤波名称">
+            <el-form-item label="ame">
               <el-select v-model="form.filter">
-                <el-option value="0" label="巴特沃斯" name="巴特沃斯"></el-option>
-                <el-option value="1" label="切比雪夫" name="切比雪夫"></el-option>
-                <el-option value="2" label="贝叶斯" name="贝叶斯"></el-option>
+                <el-option value="0" label="Butterworth" name="Butterworth"></el-option>
+                <el-option value="1" label="Chebyshev" name="Chebyshev"></el-option>
+                <el-option value="2" label="Bayes" name="Bayes"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </div>
         <div class="time-fregament time-fregament-second">
           <el-col :span="12">
-            <el-form-item label="滤波范围:">
+            <el-form-item label="range:">
               <el-col :span="6">
-                <el-input type="text" label="low" v-model="form.low" placeholder="请输入滤波的起始值"></el-input>
+                <el-input type="text" label="low" v-model="form.low" placeholder="low band"></el-input>
               </el-col>
               <el-col :span="1">
                 <div class="time-filter-split">--</div>
               </el-col>
               <el-col :span="6">
-                <el-input type="text" label="heigh" v-model="form.high" placeholder="请输入滤波的z值"></el-input>
+                <el-input type="text" label="heigh" v-model="form.high" placeholder="high band"></el-input>
               </el-col>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="滤波阶数:">
+            <el-form-item label="level:">
                 <el-select v-model="form.order">
                   <el-option value="1" label="1" name="1"></el-option>
                   <el-option value="2" label="2" name="2"></el-option>
@@ -55,15 +55,15 @@
             </el-form-item>
           </el-col>
 
-          <el-form-item label="脑电规格:">
-            <el-button class="data-scale-apply" @click="changeSCale('upper')" type="primary">放大</el-button>
-            <el-button class="data-scale-apply" @click="changeSCale('lower')" type="primary">缩小</el-button>
+          <el-form-item label="Specification:">
+            <el-button class="data-scale-apply" @click="changeSCale('upper')" type="primary">Scale up</el-button>
+            <el-button class="data-scale-apply" @click="changeSCale('lower')" type="primary">Scale down</el-button>
           </el-form-item>
         </div>
         
           <div class="data-config-apply-container">
-            <el-button class="data-config-apply" @click="apply" type="primary">应用</el-button>
-            <el-button class="home-page-button" type="warning" @click="homePage">返回首页</el-button>
+            <el-button class="data-config-apply" @click="apply" type="primary">Application</el-button>
+            <el-button class="home-page-button" type="warning" @click="homePage">Home page</el-button>
           </div>
       </el-form>
       <div class="channel-button">

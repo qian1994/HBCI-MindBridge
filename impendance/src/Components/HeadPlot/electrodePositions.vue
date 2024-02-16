@@ -63,7 +63,7 @@ export default {
         const res = [this.eegInfo[0][index], this.eegInfo[1][index], this.eegInfo[2][index]]
         let style = ''
         if (this.showInfo[item].show == 'color') {
-          let color = this.getGradientColor("#00ff00", '#ff0000', this.showInfo[item].value/100)
+          let color = this.getGradientColor("#00ff00", '#ff0000', this.showInfo[item].value/50)
           style = `background:${color}`
         } else if (this.showInfo[item].show == 'switch') {
           style = `background:${this.showInfo[item].switch ? '#00ff00' : '#ff0000'}`

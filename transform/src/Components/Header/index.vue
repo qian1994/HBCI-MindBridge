@@ -2,7 +2,7 @@
     <div class="header">
         <div class="logo-MindBridge" @click="homePage" >
         </div>
-        <div class="header-btn-container"> <el-button type="">主页</el-button> <el-button type=""> 产品文档</el-button>  <el-button type="">团队介绍</el-button></div>
+        <div class="header-btn-container"> <el-button type="">Home Page</el-button> <el-button type=""> Document</el-button>  <el-button type="">Introduction</el-button></div>
     </div>
 </template>
 <script>
