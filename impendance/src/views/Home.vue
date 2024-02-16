@@ -2,15 +2,15 @@
   <div class="impedences">
     <div class="impedences-content">
       <div class="impedences-pass">
-        <el-button v-if="!entered" type="primary" @click="impendences">测试设备</el-button>
-        <el-button @click="goToHomePage">返回</el-button>
-        <el-radio border size="small" label='label' v-model="showLabel">显示通道名</el-radio>
-        <el-radio border size="small" label='color' v-model="showLabel">阻抗测试</el-radio>
-        <el-radio border size="small" label='switch' v-model="showLabel">坏导选择</el-radio>
+        <el-button v-if="!entered" type="primary" @click="impendences">start impedance</el-button>
+        <el-button @click="goToHomePage">back</el-button>
+        <el-radio border size="small" label='label' v-model="showLabel">Label</el-radio>
+        <el-radio border size="small" label='color' v-model="showLabel">Impedance</el-radio>
+        <el-radio border size="small" label='switch' v-model="showLabel">Bad channel</el-radio>
 
       </div>
       <div class="impedences-bad-channel" v-if="badChannels.length">
-        <div class="impedences-bad-channel-warning">选择相关坏导： </div>
+        <div class="impedences-bad-channel-warning">Selected Bad channel： </div>
         <el-button v-for="channel in badChannels" type="danger" @click="removeBadChannel(channel)">
           {{ channel }}</el-button>
       </div>

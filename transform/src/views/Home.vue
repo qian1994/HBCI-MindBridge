@@ -1,54 +1,54 @@
 <template>
   <div class="container">
     <el-form ref="form" :model="form" label-width="auto" width class="productBox-content">
-      <el-form-item label="生成文件类型：">
+      <el-form-item label="File type：">
         <el-select v-model="form.type" placeholder="请选择需要转换的文件类型">
           <el-option v-for="item in listFileType" :label="item" :value="item"></el-option>
         </el-select>
       </el-form-item>
 
-      <el-form-item label="选择原始数据:">
-        <el-button size="small" type="primary" @click="openFileDialogEvent">点击上传</el-button>
-        <div slot="tip" class="el-upload__tip" v-if="!form.fileList.length">请选择需要转换的文件</div>
+      <el-form-item label="Choose file:">
+        <el-button size="small" type="primary" @click="openFileDialogEvent">Uploader</el-button>
+        <div slot="tip" class="el-upload__tip" v-if="!form.fileList.length">Selected files</div>
         <div class="" v-else>
           <div v-for="item in showFiles" :key="item"> {{ item }} <span class="files-delete"
               @click="deleteFile(item)"></span></div>
         </div>
       </el-form-item>
-      <el-form-item label="选择保存路径:">
-        <el-button size="small" type="primary" @click="opendir">选择</el-button>
-        <div slot="tip" class="el-upload__tip" v-if="!form.savePath">请选择保存路径，默认与上传文件同路径</div>
+      <el-form-item label="Save Path:">
+        <el-button size="small" type="primary" @click="opendir">Select</el-button>
+        <div slot="tip" class="el-upload__tip" v-if="!form.savePath">Select a path for saving the file. By default, the path is the same as that for uploading the file</div>
         <div v-else>
           <div> {{ form.savePath }} <span class="files-delete" @click="deleteSavePath(item)"></span></div>
         </div>
       </el-form-item>
-      <el-form-item label="操作者" v-if="form.type == 'edf'">
-        <el-input v-model="form.technician" placeholder="操作者名字或编号"></el-input>
+      <el-form-item label="operator" v-if="form.type == 'edf'">
+        <el-input v-model="form.technician" placeholder="place enter operator name"></el-input>
       </el-form-item>
-      <el-form-item label="被试名字" v-if="form.type == 'edf'">
-        <el-input v-model="form.patientname" placeholder="请输入被试的名字"></el-input>
+      <el-form-item label="Name" v-if="form.type == 'edf'">
+        <el-input v-model="form.patientname" placeholder="place enter subject name"></el-input>
       </el-form-item>
-      <el-form-item label="被试编号" v-if="form.type == 'edf'">
-        <el-input v-model="form.patientcode" placeholder="请输入被试编号"></el-input>
+      <el-form-item label="ID" v-if="form.type == 'edf'">
+        <el-input v-model="form.patientcode" placeholder="place enter subject ID"></el-input>
       </el-form-item>
-      <el-form-item label="被试附加信息" v-if="form.type == 'edf'">
-        <el-input v-model="form.patient_additional" placeholder="请输入被试相关信息"></el-input>
+      <el-form-item label="additional" v-if="form.type == 'edf'">
+        <el-input v-model="form.patient_additional" placeholder="place enter subject addition information"></el-input>
       </el-form-item>
-      <el-form-item label="被试年龄" v-if="form.type == 'edf'">
-        <el-input v-model="form.gender" type="number" placeholder="请输入被试的年龄"></el-input>
+      <el-form-item label="age" v-if="form.type == 'edf'">
+        <el-input v-model="form.gender" type="number" placeholder="place enter subject age"></el-input>
       </el-form-item>
-      <el-form-item label="被试生日" v-if="form.type == 'edf'">
-        <el-popover v-model="visible" placement="right" title="被试生日" width="600" trigger="click">
+      <el-form-item label="birthday" v-if="form.type == 'edf'">
+        <el-popover v-model="visible" placement="right" title="birthday" width="600" trigger="click">
           <el-Calendar v-model="form.birthdate"></el-Calendar>
           <div style="text-align: right; margin: 0">
-            <el-button size="mini" type="text" @click="visible = false">取消</el-button>
-            <el-button type="primary" size="mini" @click="visible = false">确定</el-button>
+            <el-button size="mini" type="text" @click="visible = false">Cancel</el-button>
+            <el-button type="primary" size="mini" @click="visible = false">Confirm</el-button>
           </div>
           <el-button slot="reference">{{ birthdate }}</el-button>
         </el-popover>
       </el-form-item>
       <el-form-item label="">
-        <el-button @click="createFile">生成文件</el-button> <el-button @click="goToHomePage">返回</el-button>
+        <el-button @click="createFile">Save</el-button> <el-button @click="goToHomePage">Back</el-button>
       </el-form-item>
     </el-form>
   </div>

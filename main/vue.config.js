@@ -5,7 +5,7 @@ function resolve(dir) {
 }
 
 module.exports = {
-    outputDir: '../mainPage',
+    outputDir: '../web-app/app',
     publicPath: process.env.NODE_ENV === 'production' ? './' : './',
     devServer: {
         port: 8082

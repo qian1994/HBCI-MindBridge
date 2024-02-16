@@ -1,32 +1,32 @@
 <template>
   <div class="container">
     <div class="file">
-      <h2 class="select_file">选中文件</h2>
-      <el-button @click="homePage"  style="background: #FAA629;color: white;">首页</el-button>
-      <el-button @click="chooseFile"  style="background: #FAA629;color: white;">选择文件</el-button>
-      <el-button @click="chooseDir"  style="background: #FAA629;color: white;">选择文件夹</el-button>
-      <el-button @click="addFiles"  style="background: #2868C9;color: white;">添加文件</el-button>
+      <h2 class="select_file">File</h2>
+      <el-button @click="homePage"  style="background: #FAA629;color: white;">Home</el-button>
+      <el-button @click="chooseFile"  style="background: #FAA629;color: white;">File</el-button>
+      <el-button @click="chooseDir"  style="background: #FAA629;color: white;">Files</el-button>
+      <el-button @click="addFiles"  style="background: #2868C9;color: white;">Add file</el-button>
     </div>
     <div class="border"></div>
     <div v-if="files.length" class="position">
-      <div v-for="file in files" style="display: flex;padding-bottom: 15px;"><h2 class="position_name">地址：</h2><input :value= "file" class="address"><span class="remove-btn" @click="plotEEGData(file)"><el-button style="background: #2868C9;color: white;width: 90px;margin-left: 20px;">绘图</el-button></span><span class="remove-btn" @click="removeFiles(file)"><el-button style="background: #FA5151;color: white;width: 90px;margin-left: 20px;">删除</el-button></span> </div>
+      <div v-for="file in files" style="display: flex;padding-bottom: 15px;"><h2 class="position_name">Path：</h2><input :value= "file" class="address"><span class="remove-btn" @click="plotEEGData(file)"><el-button style="background: #2868C9;color: white;width: 90px;margin-left: 20px;">Plot</el-button></span><span class="remove-btn" @click="removeFiles(file)"><el-button style="background: #FA5151;color: white;width: 90px;margin-left: 20px;">Delete</el-button></span> </div>
     </div>
     <div class="pre_dispose" v-if="files.length">
       <div>
-        <h2 class="select_dispose"> 选中预处理步骤</h2>
+        <h2 class="select_dispose"> Preprocessing </h2>
       </div>
       <div style="margin-top: 6px;">
         <el-checkbox-group v-model="form.checkList">
-          <el-checkbox label="detrend" value="detrend" class="checking">基线漂移</el-checkbox>
-          <el-checkbox label="wlt_denoising" value="wlt_denoising" class="checking">去噪</el-checkbox>
-          <el-checkbox label="filter" value="" class="checking">基础滤波</el-checkbox>
-          <el-checkbox label="badChannel" value="badChannel" class="checking">去坏导</el-checkbox><br></br>
-          <el-checkbox label="refrence" value="refrence" class="checking">重参考</el-checkbox>
-          <el-checkbox label="sample" value="sample" class="checking">切片</el-checkbox>
-          <el-checkbox label="sample_detrend" value="sample_detrend" class="checking">样本矫正基线</el-checkbox>
-          <el-checkbox label="segmentation" value="segmentation" class="checking">样本分段</el-checkbox><br></br>
-          <el-checkbox label="sample_filter" value="sample_filter" class="checking">样本滤波</el-checkbox>
-          <el-checkbox label="down_sample" value="down_sample" class="checking">降采样</el-checkbox>
+          <el-checkbox label="detrend" value="detrend" class="checking">Detrend</el-checkbox>
+          <el-checkbox label="wlt_denoising" value="wlt_denoising" class="checking">Denoising</el-checkbox>
+          <el-checkbox label="filter" value="" class="checking">Filter</el-checkbox>
+          <el-checkbox label="badChannel" value="badChannel" class="checking">BadChannel</el-checkbox><br/>
+          <el-checkbox label="refrence" value="refrence" class="checking">Refrence</el-checkbox>
+          <el-checkbox label="sample" value="sample" class="checking">Sample</el-checkbox>
+          <el-checkbox label="sample_detrend" value="sample_detrend" class="checking">Sample Detrend</el-checkbox>
+          <el-checkbox label="segmentation" value="segmentation" class="checking">Segmentation</el-checkbox><br/>
+          <el-checkbox label="sample_filter" value="sample_filter" class="checking">Segmentation filter</el-checkbox>
+          <el-checkbox label="down_sample" value="down_sample" class="checking">Down sample</el-checkbox>
           <el-checkbox disabled label="ica" value="ica"></el-checkbox>
         </el-checkbox-group>
       </div>
@@ -34,37 +34,37 @@
 
     <div class="pre_parameter"  v-if="files.length">
       <el-form ref="form" :model="form" label-width="80px" size="mini">
-        <h2 class="select_parameter" style="padding-bottom: 20px;"> 预处理参数选择</h2>
+        <h2 class="select_parameter" style="padding-bottom: 20px;"> Config</h2>
         
         <el-form-item v-if="form.checkList.indexOf('detrend') >=0" style="flex: 1;">
           <div class="baseline_drift">
-            <label for="基线漂移: " style=" width:100px; display: inline-block;">基线漂移：</label>
-          <el-radio v-model="form.detrend" border label="0" value="0" style="width:110px;">是</el-radio>
-          <el-radio  v-model="form.detrend" border label="1" value="1" style="width:110px;">否</el-radio>
+            <label for="Detrend: " style=" width:100px; display: inline-block;">Detrend: </label>
+          <el-radio v-model="form.detrend" border label="0" value="0" style="width:110px;">Y</el-radio>
+          <el-radio  v-model="form.detrend" border label="1" value="1" style="width:110px;">N</el-radio>
         </div>
         </el-form-item>
 
         <el-form-item v-if="form.checkList.indexOf('wlt_denoising') >=0">
           <div class="denoising">
-            <label for="去噪: " style=" width:70px; display: inline-block;">去噪：</label>
-            <el-radio  v-model="form.wlt_denoising" border label="0" value="0">小波去噪</el-radio>
-            <el-radio  v-model="form.wlt_denoising" border label="1" value="1">公频干扰</el-radio>
-            <el-radio  v-model="form.wlt_denoising" border label="2" value="2">小波和公频</el-radio>
+            <label for="Denoising: " style=" width:70px; display: inline-block;">Denoising: </label>
+            <el-radio  v-model="form.wlt_denoising" border label="0" value="0">Wavelet denoising</el-radio>
+            <el-radio  v-model="form.wlt_denoising" border label="1" value="1">50HZ </el-radio>
+            <el-radio  v-model="form.wlt_denoising" border label="2" value="2">Both</el-radio>
           </div>
         </el-form-item>
 
         <el-form-item v-if="form.checkList.indexOf('refrence') >=0">
           <div class="re-reference">
-          <label for="重参考: " style=" width:70px; display: inline-block;">重参考：</label>
-          <el-radio v-model="form.refrence" border label="0" value="0">单个电极</el-radio>
-          <el-radio v-model="form.refrence" border label="1" value="1">多个电极</el-radio>
-          <el-radio v-model="form.refrence" border label="2" value="2">全部电极</el-radio>
+          <label for="重参考: " style=" width:70px; display: inline-block;">Refrence: </label>
+          <el-radio v-model="form.refrence" border label="0" value="0">Single</el-radio>
+          <el-radio v-model="form.refrence" border label="1" value="1">Milt</el-radio>
+          <el-radio v-model="form.refrence" border label="2" value="2">ALL</el-radio>
           </div>
         </el-form-item>
 
         <el-form-item v-if="form.checkList.indexOf('filter') >=0">
           <div class="basic_filtering"  style="display: flex;">
-            <label for="基础滤波: " style=" width:83px; display: inline-block;">基础滤波：</label>
+            <label for="Base filter: " style=" width:83px; display: inline-block;">Filter</label>
           <div>
           <el-col :span="6">
            <el-input v-model="form.low"> </el-input>
@@ -82,7 +82,7 @@
         <div style="display: flex;">
           <el-form-item label="" v-if="form.checkList.indexOf('badChannel') >=0" style="flex: 1;">
             <div class="to_bad_guide">
-              <label for="去坏导: " style=" width:200px; display: inline-block;">去坏导：</label>
+              <label for="Bad channel: " style=" width:200px; display: inline-block;">Bad channel</label>
               <div class="badChannel-pass">
                 <ElectrodePositions :show-info="selectedChannelInfo" :radius="radius" @point-click="cellClick"> </ElectrodePositions> 
               </div>
@@ -91,7 +91,7 @@
 
           <el-form-item v-if="form.checkList.indexOf('refrence') >=0 && form.refrence != 2">
             <div class="select_the_reference_electrode">
-              <label for="选择参考电极: " style=" width:200px; display: inline-block;">选择参考电极：</label>
+              <label for="refrence: " style=" width:200px; display: inline-block;">Refrence</label>
             <div  class="badChannel-pass">
               <ElectrodePositions :show-info="chooseRefrenceChannel" :radius="radius" @point-click="refrenceCellClick"> </ElectrodePositions> 
             </div>
@@ -101,69 +101,69 @@
 
         <el-form-item v-if="form.checkList.indexOf('sample') >=0">
           <div class="time_slices">
-            <label for="时间切片" style=" width:83px; display: inline-block;flex: 1;vertical-align:middle;">时间切片</label>
+            <label for="Segmentation" style=" width:83px; display: inline-block;flex: 1;vertical-align:middle;">Segmentation</label>
             <div style="margin-right: 30px;">
-              <el-button  style="background: #FFFFFF;color: #262626;width: 80px;height: 40px;">重置</el-button>
-              <el-button  style="background: #2868C9;color: white;width: 80px;height: 40px;">添加</el-button>
+              <el-button  style="background: #FFFFFF;color: #262626;width: 80px;height: 40px;">Reset</el-button>
+              <el-button  style="background: #2868C9;color: white;width: 80px;height: 40px;">Add</el-button>
             </div>
           </div>
           <div class="border2"></div>
           <div  v-for="item in form.triggers" class="processing-slice">
             <div style="margin: 4px;">
               <el-col :span="6" style="padding: 5px;">
-                <label for="开始时间: " style=" width:80px; display: inline-block;">开始时间：</label><el-input v-model="item.startTime" style="width: 100px;height: 40px;display: inline-block;"> </el-input>
+                <label for="Start time: " style=" width:80px; display: inline-block;">Start time:</label><el-input v-model="item.startTime" style="width: 100px;height: 40px;display: inline-block;"> </el-input>
               </el-col>
               <el-col :span="6" style="padding: 5px;">
-                <label for="结束时间: " style=" width:80px; display: inline-block;">结束时间：</label><el-input  v-model="item.endTime" style="width: 100px;height: 40px;"> </el-input>
+                <label for="End time: " style=" width:80px; display: inline-block;">End time:</label><el-input  v-model="item.endTime" style="width: 100px;height: 40px;"> </el-input>
               </el-col>
               <el-col class="line" :span="8" style="padding: 5px;">
-                <label for="打标数据: " style=" width:80px; display: inline-block;">打标数据：</label> <el-select v-model="item.trigger" placeholder="请选择有用打标"  style="width: 100px;height: 40px;">
+                <label for="Trigger: " style=" width:80px; display: inline-block;">Trigger: </label> <el-select v-model="item.trigger" placeholder="choose trigger"  style="width: 100px;height: 40px;">
                   <el-option v-for="item in triggerNumbers" :label="item" :value="item"></el-option>
                 </el-select>
               </el-col>
           </div>
             <el-col :span="2">
-            <el-button @click="addTrigger" style="background: #2868C9;color: white;width: 80px;height: 40px;margin-left: -53px;"> 添加 + </el-button>
+            <el-button @click="addTrigger" style="background: #2868C9;color: white;width: 80px;height: 40px;margin-left: -53px;"> Add </el-button>
           </el-col>
             <el-col :span="2">
-              <el-button @click="removeTriggerSlice(item)" style="background: #FA5151;color: white;width: 80px;height: 40px;margin-left: -32px;">删除</el-button>
+              <el-button @click="removeTriggerSlice(item)" style="background: #FA5151;color: white;width: 80px;height: 40px;margin-left: -32px;">Remove</el-button>
             </el-col>
           </div>
         </el-form-item>
 
-        <el-form-item label="样本基线"  v-if="form.checkList.indexOf('sample_detrend') >=0">
+        <el-form-item label="Sample Detrend"  v-if="form.checkList.indexOf('sample_detrend') >=0">
           <div class="baseline">
-            <label for="样本基线: " style=" width:100px; display: inline-block;margin-left: -64px;">样本基线：</label>
-            <el-radio v-model="form.sampleDetrend" border label="0" style="width:110px;">平均</el-radio>
-            <el-radio v-model="form.sampleDetrend" border label="1" style="width:110px;">选择时间</el-radio>
+            <label for="Sample Detrend : " style=" width:100px; display: inline-block;margin-left: -64px;">Sample Detrend: </label>
+            <el-radio v-model="form.sampleDetrend" border label="0" style="width:110px;">Average</el-radio>
+            <el-radio v-model="form.sampleDetrend" border label="1" style="width:110px;">Time range</el-radio>
           </div>
         </el-form-item>
 
         <el-form-item v-if="form.checkList.indexOf('sample_detrend') >=0 && form.sampleDetrend == 1" style="margin-top: 30px;">
           <div class="sample_fixation"  style="display: flex;">
-            <label for="样本固定: " style=" width:83px; display: inline-block;color: #999999;">样本固定</label>
+            <label for="Sample choose: " style=" width:83px; display: inline-block;color: #999999;">Sample choose</label>
             <el-col :span="10">
-            <label for="trigger开始时刻: " style="width:160px; display: inline-block;">trigger开始时刻：</label><el-input v-model="form.sampleDetrendStart" style="width: 100px;height: 40px;display: inline-block;margin-left: -50px;"> </el-input>
+            <label for="trigger range: " style="width:160px; display: inline-block;">Trigger start：</label><el-input v-model="form.sampleDetrendStart" style="width: 100px;height: 40px;display: inline-block;margin-left: -50px;"> </el-input>
             </el-col>
             <el-col :span="2">
               <div class="split-line" style="margin-left:-300px">--</div>
             </el-col>
             <el-col :span="10">
-              <label for="trigger时刻时刻: " style="width:160px; display: inline-block;margin-left: -160px;">trigger时刻时刻：</label><el-input v-model="form.sampleDetrendEnd" style="width: 100px;height: 40px;display: inline-block;margin-left: -50px;"> </el-input>
+              <label for="trigger range: " style="width:160px; display: inline-block;margin-left: -160px;">Trigger end</label><el-input v-model="form.sampleDetrendEnd" style="width: 100px;height: 40px;display: inline-block;margin-left: -50px;"> </el-input>
             </el-col>
         </div>
         </el-form-item>
        
         <el-form-item  v-if="form.checkList.indexOf('segmentation') >=0">
           <div class="sample_segmentation">
-            <label for="样本分段: " style=" width:100px; display: inline-block;">样本分段：</label>
-          <el-input v-model="form.segmentation" style="width: 60px;"></el-input> <span>段</span>
+            <label for="Segmentation: " style=" width:100px; display: inline-block;">Segmentation：</label>
+          <el-input v-model="form.segmentation" style="width: 60px;"></el-input> <span>Section</span>
         </div>
         </el-form-item>
 
         <el-form-item v-if="form.checkList.indexOf('sample_filter') >=0">
           <div class="sample_filtering"  style="display: flex;">
-            <label for="样本滤波: " style=" width:83px; display: inline-block;">样本滤波：</label>
+            <label for="Segmentation filter: " style=" display: inline-block;">Segmentation filter: </label>
           <div>
           <el-col :span="6">
            <el-input v-model="form.samplelow"> </el-input>
@@ -180,30 +180,30 @@
       
         <el-form-item  v-if="form.checkList.indexOf('down_sample') >=0">
           <div class="downsampling"  style="display: flex;">
-            <label for="时间基线: " style=" width:86px; display: inline-block;color: #999999;">时间基线</label>
-            <label for="降采样: " style=" width:83px; display: inline-block;">降采样：</label>
+            <!-- <label for="time baseline: " style="  display: inline-block;color: #999999;">time baseline</label> -->
+            <label for="降采样: " style="width: 100px; display: inline-block;">Down sample:</label>
             <el-input v-model="form.downSample" style="width: 80px;margin-left: -20px;"></el-input> <span style="margin-left: 5px;">HZ</span>
         </div>
         </el-form-item>
 
         <el-form-item label="ica" v-if="form.checkList.indexOf('ica') >=0">
-          <el-radio v-model="form.ica" border label="0" value="0">是</el-radio>
-          <el-radio  v-model="form.ica" border label="1" value="1">否</el-radio>
+          <el-radio v-model="form.ica" border label="0" value="0">Y</el-radio>
+          <el-radio  v-model="form.ica" border label="1" value="1">N</el-radio>
         </el-form-item>
 
         <el-form-item>
           <div class="save">
-            <label for="是否保存数据式" style=" width:130px; display: inline-block;">是否保存数据式</label>
-          <el-radio v-model="form.isOutPutData" border label="1" value="1" style="width:110px;">是</el-radio>
-          <el-radio  v-model="form.isOutPutData" border label="0" value="0" style="width:110px;">否</el-radio>
+            <label for="Save data" style=" width:130px; display: inline-block;">Save data</label>
+          <el-radio v-model="form.isOutPutData" border label="1" value="1" style="width:110px;">Y</el-radio>
+          <el-radio  v-model="form.isOutPutData" border label="0" value="0" style="width:110px;">N</el-radio>
         </div>
         </el-form-item>
         
         <el-form-item>
           <div class="create">
-            <label for="创建脚本" style=" width:130px; display: inline-block;">创建脚本</label>
-          <el-radio v-model="form.createScript" border label="1" value="1" style="width:110px;">是</el-radio>
-          <el-radio  v-model="form.createScript" border label="0" value="0" style="width:110px;">否</el-radio>
+            <label for="Create script" style=" width:130px; display: inline-block;">Create script</label>
+          <el-radio v-model="form.createScript" border label="1" value="1" style="width:110px;">Y</el-radio>
+          <el-radio  v-model="form.createScript" border label="0" value="0" style="width:110px;">N</el-radio>
         </div>
         </el-form-item>
         <div class=""  v-if="files.length">
@@ -212,12 +212,12 @@
       </el-form>
     </div>
     <div class="storage_address" v-if="files.length">
-      <label for="存储地址" style=" width:130px; display: inline-block;">存储地址</label>
-      <el-button @click="saveDataDir" style="margin-left: -50px;">选择文件夹</el-button>
+      <label for="Save path" style=" width:130px; display: inline-block;">Save path</label>
+      <el-button @click="saveDataDir" style="margin-left: -50px;">Choose</el-button>
       <div> {{this.form.saveDataPath}}</div>
     </div>
     <div class="create-feature-btn" v-if="files.length">
-      <el-button type="primary" :disabled="form.checkList.length == 0" @click="onSubmit" style="background: #2868C9;color: white;width: 80px;height: 40px;">确定</el-button>
+      <el-button type="primary" :disabled="form.checkList.length == 0" @click="onSubmit" style="background: #2868C9;color: white;width: 80px;height: 40px;">Confirm</el-button>
     </div>
   </div>
 </template>

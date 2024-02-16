@@ -1,18 +1,18 @@
 <template>
     <div class="feature-widgets">
-        <h2 class="feature-widget"> 特征提取 </h2>
+        <h2 class="feature-widget"> Extra feature </h2>
         <el-form ref="form" :model="feature" label-width="80px" size="mini">
             <div class="features">
                 <el-form-item size="large">
                     <el-checkbox-group v-model="feature.checkList">
                         <el-checkbox label="statistic" value="statistic" class="feature"
-                            style="margin-left: -70px;">统计特征</el-checkbox>
-                        <el-checkbox label="psd" value="psd" class="feature">PSD特征</el-checkbox>
-                        <el-checkbox label="DE" value="DE" class="feature">差分熵特征</el-checkbox>
-                        <el-checkbox label="spatialPattern" value="spatialPattern" class="feature">共空间模式</el-checkbox>
+                            style="margin-left: -70px;">Statistic</el-checkbox>
+                        <el-checkbox label="psd" value="psd" class="feature">PSD</el-checkbox>
+                        <el-checkbox label="DE" value="DE" class="feature">DE</el-checkbox>
+                        <el-checkbox label="spatialPattern" value="spatialPattern" class="feature">Spatial Pattern</el-checkbox>
                         <el-checkbox label="characteristicWave" value="characteristicWave"
-                            class="feature">提取特征波段</el-checkbox>
-                        <el-checkbox disabled label="PLV" value="PLV" class="feature">锁相值特征</el-checkbox>
+                            class="feature"> Feature band</el-checkbox>
+                        <el-checkbox disabled label="PLV" value="PLV" class="feature">PLV</el-checkbox>
                     </el-checkbox-group>
                 </el-form-item>
             </div>
@@ -22,9 +22,9 @@
         </el-form>
         <div>
             <div class="characteristic_waves">
-                <label for="特征波" style=" width:130px; display: inline-block;">特征波</label>
+                <label for="特征波" style=" width:130px; display: inline-block;">Band</label>
                 <div v-for="item, index in feature.characteristicWave" class="feature-slice"
-                    style="margin-top: 35px;">
+                    style="margin-top: 15px;">
                     <label for="low: "
                         style="width:160px; display: inline-block;">low：</label><el-input
                         v-model="item[0]" style="width: 100px;height: 40px;display: inline-block;">
@@ -35,10 +35,10 @@
                     </el-input>
                     <div style="float: right;margin-right: 40px;">
                         <el-button @click="addCharacteristicWave"
-                            style="background: #2868C9;color: white;width: 90px;height: 40px;border-radius: 4px;">添加
+                            style="background: #2868C9;color: white;width: 90px;height: 40px;border-radius: 4px;">Add
                             +</el-button>
                         <el-button @click="removeCharacteristicWave(index)"
-                            style="background: #FA5151;color: white;width: 90px;height: 40px;border-radius: 4px;">删除</el-button>
+                            style="background: #FA5151;color: white;width: 90px;height: 40px;border-radius: 4px;">Remove</el-button>
                     </div>
                 </div>
             </div>
